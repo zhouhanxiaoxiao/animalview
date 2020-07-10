@@ -46,15 +46,24 @@
         },
         methods:{
             submitLogin : function () {
+                var _this = this;
                 this.$axios({
                     method : "post",
                     url : "/login",
                     params : {
-                        "username" : this.loginEmail,
+                        "loginEmail" : this.loginEmail,
                         "password" : this.loginPwd
                     }
                 }).then(function (res) {
                     console.log(res);
+                    if (res.data.code != "200"){
+                        _this.$toast(_this.$t(res.data.code));
+                    }else {
+                        _this.$cookies.set("token",res.data.retMap.token);
+                        _this.$cookies.set("user",res.data.retMap.user);
+                        this.$("body").css("background-image","none");
+                        _this.$router.push("/home");
+                    }
                 }).catch(function (res) {
                     console.log(res);
                 });
@@ -73,5 +82,11 @@
 <style scoped>
     .login-div{
         display: inline;
+    }
+    .language-select{
+        margin-top: 100px;
+    }
+    .btn-link{
+        color: white !important;
     }
 </style>

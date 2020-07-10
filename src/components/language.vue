@@ -4,6 +4,7 @@
             <label class="btn btn-link active">
                 <input type="radio" name="options" id="option1" checked @click="changeLanguage('zh')"> 中文
             </label>
+            <span style="color: cadetblue">|</span>
             <label class="btn btn-link">
                 <input type="radio" name="options" id="option3" @click="changeLanguage('en')"> English
             </label>
@@ -24,10 +25,5 @@
 </script>
 
 <style scoped>
-    .btn-link{
-        color: white;
-    }
-    .language-select{
-        margin-top: 100px;
-    }
+
 </style>

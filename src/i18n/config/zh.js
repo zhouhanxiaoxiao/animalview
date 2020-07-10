@@ -15,6 +15,20 @@ const zh={
     userEmailErr : "请使用脑中心邮箱注册！",
     userNameErr : "2到16位（中文，字母，数字）",
     userPwdRegErr : "必须有数字和字母组合",
-    userPwd2NotSame : "两次输入的密码不一致！"
+    userPwd2NotSame : "两次输入的密码不一致！",
+    verificationStatuErr: "验证码输入错误",
+    verificationStatuOK : "验证通过",
+    registerSucc : "注册成功，请等待管理员审核！",
+    nav_hello : "你好",
+    nav_home : "主页",
+    systemErr : "系统异常！",
+    E501 : "该邮箱已注册，请等待管理员审核！",
+    E502 : "该邮箱已注册，请直接登录！",
+    E500 : "系统异常！",
+    E503 : "验证码校验不通过！",
+    E504 : "验证码已过期，请重新发送！",
+    E511 : "密码错误！",
+    E510 : "用户不存在！"
+
 }
 export default zh;

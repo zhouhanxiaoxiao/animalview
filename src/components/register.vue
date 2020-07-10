@@ -16,13 +16,15 @@
 
             <div class="input-group mb-3" style="margin-top: 10px">
                 <input type="text" class="form-control" :placeholder="$t('verification')" aria-label="输入验证码"
-                        aria-describedby="get-verification-code" :value="verificationCode">
+                        aria-describedby="get-verification-code" v-model="verificationCode">
                 <div class="input-group-append" >
                     <button class="btn btn-outline-secondary btn-primary" style="color: white" @click="getVerification"
                             type="button" id="get-verification-code">{{$t('getverification')}}</button>
                 </div>
             </div>
-
+            <div :class="codeShowClass">
+                {{codeStatu}}
+            </div>
             <div class="but-div">
                 <button type="button" class="btn btn-primary login-btn" @click="userRegister()">{{$t('userRegister')}}</button>
                 <br/>
@@ -36,7 +38,6 @@
 <script>
     import InputwhitName from "@/components/InputwhitName";
     import Language from "@/components/language";
-    import CibrToasts from "@/components/publib/CibrToasts";
 
     export default {
         name: "register",
@@ -47,7 +48,8 @@
                 codeTimer:'',
                 regetSec : 120,
                 verificationCode : "",
-                verificationServerCode : "",
+                codeShowClass:"",
+                codeStatu:"",
                 registerNameData:{
                     inputLabel : this.$t('userName'),
                     inputType : "text",
@@ -92,28 +94,35 @@
             },
             getVerification : function () {
                 var _this = this;
-                if (this.checkData()){
-                    _this.waitReCode();
-                    _this.codeTimer = setInterval(function () {
-                        _this.waitReCode();
-                    },1000);
-
-                    this.$axios({
-                        method : "post",
-                        url : "/register/getVerification",
-                        params : {
-                            "registerName" : this.registerName,
-                            "registerEmail" : this.registerEmail,
-                            "registerPwd" : this.registerPwd
-                        }
-                    }).then(function (res) {
-                        console.log(res);
-                        _this.verificationServerCode = res.data.retMap.VerificationCode;
-                    }).catch(function (res) {
-                        console.log(res);
-                    });
+                var reg = /^\w{3,}@cibr\.ac\.cn$/;
+                if(!reg.test(this.registerEmail)){
+                    this.registerEmailData.isValid = "2";
+                    this.registerEmailData.checkMsg = this.$t('userEmailErr');
+                    return;
                 }
+                this.$axios({
+                    method : "post",
+                    url : "/register/getVerification",
+                    params : {
+                        "registerName" : this.registerName,
+                        "registerEmail" : this.registerEmail,
+                        "registerPwd" : this.registerPwd
+                    }
+                }).then(function (res) {
+                    if (res.data.code != "200"){
+                        _this.$toast(_this.$t(res.data.code));
+                    }else{
+                        _this.waitReCode();
+                        _this.codeTimer = setInterval(function () {
+                            _this.waitReCode();
+                        },1000);
+                    }
+                }).catch(function (e) {
+                    console.log(e);
+                    _this.$toast(_this.$t("systemErr"));
+                });
             },
+
             waitReCode : function(){
                 var codeBtn = this.$("#get-verification-code").eq(0);
                 if (codeBtn.attr("disabled") == "" || codeBtn.attr("disabled") == undefined){
@@ -138,7 +147,33 @@
                     && this.registerPwd2Data.isValid == "1";
             },
             userRegister : function () {
-
+                if (this.verificationServerCode != this.verificationCode){
+                    this.codeShowClass = "invalid-feedback";
+                    this.codeStatu = this.$t("verificationStatuOK");
+                }else {
+                    this.codeShowClass = "invalid-feedback";
+                    this.codeStatu = this.$t("verificationStatuErr");
+                }
+                var _this = this;
+                this.$axios({
+                    method : "post",
+                    url : "/register/submit",
+                    params : {
+                        "registerName" : this.registerName,
+                        "registerEmail" : this.registerEmail,
+                        "registerPwd" : this.registerPwd,
+                        "verificationCode" : this.verificationCode
+                    }
+                }).then(function (res) {
+                    if (res.data.code != "200"){
+                        _this.$toast(_this.$t(res.data.code));
+                    }else {
+                        _this.$toast(_this.$t("registerSucc"));
+                        _this.$router.push("/login");
+                    }
+                }).catch(function (res) {
+                    console.log(res);
+                });
             }
         },
         watch:{
@@ -213,12 +248,18 @@
                 }
             }
         },
-        components: {CibrToasts, Language, InputwhitName}
+        components: {Language, InputwhitName}
     }
 </script>
 
 <style scoped>
     .reCode{
         color: black !important;
+    }
+    .language-select{
+        margin-top: 100px;
+    }
+    .btn-link{
+        color: white;
     }
 </style>

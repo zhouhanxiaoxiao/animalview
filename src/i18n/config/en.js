@@ -7,5 +7,6 @@ const en = {
     userRegister: 'sign in',
     verification:'Input verification code',
     getverification:'Get Verification Code',
+    nav_home : "home"
 }
 export default en;
