@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <transition :name="transitionName">
+    <transition name="fade">
       <keep-alive>
         <router-view></router-view>
       </keep-alive>
@@ -20,15 +20,7 @@ export default {
   components: {
   },
   watch:{
-    $route(to, from) {
-      //如果to索引大于from索引,判断为前进状态,反之则为后退状态
-      if(to.meta.index > from.meta.index){
-        //设置动画名称
-        this.transitionName = 'slide-left';
-      }else{
-        this.transitionName = 'slide-right';
-      }
-    }
+
   }
 }
 </script>
@@ -50,29 +42,11 @@ export default {
   input{
     height: 30px;
   }
-  .slide-right-enter-active,
-  .slide-right-leave-active,
-  .slide-left-enter-active,
-  .slide-left-leave-active {
-    will-change: transform;
-    transition: all 500ms;
-    position: absolute;
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity .5s;
   }
-  .slide-right-enter {
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
     opacity: 0;
-    transform: translate3d(-50%, 50%,50%);
-  }
-  .slide-right-leave-active {
-    opacity: 0;
-    transform: translate3d(50%, 50%,50%);
-  }
-  .slide-left-enter {
-    opacity: 0;
-    transform: translate3d(50%, 50%, 50%);
-  }
-  .slide-left-leave-active {
-    opacity: 0;
-    transform: translate3d(-50%, 50%, 50%);
   }
   .but-div{
   }

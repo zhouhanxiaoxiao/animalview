@@ -59,9 +59,9 @@
                     if (res.data.code != "200"){
                         _this.$toast(_this.$t(res.data.code));
                     }else {
-                        _this.$cookies.set("token",res.data.retMap.token);
-                        _this.$cookies.set("user",res.data.retMap.user);
-                        this.$("body").css("background-image","none");
+                        _this.$cookies.set("token",res.data.retMap.token,'1d');
+                        _this.$cookies.set("user",res.data.retMap.user,'1d');
+                        _this.$("body").css("background-image","none");
                         _this.$router.push("/home");
                     }
                 }).catch(function (res) {

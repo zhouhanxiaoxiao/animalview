@@ -9,8 +9,12 @@ import i18n from "@/i18n";
 import Toast from "@/components/Toast/Toast";
 import globalVariable from "@/api/global_variable";
 import $ from "jquery";
-
 import VueCookies from 'vue-cookies'
+
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
+
+Vue.use(DatePicker)
 
 Vue.prototype.GLOBAL = globalVariable;
 Vue.prototype.$axios = axios;
@@ -28,7 +32,9 @@ axios.defaults.baseURL = 'http://localhost:8081/';
 axios.interceptors.request.use(config => {
   var token = VueCookies.get("token");
   if (token){
-    config.headers.common['token'] = token;
+    config.headers['token'] = token;
+
+    // config.headers['Access-Control-Allow-Origin'] = "*";
   }
   return config;
 },error => {
@@ -39,10 +45,12 @@ axios.interceptors.request.use(config => {
 axios.interceptors.response.use(response =>{
   return response;
 },error => {
+  console.log(error);
   if (error.response){
     switch (error.response.status) {
       case 401:
         VueCookies.remove("token");
+        $("body").css("background-image","./assets/login-back.jpg");
         router.replace({
           path : "/login",
           query : {redirect : router.currentRoute.fullPath}
