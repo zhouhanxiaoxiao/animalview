@@ -85,6 +85,9 @@
                         _this.strains = res.data.retMap.strains;
                         _this.total = res.data.retMap.totalnumber;
                     }
+                }).catch(function (res) {
+                    console.log(res);
+                    _this.$toast(_this.$t("systemErr"));
                 })
             },
             updateTable : function (currentPage) {

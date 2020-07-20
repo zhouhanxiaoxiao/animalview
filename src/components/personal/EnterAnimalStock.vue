@@ -100,6 +100,9 @@
                     }else {
                         _this.$toast(_this.$t("save_success"));
                     }
+                }).catch(function (res) {
+                    console.log(res);
+                    _this.$toast(_this.$t("systemErr"));
                 })
             },
             setErrObject : function (name,value) {
@@ -139,6 +142,9 @@
                     }else {
                         _this.environment = res.data.retMap.envs;
                     }
+                }).catch(function (res) {
+                    console.log(res);
+                    _this.$toast(_this.$t("systemErr"));
                 })
             },
             checkExist : function () {
@@ -159,6 +165,9 @@
                             _this.$toast(_this.$t("animal_stock_genotype") + _this.$t("hasNotExist"));
                         }
                     }
+                }).catch(function (res) {
+                    console.log(res);
+                    _this.$toast(_this.$t("systemErr"));
                 })
             }
         },

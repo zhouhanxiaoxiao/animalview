@@ -106,7 +106,7 @@
                     params : {
                         "registerName" : this.registerName,
                         "registerEmail" : this.registerEmail,
-                        "registerPwd" : this.registerPwd
+                        "registerPwd" : this.$md5(this.registerPwd)
                     }
                 }).then(function (res) {
                     if (res.data.code != "200"){
@@ -161,7 +161,7 @@
                     params : {
                         "registerName" : this.registerName,
                         "registerEmail" : this.registerEmail,
-                        "registerPwd" : this.registerPwd,
+                        "registerPwd" : this.$md5(this.registerPwd),
                         "verificationCode" : this.verificationCode
                     }
                 }).then(function (res) {
@@ -173,6 +173,7 @@
                     }
                 }).catch(function (res) {
                     console.log(res);
+                    _this.$toast(_this.$t("systemErr"));
                 });
             }
         },

@@ -10,16 +10,20 @@ import Toast from "@/components/Toast/Toast";
 import globalVariable from "@/api/global_variable";
 import $ from "jquery";
 import VueCookies from 'vue-cookies'
+import md5 from 'js-md5';
 
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 
+import Multiselect from 'vue-multiselect'
+Vue.component('multiselect', Multiselect)
 Vue.use(DatePicker)
 
 Vue.prototype.GLOBAL = globalVariable;
 Vue.prototype.$axios = axios;
 Vue.prototype.$ = $;
 Vue.prototype.$toast = Toast;
+Vue.prototype.$md5 = md5;
 
 VueCookies.config('1h');
 Vue.prototype.$cookies = VueCookies;
@@ -61,9 +65,17 @@ axios.interceptors.response.use(response =>{
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.path === '/login' || to.path === "/register") {
+  if (to.path === "/register") {
     next();
-  } else {
+  }else if(to.path === '/login' || to.path === '/'){
+    let token = VueCookies.get("token");
+    if (token != 'null' && token != '' && token != null){
+      next('/home');
+    }else {
+      next();
+    }
+  }
+  else {
     let token = VueCookies.get("token");
     if (token === 'null' || token === '' || token === null) {
       next('/login');

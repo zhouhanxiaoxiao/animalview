@@ -72,14 +72,24 @@ const zh={
     hybridStrain:"对应的杂交品系",
     specialFeeding : "特殊饲养条件",
     specificFeeding : "具体饲养条件",
-    age : "年龄",
+    age : "年龄day",
     orderNumber : "拟用数量",
     expectedTime : "预计实验时间",
     operationProcess : "操作流程",
     remarks : "备注",
+    urgent : "加急",
+
+    normal : "常规",
+    special : "特殊",
+
+    incompleteInformation : "信息不完整",
+    completeInformation: "信息已确认",
+
+    noUser : "未找到用户",
 
     cancel : "取消",
     confirm : "确认",
+    submitting : "正在提交...",
 
     not_null : "不能为空!",
     systemErr : "系统异常！",
@@ -88,8 +98,8 @@ const zh={
     E500 : "系统异常！",
     E503 : "验证码校验不通过！",
     E504 : "验证码已过期，请重新发送！",
+    E505 : "邮箱不存在！",
     E511 : "密码错误！",
     E510 : "用户不存在！"
-
 }
 export default zh;

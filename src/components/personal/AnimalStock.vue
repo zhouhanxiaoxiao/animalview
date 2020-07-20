@@ -20,7 +20,7 @@
                 <tr v-for="row in rows" v-bind:key="row" @click="selectRow($event)">
                     <th scope="row" style="width: 5%">
                         <input class="form-check-input stock-line-select" type="checkbox"
-                               :disabled="row.number<1"
+                               :disabled="row.number<1 || row.number == null"
                                :value="row.id" @click="selectAll(row.id,$event)">
                     </th>
                     <td style="width: 5%">
@@ -50,7 +50,7 @@
                     <td style="width: 10%">
                         <button type="button" class="btn btn-primary btn-sm stock-action"
                                 @click="makeAppointment(row.id)"
-                                :disabled="row.number<1">
+                                :disabled="row.number<1 || row.number == null">
                             预约
                         </button>
                         &nbsp;
@@ -60,7 +60,8 @@
                 </tr>
                 </tbody>
             </table>
-            <AppointmentDialog :stock-ids="orderIds"></AppointmentDialog>
+            <AppointmentDialog @submitData="submitAllData" :stock-ids="orderIds"></AppointmentDialog>
+            <submitting :title="$t('submitting')"></submitting>
             <div class="page-index-container">
                 <nav aria-label="Page navigation example " class="page-index">
                     <ul class="pagination">
@@ -82,9 +83,10 @@
 <script>
     import TopNav from "@/components/publib/TopNav";
     import AppointmentDialog from "@/components/stockcenter/AppointmentDialog";
+    import Submitting from "@/components/publib/submitting";
     export default {
         name: "AnimalStock",
-        components: {AppointmentDialog, TopNav},
+        components: {Submitting, AppointmentDialog, TopNav},
         data:function(){
           return {
               orderIds:[],
@@ -145,6 +147,9 @@
                             }
                         }
                     }
+                }).catch(function (res) {
+                    console.log(res);
+                    _this.$toast(_this.$t("systemErr"));
                 });
             },
             selectAll:function (value,evnt) {
@@ -193,7 +198,7 @@
                 event.stopPropagation();
                 this.orderIds = new Array();
                 this.orderIds.push(id);
-                this.$("#exampleModal").modal();
+                this.$("#exampleModal").modal('show');
             },
             batchOrder : function () {
                 this.orderIds = new Array();
@@ -201,6 +206,18 @@
                     this.orderIds.push(this.selectedList[i]);
                 }
                 this.$("#exampleModal").modal();
+            },
+            submitAllData : function (data) {
+                this.$("#submitting").modal('show');
+                var _this = this;
+                console.log(data);
+                this.$axios.post("/task/askTask",data).then(function (res) {
+                    console.log(res);
+
+                }).catch(function (res) {
+                    console.log(res);
+                    _this.$toast(_this.$t("systemErr"));
+                })
             }
         },
         computed : {
@@ -214,7 +231,7 @@
             },
             selectallDisable : function () {
               return this.selectedList.length == 0;
-            }
+            },
         }
     }
 </script>

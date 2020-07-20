@@ -52,7 +52,7 @@
                     url : "/login",
                     params : {
                         "loginEmail" : this.loginEmail,
-                        "password" : this.loginPwd
+                        "password" : this.$md5(this.loginPwd)
                     }
                 }).then(function (res) {
                     console.log(res);
@@ -66,6 +66,7 @@
                     }
                 }).catch(function (res) {
                     console.log(res);
+                    _this.$toast(_this.$t("systemErr"));
                 });
             },
             updateLogin:function (data) {

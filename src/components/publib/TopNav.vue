@@ -76,6 +76,9 @@
                         _this.$cookies.remove("token");
                         _this.$router.push("/login");
                     }
+                }).catch(function (res) {
+                    console.log(res);
+                    _this.$toast(_this.$t("systemErr"));
                 })
             }
         },
