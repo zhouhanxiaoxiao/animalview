@@ -37,14 +37,14 @@
             <div class="page-index-container">
                 <nav aria-label="Page navigation example " class="page-index">
                     <ul class="pagination">
-                        <li class="page-item" @click="updateTable(currentPage - 1)"><a class="page-link">Previous</a></li>
+                        <li class="page-item" @click="updateTable(currentPage - 1)"><a class="page-link">{{$t("previous")}}</a></li>
                         <li class="page-item" :class="currentPage + 1 == item ? 'active':'' "
                             v-for="item in pageTotal" :key="item"
                             @click="updateTable(item - 1)"
                         >
                             <a class="page-link">{{item}}</a>
                         </li>
-                        <li class="page-item" @click="updateTable(currentPage + 1)"><a class="page-link">Next</a></li>
+                        <li class="page-item" @click="updateTable(currentPage + 1)"><a class="page-link">{{$t("next")}}</a></li>
                     </ul>
                 </nav>
             </div>

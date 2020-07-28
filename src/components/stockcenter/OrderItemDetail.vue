@@ -83,11 +83,9 @@
                                      :disabled="isHybridizationNecessary == 'N'"
                                      :show-labels="false"
                                      track-by="genotype"
-
                                      label="genotype">
                             <span slot="noResult"></span>
                         </multiselect>
-
 <!--                        <input type="text" class="form-control" id="hybridStrain" v-model="hybridStrain"-->
 <!--                               :disabled="isHybridizationNecessary == 'N'"-->
 <!--                               :required="isHybridizationNecessary == 'Y'"-->
@@ -163,11 +161,15 @@
         methods : {
             handleData(){
                 this.allReady = this.checkData();
+                var hybridStrainId = "";
+                if (this.isHybridizationNecessary == "Y"){
+                    hybridStrainId = this.hybridStrain.id;
+                }
                 var retData = {
                     virginFly : this.virginFly,
                     gender : this.gender,
                     isHybridizationNecessary : this.isHybridizationNecessary,
-                    hybridStrain : this.hybridStrain,
+                    hybridStrainId : hybridStrainId,
                     specialFeeding : this.specialFeeding,
                     specificFeeding : this.specificFeeding,
                     age : this.age,

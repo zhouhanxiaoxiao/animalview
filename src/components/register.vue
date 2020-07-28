@@ -1,6 +1,5 @@
 <template>
     <div style="width: 100%">
-        <CibrToasts class="registerTip" :toast-msg="toastsMsg" toast-title="提示"></CibrToasts>
         <div class="form-group form-contains">
             <div>
                 <img src="../assets/login.png" width="100%">

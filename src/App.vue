@@ -17,6 +17,11 @@ export default {
       transitionName:"slide-right"
     }
   },
+
+  created(){
+    this.$store.commit("saveUser",this.$cookies.get("user"));
+  },
+
   components: {
   },
   watch:{

@@ -41,7 +41,7 @@
             <div class="personal-info">
                 <div class="dropdown">
                     <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        {{$t("nav_hello") + " , " + user.name}}
+                        {{$t("nav_hello") + " , " + userName}}
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <a class="dropdown-item" id="exit" @click="sysExit">{{$t("exit")}}</a>
@@ -56,6 +56,7 @@
     import Language from "@/components/language";
     export default {
         name: "TopNav",
+        components: {Language},
         data:function(){
             return {
                 user :{
@@ -85,11 +86,12 @@
         beforeMount : function(){
             this.$("body").css("background-image","none");
             this.$("body").css("background-color","#e9ecef");
-            if (this.$cookies.get("user")){
-                this.user = this.$cookies.get("user");
-            }
         },
-        components: {Language}
+        computed : {
+            userName:function () {
+                return this.$store.getters.getUser.name;
+            }
+        }
     }
 </script>
 

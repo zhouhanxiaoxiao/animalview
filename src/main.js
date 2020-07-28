@@ -11,6 +11,7 @@ import globalVariable from "@/api/global_variable";
 import $ from "jquery";
 import VueCookies from 'vue-cookies'
 import md5 from 'js-md5';
+import store from "@/store/store";
 
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
@@ -32,7 +33,6 @@ Vue.prototype.$cookies = VueCookies;
 * axios 全局设置
 * */
 axios.defaults.baseURL = 'http://localhost:8081/';
-
 axios.interceptors.request.use(config => {
   var token = VueCookies.get("token");
   if (token){
@@ -64,6 +64,7 @@ axios.interceptors.response.use(response =>{
   return Promise.reject("转到登录啦！");
 });
 
+/*路由监听*/
 router.beforeEach((to, from, next) => {
   if (to.path === "/register") {
     next();
@@ -90,5 +91,6 @@ Vue.config.productionTip = false
 new Vue({
   router,
   i18n,
+  store,
   render: h => h(App)
 }).$mount('#app')

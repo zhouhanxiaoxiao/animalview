@@ -99,7 +99,7 @@
               studyDirectors : [],
               allDrosophila : [],
               detailData : {},
-              urgent : false
+              urgent : ""
           }
         },
         methods : {
@@ -112,8 +112,12 @@
                 this.$set(this.detailData,data.pkid,data.data);
             },
             submitTask : function () {
+                var selectedStudyId = new Array();
+                for (var i=0;i<this.selectedStudyDirector.length;i++){
+                    selectedStudyId.push(this.selectedStudyDirector[i].id);
+                }
                 var postData = {
-                    selectedStudyDirector : this.selectedStudyDirector,
+                    selectedStudyId : selectedStudyId,
                     purpose : this.purpose,
                     expectedTime : this.expectedTime,
                     operationProcess : this.operationProcess,
@@ -125,11 +129,32 @@
                 this.$("#exampleModal").modal('hide');
             },
             getValue : function (data) {
-                this.urgent = data;
+                console.log(data);
+                if (data){
+                    this.urgent = "1";
+                }else {
+                    this.urgent = "0";
+                }
             }
         },
         watch:{
-            stockIds(newValue){
+            stockIds(newValue,oldValue){
+                var boolean = true;
+                if (newValue.length == oldValue.length){
+                    for (var i = 0;i<newValue.length;i++){
+                        for (var j = 0;j<oldValue.length;j++){
+                            if (newValue[i] != oldValue[j]){
+                                boolean = false;
+                            }
+                        }
+                    }
+                }else {
+                    boolean = false;
+                }
+                /*如果预约的果蝇相同，则不更新页面*/
+                if (boolean){
+                    return;
+                }
                 var postData = {
                     stockIds : newValue
                 }
@@ -149,7 +174,7 @@
                     console.log(res);
                     _this.$toast(_this.$t("systemErr"));
                 });
-            },
+            }
         },
 
         computed : {

@@ -56,6 +56,7 @@ const zh={
     task : "任务",
     batchEdit : "批量预约",
     orderDetail : "预约详情",
+    detail : "详情",
 
     studyDirector : "实验负责人",
     purpose: "实验目的",
@@ -90,6 +91,14 @@ const zh={
     cancel : "取消",
     confirm : "确认",
     submitting : "正在提交...",
+
+    tasktype : "任务类型",
+    currentstatu : "当前状态",
+    creater : "创建人",
+    createTime : "创建时间",
+
+    previous:"上一页",
+    next : "下一页",
 
     not_null : "不能为空!",
     systemErr : "系统异常！",

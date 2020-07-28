@@ -13,11 +13,11 @@
                     <th scope="col">
                         <input type="checkbox" id="selectAll" value="selectAll" @click="selectAll('selectAll',$event)">
                     </th>
-                    <th scope="col" v-for="title in titles" v-bind:key="title">{{title}}</th>
+                    <th scope="col" v-for="(title,index) in titles" v-bind:key="index">{{title}}</th>
                 </tr>
                 </thead>
                 <tbody class="stock-table-body">
-                <tr v-for="row in rows" v-bind:key="row" @click="selectRow($event)">
+                <tr v-for="row in rows" v-bind:key="row.id" @click="selectRow($event)">
                     <th scope="row" style="width: 5%">
                         <input class="form-check-input stock-line-select" type="checkbox"
                                :disabled="row.number<1 || row.number == null"
@@ -65,14 +65,14 @@
             <div class="page-index-container">
                 <nav aria-label="Page navigation example " class="page-index">
                     <ul class="pagination">
-                        <li class="page-item" @click="updateTable(currentPage - 1)"><a class="page-link">Previous</a></li>
+                        <li class="page-item" @click="updateTable(currentPage - 1)"><a class="page-link">{{$t("previous")}}</a></li>
                         <li class="page-item" :class="currentPage + 1 == item ? 'active':'' "
                             v-for="item in pageTotal" :key="item"
                             @click="updateTable(item - 1)"
                         >
                             <a class="page-link">{{item}}</a>
                         </li>
-                        <li class="page-item" @click="updateTable(currentPage + 1)"><a class="page-link">Next</a></li>
+                        <li class="page-item" @click="updateTable(currentPage + 1)"><a class="page-link">{{$t("next")}}</a></li>
                     </ul>
                 </nav>
             </div>
@@ -213,9 +213,15 @@
                 console.log(data);
                 this.$axios.post("/task/askTask",data).then(function (res) {
                     console.log(res);
-
+                    _this.$("#submitting").modal('hide');
+                    if (res.data.code != 200){
+                        _this.$toast(_this.$t(res.data.code));
+                    }else {
+                        _this.$toast("提交成功");
+                    }
                 }).catch(function (res) {
                     console.log(res);
+                    _this.$("#submitting").modal('hide');
                     _this.$toast(_this.$t("systemErr"));
                 })
             }

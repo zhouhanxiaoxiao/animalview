@@ -1,5 +1,5 @@
 <template>
-    <div class="modal" id="submitting" tabindex="-1" role="dialog">
+    <div class="modal" id="submitting" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
