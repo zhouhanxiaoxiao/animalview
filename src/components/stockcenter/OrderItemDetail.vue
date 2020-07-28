@@ -73,7 +73,6 @@
                     <!--  对应的杂交品系  -->
                     <div class="form-group-sm col-md-3" :class=" isHybridizationNecessary == 'Y' ? 'was-validated':''">
                         <label for="hybridStrain">{{$t("hybridStrain")}}</label>
-
                         <multiselect id="hybridStrain"
                                      v-model="hybridStrain"
                                      :options="allDrosophila"

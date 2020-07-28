@@ -176,7 +176,6 @@
                 });
             }
         },
-
         computed : {
             canSubmit : function () {
                 var count = 0;
