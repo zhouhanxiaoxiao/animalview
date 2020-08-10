@@ -96,13 +96,13 @@
                     postData
                 ).then(function (res) {
                     if (res.data.code != "200"){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
-                        _this.$toast(_this.$t("save_success"));
+                        _this.$message.success(_this.$t("save_success"));
                     }
                 }).catch(function (res) {
                     console.log(res);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 })
             },
             setErrObject : function (name,value) {
@@ -128,7 +128,6 @@
                 this.environment = [];
                 this.environmentValid = "";
                 this.checkExistFlag = true;
-
                 this.initEvn();
             },
             initEvn : function () {
@@ -138,13 +137,13 @@
                     url:"/personal/environment"
                 }).then(function (res) {
                     if (res.data.code != "200"){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
                         _this.environment = res.data.retMap.envs;
                     }
                 }).catch(function (res) {
                     console.log(res);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 })
             },
             checkExist : function () {
@@ -157,17 +156,17 @@
                      postData
                 ).then(function (res) {
                     if (res.data.code != "200"){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
                         if (res.data.retMap.hasExist){
-                            _this.$toast(_this.$t("animal_stock_genotype") + _this.$t("hasExist"));
+                            _this.$message.success(_this.$t("animal_stock_genotype") + _this.$t("hasExist"));
                         }else {
-                            _this.$toast(_this.$t("animal_stock_genotype") + _this.$t("hasNotExist"));
+                            _this.$message.success(_this.$t("animal_stock_genotype") + _this.$t("hasNotExist"));
                         }
                     }
                 }).catch(function (res) {
                     console.log(res);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 })
             }
         },

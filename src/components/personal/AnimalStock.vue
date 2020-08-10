@@ -114,7 +114,7 @@
                 ).then(function (res) {
                     console.log(res);
                     if (res.data.code != "200"){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
                         var stockTable = res.data.retMap.stockTable;
                         _this.total = res.data.retMap.totalnumber;
@@ -149,7 +149,7 @@
                     }
                 }).catch(function (res) {
                     console.log(res);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 });
             },
             selectAll:function (value,evnt) {
@@ -215,14 +215,14 @@
                     console.log(res);
                     _this.$("#submitting").modal('hide');
                     if (res.data.code != 200){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
-                        _this.$toast("提交成功");
+                        _this.$message.success(_this.$t("commitSucc"));
                     }
                 }).catch(function (res) {
                     console.log(res);
                     _this.$("#submitting").modal('hide');
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 })
             }
         },

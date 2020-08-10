@@ -6,12 +6,16 @@ import "zico/css/zico.min.css";
 import axios from "axios";
 import router from "@/router/router";
 import i18n from "@/i18n";
-import Toast from "@/components/Toast/Toast";
+
 import globalVariable from "@/api/global_variable";
 import $ from "jquery";
 import VueCookies from 'vue-cookies'
 import md5 from 'js-md5';
 import store from "@/store/store";
+
+import 'ant-design-vue/dist/antd.css';
+import Antd from 'ant-design-vue';
+Vue.use(Antd);
 
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
@@ -23,7 +27,7 @@ Vue.use(DatePicker)
 Vue.prototype.GLOBAL = globalVariable;
 Vue.prototype.$axios = axios;
 Vue.prototype.$ = $;
-Vue.prototype.$toast = Toast;
+
 Vue.prototype.$md5 = md5;
 
 VueCookies.config('1h');
@@ -32,7 +36,7 @@ Vue.prototype.$cookies = VueCookies;
 /*
 * axios 全局设置
 * */
-axios.defaults.baseURL = 'http://localhost:8081/';
+axios.defaults.baseURL = 'http://192.168.10.11:8081/';
 axios.interceptors.request.use(config => {
   var token = VueCookies.get("token");
   if (token){

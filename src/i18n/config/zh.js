@@ -25,22 +25,17 @@ const zh={
     nav_mytask : "我的任务",
     nav_personal : "个人中心",
     nav_stock : "库存中心",
-
     personnal_btn_enter:"录入",
     personnal_btn_stock:"库存",
-
     current_stock: "现有库存",
     current_strain: "现有品系",
-
     animal_stock_stockID : "编号",
     animal_stock_genotype : "基因型",
     animal_stock_resource : "来源",
     animal_stock_container : "容器类型",
     animal_stock_number : "数量",
     animal_stock_environment : "保存环境",
-
     save_success : "保存成功！",
-
     reset : "重置",
     submit : "提交",
     choose : "请选择",
@@ -52,12 +47,11 @@ const zh={
     createTask : "新建任务",
     newStrain : "新增品系",
     useTask : "使用申请",
-
     task : "任务",
     batchEdit : "批量预约",
     orderDetail : "预约详情",
+    expectionObject : "实验材料",
     detail : "详情",
-
     studyDirector : "实验负责人",
     purpose: "实验目的",
     species: "物种",
@@ -79,28 +73,47 @@ const zh={
     operationProcess : "操作流程",
     remarks : "备注",
     urgent : "加急",
-
     normal : "常规",
     special : "特殊",
-
     incompleteInformation : "信息不完整",
     completeInformation: "信息已确认",
-
     noUser : "未找到用户",
-
     cancel : "取消",
     confirm : "确认",
     submitting : "正在提交...",
-
     tasktype : "任务类型",
     currentstatu : "当前状态",
     creater : "创建人",
     createTime : "创建时间",
-
+    refuse : "拒绝",
     previous:"上一页",
     next : "下一页",
-
     not_null : "不能为空!",
+    expectionPrep : "材料准备",
+    confirmTime : "确认时间",
+    submitTime : "申请时间",
+    birthday : "羽化日期",
+    location : "保存地点",
+    refuseTask : "拒绝请求",
+    needmore : "需要扩繁",
+    noneedmore : "不需要扩繁",
+    startmore : "开始扩繁日期",
+    endmore :"预计扩繁完成日期",
+    reason : "原因",
+    prepare : "准备",
+    readyTime : "样本准备日期ready",
+    realAge : "实际果蝇年龄",
+    realNumber : "实际提供果蝇数量",
+    allowTime : "可以实验时间",
+    isComplete: "需求是否完成",
+    commitSucc : "提交成功",
+    selectRoles : "请选择角色",
+    add : "新增",
+    enterCorrectly : "输入正确",
+    animalName : "动物名称",
+    useType : "用途",
+
+    numberErr : "必须大于1",
     systemErr : "系统异常！",
     E501 : "该邮箱已注册，请等待管理员审核！",
     E502 : "该邮箱已注册，请直接登录！",

@@ -2,8 +2,8 @@
     <div class="current-strain">
         <top-nav></top-nav>
         <div class="current-strain-container">
-            <div class="sumarry-info">
-                <div class="input-group mb-3 page-size-select">
+            <div class="sumarry-info row justify-content-between">
+                <div class="input-group page-size-select col-4">
                     <div class="input-group-prepend">
                         <label class="input-group-text" for="pageSizeSelect">共{{total}}条，每页显示：</label>
                     </div>
@@ -12,6 +12,9 @@
                         <option :value="20">20</option>
                         <option :value="50">50</option>
                     </select>
+                </div>
+                <div class="col-4" style="text-align: right">
+                  <button type="button" class="btn btn-primary" @click="showAdd">{{$t("add")}}</button>
                 </div>
             </div>
             <div class="strain-table">
@@ -49,14 +52,18 @@
                 </nav>
             </div>
         </div>
+      <add-new-strain @submitData="submitData"></add-new-strain>
+      <submitting :title="$t('submitting')"></submitting>
     </div>
 </template>
 
 <script>
     import TopNav from "@/components/publib/TopNav";
+    import AddNewStrain from "@/components/stockcenter/addNewStrain";
+    import Submitting from "@/components/publib/submitting";
     export default {
         name: "CurrentStrain",
-        components: {TopNav},
+        components: {Submitting, AddNewStrain, TopNav},
         data : function(){
             return {
                 strains : [],
@@ -69,6 +76,24 @@
             this.initTable();
         },
         methods : {
+          submitData:function (data){
+            this.$("#submitting").modal("show");
+            var _this = this;
+            this.$axios.post( "/stock/add",
+                data
+            ).then(function (res) {
+              _this.$("#submitting").modal("hide");
+              if (res.data.code != "200"){
+                _this.$message.error(_this.$t(res.data.code));
+              }else {
+                _this.$message.success(_this.$t("save_success"));
+              }
+            }).catch(function (res) {
+              _this.$("#submitting").modal("hide");
+              console.log(res);
+              _this.$message.error(_this.$t("systemErr"));
+            })
+          },
             initTable : function () {
                 var _this = this;
                 var postData = {
@@ -80,14 +105,14 @@
                 ).then(function (res) {
                     console.log(res);
                     if (res.data.code != "200"){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
                         _this.strains = res.data.retMap.strains;
                         _this.total = res.data.retMap.totalnumber;
                     }
                 }).catch(function (res) {
                     console.log(res);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 })
             },
             updateTable : function (currentPage) {
@@ -99,7 +124,11 @@
                 }
                 this.currentPage = currentPage;
                 this.initTable();
-            }
+            },
+          showAdd : function (){
+            this.$("#addNewStrain").modal("show");
+            // this.$router.push("/personal/enterAnimalStock");
+          }
         },
         computed : {
             pageTotal : function () {
@@ -149,7 +178,7 @@
         display: inline-block;
     }
     .sumarry-info{
-        width: 30%;
+        width: 90%;
         margin-left: 5%;
         padding-top: 10px;
     }

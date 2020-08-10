@@ -75,5 +75,11 @@ export default {
     height: 50px;
     font-size: 16px;
   }
+.modal{
+  z-index: 999 !important;
+}
+.modal-backdrop {
+  z-index: 998 !important;
+}
 </style>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

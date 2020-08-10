@@ -25,7 +25,6 @@
 <style scoped>
     .main-page{
         margin-top: 100px;
-        /*padding-top: 100px;*/
         background-color: white;
         width: 90%;
         margin-left: 5%;

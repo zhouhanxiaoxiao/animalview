@@ -22,6 +22,7 @@
                             <router-link to="/task"><a class="dropdown-item">{{$t("nav_mytask")}}</a></router-link>
                             <a class="dropdown-item">{{$t("newStrain")}}</a>
                             <a class="dropdown-item">{{$t("useTask")}}</a>
+                          <a class="dropdown-item">流程管理</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -72,14 +73,14 @@
                     method : "post"
                 }).then(function (res) {
                     if (res.data.code != "200"){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
                         _this.$cookies.remove("token");
                         _this.$router.push("/login");
                     }
                 }).catch(function (res) {
                     console.log(res);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 })
             }
         },
@@ -101,7 +102,7 @@
         position: fixed;
         width: 100%;
         top: 0px;
-        z-index: 999;
+        z-index: 99;
     }
     li{
         margin-left: 50px;
@@ -114,4 +115,5 @@
         text-decoration:none;
         color: black;
     }
+
 </style>

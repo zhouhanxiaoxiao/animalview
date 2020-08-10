@@ -57,7 +57,7 @@
                 }).then(function (res) {
                     console.log(res);
                     if (res.data.code != "200"){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
                         _this.$cookies.set("token",res.data.retMap.token,'1h');
                         _this.$cookies.set("user",res.data.retMap.user,'1h');
@@ -67,7 +67,7 @@
                     }
                 }).catch(function (res) {
                     console.log(res);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 });
             },
             updateLogin:function (data) {

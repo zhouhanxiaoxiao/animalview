@@ -8,6 +8,8 @@ import EnterAnimalStock from "@/components/personal/EnterAnimalStock";
 import AnimalStock from "@/components/personal/AnimalStock";
 import TaskMain from "@/components/task/TaskMain";
 import CurrentStrain from "@/components/stockcenter/CurrentStrain";
+import askDetail from "@/components/task/askDetail";
+import userallow from "@/components/task/userallow";
 
 /*配置路由*/
 const routes=[
@@ -19,6 +21,8 @@ const routes=[
     {path: '/personal/enterAnimalStock',component: EnterAnimalStock,meta: {index: 0}},
     {path: '/personal/animalStock',component: AnimalStock,meta: {index: 0}},
     {path: '/task',component: TaskMain,meta: {index: 0}},
+    {path: '/task/askDetail',name:"askDetail",component: askDetail,meta: {index: 0}},
+    {path: '/task/userAllow',name:"userAllow",component: userallow,meta: {index: 0}},
     {path: '/stock/currentStrain',component: CurrentStrain,meta: {index: 0}},
     {path: '/*',login,meta:{index:0}}
 ]

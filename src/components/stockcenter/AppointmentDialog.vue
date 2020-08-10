@@ -30,20 +30,6 @@
                                 <span slot="noResult">{{$t('noUser')}}</span>
                             </multiselect>
                         </div>
-                        <!--  实验目的  -->
-                        <div class="form-group-sm col-md-3 was-validated">
-                            <label for="Purpose">{{$t("purpose")}}</label>
-                            <input type="text" class="form-control" id="Purpose" v-model="purpose"
-                                   required
-                                   placeholder="例：药物实验-control-001">
-                        </div>
-                        <!--  预计实验时间  -->
-                        <div class="form-group-sm col-md-4">
-                            <label for="expectedTime">{{$t("expectedTime")}}</label>
-                            <div id="expectedTime" >
-                                <date-picker v-model="expectedTime" value-type="format" format="YYYY-MM-DD" :disabled-date="disabledDate"></date-picker>
-                            </div>
-                        </div>
                         <!--  加急  -->
                         <div class="form-group col-md-2 form-check">
                             <label for="urgent"></label>
@@ -51,22 +37,18 @@
                         </div>
                     </div>
                     <div>
-                        实验材料：
+                      {{$t("expectionObject")}}：
                     </div>
                     <order-item-detail v-for="row in rows" :key="row.stock.id" :row="row" :all-drosophila="allDrosophila"
                                        @updateData="updateDetailData"></order-item-detail>
-                    <!--  操作流程  -->
-                    <div class="form-group-sm col-md-12">
-                        <label for="operationProcess">{{$t("operationProcess")}}</label>
-                        <textarea class="form-control" id="operationProcess" v-model="operationProcess" placeholder="例：转管，喂食：先CO2麻醉，转移到新的管子，喂食含有染料的蔗糖水" rows="3"></textarea>
-                    </div>
+
                     <!--  备注  -->
                     <div class="form-group-sm col-md-12">
                         <label for="remarks">{{$t("remarks")}}</label>
                         <textarea class="form-control" id="remarks" v-model="remarks" placeholder="例：我很着急" rows="3"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" >
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">{{$t('cancel')}}</button>
                     <button type="button" class="btn btn-primary" :disabled="!canSubmit" @click="submitTask">{{$t('confirm')}}</button>
                 </div>
@@ -92,9 +74,6 @@
               rows : [],
               orderList:{},
               selectedStudyDirector : [],
-              purpose : "",
-              expectedTime : "",
-              operationProcess : "",
               remarks : "",
               studyDirectors : [],
               allDrosophila : [],
@@ -103,11 +82,6 @@
           }
         },
         methods : {
-            disabledDate : function (time) {
-                var now = Date.now();
-                var before = now + (1000*60*60*24) * 14;
-                return time.getTime() < new Date(before);
-            },
             updateDetailData : function (data) {
                 this.$set(this.detailData,data.pkid,data.data);
             },
@@ -118,9 +92,6 @@
                 }
                 var postData = {
                     selectedStudyId : selectedStudyId,
-                    purpose : this.purpose,
-                    expectedTime : this.expectedTime,
-                    operationProcess : this.operationProcess,
                     remarks : this.remarks,
                     urgent : this.urgent,
                     detailData : this.detailData
@@ -129,7 +100,6 @@
                 this.$("#exampleModal").modal('hide');
             },
             getValue : function (data) {
-                console.log(data);
                 if (data){
                     this.urgent = "1";
                 }else {
@@ -161,7 +131,7 @@
                 var _this = this;
                 this.$axios.post("/orderTask/init",postData).then(function (res) {
                     if (res.data.code != '200'){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
                         _this.rows = res.data.retMap.stockTable;
                         _this.studyDirectors = res.data.retMap.researchers;
@@ -172,7 +142,7 @@
                     }
                 }).catch(function (res) {
                     console.log(res);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 });
             }
         },

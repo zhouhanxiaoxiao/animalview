@@ -40,7 +40,6 @@
                 if (this.total <1){
                     return new Array();
                 }
-                console.log("total",this.total);
                 var pages = Math.ceil(this.total/this.pageSize);
                 var pageArry = new Array();
                 for (var i = 0;i<pages;i++){

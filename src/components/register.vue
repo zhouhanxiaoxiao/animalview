@@ -109,7 +109,7 @@
                     }
                 }).then(function (res) {
                     if (res.data.code != "200"){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else{
                         _this.waitReCode();
                         _this.codeTimer = setInterval(function () {
@@ -118,7 +118,7 @@
                     }
                 }).catch(function (e) {
                     console.log(e);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 });
             },
 
@@ -165,14 +165,14 @@
                     }
                 }).then(function (res) {
                     if (res.data.code != "200"){
-                        _this.$toast(_this.$t(res.data.code));
+                        _this.$message.error(_this.$t(res.data.code));
                     }else {
-                        _this.$toast(_this.$t("registerSucc"));
+                        _this.$message.error(_this.$t("registerSucc"));
                         _this.$router.push("/login");
                     }
                 }).catch(function (res) {
                     console.log(res);
-                    _this.$toast(_this.$t("systemErr"));
+                    _this.$message.error(_this.$t("systemErr"));
                 });
             }
         },

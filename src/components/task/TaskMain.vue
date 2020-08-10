@@ -25,5 +25,6 @@
         min-height: 500px;
         border-radius: 5px;
         padding-top: 20px;
+        overflow-x: auto;
     }
 </style>
