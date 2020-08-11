@@ -8,7 +8,7 @@
             :status="setpStatu(0)"
             :disabled="isDisabled(0)"
         >
-          <a-icon slot="icon" type="loading" v-if="ask.currentstatu == '01'"/>
+          <a-icon slot="icon" type="loading" v-if="ask.currentstatu == '01' || ask.currentstatu == '00'"/>
         </a-step>
         <a-step
             :title="$t('expectionObject') + $t('prepare')"

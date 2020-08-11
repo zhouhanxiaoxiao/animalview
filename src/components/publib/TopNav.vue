@@ -20,9 +20,9 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="task">
                             <router-link to="/task"><a class="dropdown-item">{{$t("nav_mytask")}}</a></router-link>
-                            <a class="dropdown-item">{{$t("newStrain")}}</a>
-                            <a class="dropdown-item">{{$t("useTask")}}</a>
-                          <a class="dropdown-item">流程管理</a>
+<!--                            <a class="dropdown-item">{{$t("newStrain")}}</a>-->
+<!--                            <a class="dropdown-item">{{$t("useTask")}}</a>-->
+                          <router-link to="/task/process"><a class="dropdown-item">{{$t("processHandle")}}</a></router-link>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -50,6 +50,8 @@
                 </div>
             </div>
         </nav>
+      <div>
+      </div>
     </div>
 </template>
 

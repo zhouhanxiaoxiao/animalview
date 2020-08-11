@@ -30,6 +30,24 @@
                                 <span slot="noResult">{{$t('noUser')}}</span>
                             </multiselect>
                         </div>
+                      <!--  材料提供人员  -->
+                      <div class="form-group-sm col-md-3 was-validated">
+                        <label for="studyDirector">{{$t("supporter")}}</label>
+                        <multiselect id="supporter"
+                                     v-model="supporter"
+                                     :options="supporters"
+                                     :searchable="true"
+                                     :close-on-select="true"
+                                     :allow-empty="false"
+                                     :show-labels="false"
+                                     track-by="name"
+                                     label="name"
+                                     required
+                                     :taggable="true"
+                                     placeholder="例：曲素素">
+                          <span slot="noResult">{{$t('noUser')}}</span>
+                        </multiselect>
+                      </div>
                         <!--  加急  -->
                         <div class="form-group col-md-2 form-check">
                             <label for="urgent"></label>
@@ -74,7 +92,9 @@
               rows : [],
               orderList:{},
               selectedStudyDirector : [],
+              supporter: {},
               remarks : "",
+              supporters : [],
               studyDirectors : [],
               allDrosophila : [],
               detailData : {},
@@ -94,6 +114,7 @@
                     selectedStudyId : selectedStudyId,
                     remarks : this.remarks,
                     urgent : this.urgent,
+                  supporter : this.supporter.id,
                     detailData : this.detailData
                 }
                 this.$emit('submitData',{postData:postData});
@@ -136,6 +157,7 @@
                         _this.rows = res.data.retMap.stockTable;
                         _this.studyDirectors = res.data.retMap.researchers;
                         _this.allDrosophila = res.data.retMap.allDrosophila;
+                        _this.supporters = res.data.retMap.supporters;
                         for (var item in _this.detailData){
                             _this.$delete(_this.detailData,item);
                         }

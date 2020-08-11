@@ -10,7 +10,7 @@
         </div>
         <div class="modal-body" style="text-align: left">
           <form class="was-validated">
-          <div>{{ $t("personnal_btn_stock") + ":" }}</div>
+            <a-divider>基本信息</a-divider>
           <br>
           <div class="form-row">
             <div class="col-md-3 mb-3">
@@ -40,9 +40,7 @@
                 placeholder="例：中科院上化学与细胞生物学研究所果蝇资源与技术平台">
             </div>
           </div>
-          <hr  class="my-4">
-          <div>{{ $t("personnal_btn_stock") + ":" }}</div>
-          <br>
+            <a-divider>{{ $t("personnal_btn_stock")}}</a-divider>
           <div class="form-row">
             <div class="form-group col-md-3">
               <label for="container">{{$t("animal_stock_container")}}</label>

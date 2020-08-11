@@ -1,8 +1,8 @@
 <template>
     <div class="stock-item-detail">
         <p>
-            <button class="btn btn-sm btn-block"
-                    :class="allReady ?'btn-primary' : 'btn-outline-danger'"
+            <button class="btn btn-sm btn-block "
+                    :class="allReady ?'btn-success' : 'btn-outline-danger'"
                     type="button"
                     data-toggle="collapse"
                     :data-target="'#aa' + row.stock.id"
