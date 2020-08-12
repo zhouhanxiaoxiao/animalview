@@ -72,6 +72,9 @@ export default {
       var postData = {
         taskId : this.taskId
       };
+      if (this.taskId == "" || this.taskId == null){
+        return;
+      }
       this.$axios.post("/task/askTaskDetail",postData).then(function (res) {
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
