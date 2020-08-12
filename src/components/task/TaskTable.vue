@@ -29,7 +29,7 @@
         </td>
         <td>{{ task.creater.name }}</td>
         <td>{{ format(task.task.createtime) }}</td>
-        <td>{{ askremarks(task) }}</td>
+        <td>{{ task.task.taskdesc }}</td>
         <td>
           <button type="button" style="font-size: 12px" class="btn btn-primary btn-sm stock-action"
                   @click="showDetail(task)">{{ $t("detail") }}
@@ -97,6 +97,8 @@ export default {
         ret = "账号申请";
       } else if (task.tasktype == "02") {
         ret = "使用申请";
+      } else if (task.tasktype == "03"){
+        ret = "流程管理";
       }
       return ret;
     },
@@ -134,6 +136,22 @@ export default {
         }else {
           return "width:100%";
         }
+      }else if (task.task.tasktype == "03"){
+        var process = task.process;
+        if (process.taskstatu == "01"){
+          return "width:20%";
+        }
+        if (process.taskstatu == "02"){
+          return "width:40%";
+        }
+        if (process.taskstatu == "03"){
+          return "width:60%";
+        }
+        if (process.taskstatu == "04"){
+          return "width:80%";
+        }else {
+          return "width:100%";
+        }
       }
     },
     taskstatu : function(task){
@@ -160,6 +178,8 @@ export default {
         this.$router.push({name:"askDetail",query:{taskId:task.task.id}});
       }else if (task.task.tasktype == "01"){
         this.$router.push({name:"userAllow",query:{taskId:task.task.id}});
+      }else if (task.task.tasktype == "03"){
+        this.$router.push({name:"processDetail",query:{taskId:task.task.id}});
       }
     },
   },
@@ -167,8 +187,6 @@ export default {
     userName:function () {
       return this.$store.getters.getUser.name;
     },
-
-
   },
   watch : {
     userName(){

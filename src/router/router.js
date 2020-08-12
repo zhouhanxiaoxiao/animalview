@@ -11,6 +11,7 @@ import CurrentStrain from "@/components/stockcenter/CurrentStrain";
 import askDetail from "@/components/task/askDetail";
 import userallow from "@/components/task/userallow";
 import createProcess from "@/components/task/processHandle/createProcess";
+import processDetail from "@/components/task/processHandle/processDetail";
 
 /*配置路由*/
 const routes=[
@@ -24,6 +25,7 @@ const routes=[
     {path: '/task',component: TaskMain,meta: {index: 0}},
     {path: '/task/process',component: createProcess,meta: {index: 0}},
     {path: '/task/askDetail',name:"askDetail",component: askDetail,meta: {index: 0}},
+    {path: '/task/processDetail',name:"processDetail",component: processDetail,meta: {index: 0}},
     {path: '/task/userAllow',name:"userAllow",component: userallow,meta: {index: 0}},
     {path: '/stock/currentStrain',component: CurrentStrain,meta: {index: 0}},
     {path: '/*',login,meta:{index:0}}

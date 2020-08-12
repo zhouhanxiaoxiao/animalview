@@ -126,11 +126,23 @@ const zh={
     nucleicAcid : "核酸",
     tissue : "组织",
     cell:"细胞",
+    totalNumber : "总量",
     staffing : "人员安排",
-
+    index : "序号",
+    addNewRow : "新增一行",
+    sampleName :"样本名称",
     sample:"样本",
-
-
+    upload:"上传附件",
+    sampleStatu : "样本状态",
+    tissueNumber : "组织量",
+    bloodVolume : "血液体积",
+    sampleVolume : "样本体积",
+    concentration : "浓度",
+    cellNumber : "细胞个数",
+    cellLife : "细胞活性",
+    cellSort : "细胞分选法",
+    databaseType : "建库类型",
+    SequencingPlatform :"测序平台",
     numberErr : "必须大于1",
     systemErr : "系统异常！",
     E501 : "该邮箱已注册，请等待管理员审核！",
@@ -140,6 +152,7 @@ const zh={
     E504 : "验证码已过期，请重新发送！",
     E505 : "邮箱不存在！",
     E511 : "密码错误！",
-    E510 : "用户不存在！"
+    E510 : "用户不存在！",
+
 }
 export default zh;

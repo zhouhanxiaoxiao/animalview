@@ -26,7 +26,7 @@
           <label for="email">{{ $t("userEmail") }}</label>
           <a-tooltip placement="topRight" title="数据下载及报告分析完成后将发送相关信息至以上邮箱列表" :mouseLeaveDelay="1"
                      :auto-adjust-overflow="true">
-          <a-select id="email" mode="tags" style="width: 100%" v-model="emails" :filterOption="isEmail">
+          <a-select id="email" mode="tags" style="width: 100%" v-model="emails">
             <a-select-option v-for="user in users" :key="user.email">
               {{ user.email }}
             </a-select-option>
@@ -38,9 +38,9 @@
           <label for="sampleMsg">{{$t("sampleMsg")  }}</label>
           <div id="sampleMsg">
             <a-select style="width: 100%" v-model="sampleMsg">
-              <a-select-option value="nucleicAcid">{{$t("nucleicAcid") + $t("sample")}}</a-select-option>
-              <a-select-option value="tissue">{{$t("tissue") + $t("sample")}}</a-select-option>
-              <a-select-option value="cell">{{$t("cell") + $t("sample")}}</a-select-option>
+              <a-select-option value="01">{{$t("nucleicAcid") + $t("sample")}}</a-select-option>
+              <a-select-option value="02">{{$t("tissue") + $t("sample")}}</a-select-option>
+              <a-select-option value="03">{{$t("cell") + $t("sample")}}</a-select-option>
             </a-select>
           </div>
         </div>
@@ -101,14 +101,16 @@
                 @click="submitData">{{$t("submit")}}</button>
       </div>
     </div>
+    <submitting :title="$t('submitting')"></submitting>
   </div>
 </template>
 
 <script>
 import TopNav from "@/components/publib/TopNav";
+import Submitting from "@/components/publib/submitting";
 export default {
   name: "createProcess",
-  components: {TopNav},
+  components: {Submitting, TopNav},
   data:function (){
     return{
       projectName :"",
@@ -145,11 +147,41 @@ export default {
       if (!this.checkData()){
         return ;
       }
+      var postData = {
+        projectName : this.projectName,
+        dataType : this.dataType,
+        principal : this.principal,
+        emails : this.emails,
+        sampleMsg : this.sampleMsg,
+        samplePreparation :this.samplePreparation,
+        libraryPreparation : this.libraryPreparation,
+        dismountData : this.dismountData,
+        bioinformaticsAnalysis : this.bioinformaticsAnalysis,
+        remarks : this.remarks
+      }
+      var _this = this;
+      _this.$("#submitting").modal("show");
+      this.$axios.post("/task/addProcess",postData).then(function (res){
+        _this.$("#submitting").modal("hide");
+        if (res.data.code != "200"){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          _this.$message.success(_this.$t("save_success"));
+          _this.$router.push("/task");
+        }
+      }).catch(function (res){
+        _this.$("#submitting").modal("hide");
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
     },
     isEmail : function (inputValue,option){
       console.log(inputValue,option);
       var ePattern = /^([A-Za-z0-9_\-\\.])+\\@([A-Za-z0-9_\-\\.])+\.([A-Za-z]{2,4})$/;
       console.log(ePattern.test(inputValue));
+      if(!ePattern.test(inputValue)){
+        option = null;
+      }
       return ePattern.test(inputValue);
     },
     checkData : function (){
@@ -193,10 +225,15 @@ export default {
   },
   watch:{
     emails(newVal){
-      console.log(newVal);
-
+      if (newVal.length>0){
+        var ePattern = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+        for (var i=newVal.length-1;i>=0;i--){
+          if (!ePattern.test(newVal[i])){
+            this.$delete(newVal,i);
+          }
+        }
+      }
     },
-
   }
 }
 </script>
