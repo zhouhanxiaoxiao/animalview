@@ -8,11 +8,11 @@
           <label for="projectName">{{ $t("projectName") }}</label>
           <a-input id="projectName" v-model="projectName"/>
         </div>
-        <div class="form-group col-md-4 col-sm-12 col-lg-3">
+        <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="dataType">{{ $t("dataType") }}</label>
           <a-input id="dataType" v-model="dataType"/>
         </div>
-        <div class="form-group col-md-4 col-sm-12 col-lg-3">
+        <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="principal">{{ $t("principal") }}</label>
           <div id="principal">
             <a-select  style="width: 100%" v-model="principal">
@@ -34,7 +34,7 @@
           </a-tooltip>
         </div>
         <!--样本类型-->
-        <div class="form-group col-md-4 col-sm-12 col-lg-3">
+        <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="sampleMsg">{{$t("sampleMsg")  }}</label>
           <div id="sampleMsg">
             <a-select style="width: 100%" v-model="sampleMsg">
@@ -45,8 +45,19 @@
           </div>
         </div>
         <a-divider orientation="left">{{$t("staffing")}}</a-divider>
+        <!--样品录入负责人-->
+        <div class="form-group col-md-4 col-sm-12 col-lg-2">
+          <label for="sampleInput">{{$t("sampleInput") + $t("principal") }}</label>
+          <div id="sampleInput">
+            <a-select  style="width: 100%" v-model="sampleInput">
+              <a-select-option v-for="user in users" :key="user.id">
+                {{ user.name }}
+              </a-select-option>
+            </a-select>
+          </div>
+        </div>
         <!--样品制备负责人-->
-        <div class="form-group col-md-4 col-sm-12 col-lg-3">
+        <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="samplePreparation">{{$t("samplePreparation") + $t("principal") }}</label>
           <div id="samplePreparation">
             <a-select  style="width: 100%" v-model="samplePreparation">
@@ -57,7 +68,7 @@
           </div>
         </div>
         <!--文库制备负责人-->
-        <div class="form-group col-md-4 col-sm-12 col-lg-3">
+        <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="libraryPreparation">{{$t("libraryPreparation") + $t("principal") }}</label>
           <div id="libraryPreparation">
             <a-select style="width: 100%" v-model="libraryPreparation">
@@ -68,7 +79,7 @@
           </div>
         </div>
         <!--下机数据负责人-->
-        <div class="form-group col-md-4 col-sm-12 col-lg-3">
+        <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="dismountData">{{$t("dismountData") + $t("principal") }}</label>
           <div id="dismountData">
             <a-select style="width: 100%" v-model="dismountData">
@@ -79,7 +90,7 @@
           </div>
         </div>
         <!--生信分析负责人-->
-        <div class="form-group col-md-4 col-sm-12 col-lg-3">
+        <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="bioinformaticsAnalysis">{{$t("bioinformaticsAnalysis") + $t("principal") }}</label>
           <div id="bioinformaticsAnalysis">
             <a-select style="width: 100%" v-model="bioinformaticsAnalysis">
@@ -122,6 +133,7 @@ export default {
       sampleMsg : "",
       samplePreparation:"",
       libraryPreparation:"",
+      sampleInput : "",
       dismountData : "",
       bioinformaticsAnalysis :""
     }

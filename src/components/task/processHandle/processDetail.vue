@@ -5,36 +5,44 @@
       <div class="detail-all">
         <a-steps v-model="current" type="navigation" size="small" :style="stepStyle">
           <a-step
-              :title="$t('samplePreparation')"
+              :title="$t('sampleInput')"
               :status="setpStatu(0)"
               :disabled="isDisabled(0)"
           >
-            <a-icon slot="icon" type="loading"/>
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '01'"/>
           </a-step>
           <a-step
-              :title="$t('libraryPreparation')"
+              :title="$t('samplePreparation')"
               :status="setpStatu(1)"
               :disabled="isDisabled(1)"
           >
-            <a-icon slot="icon" type="loading"/>
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '02'"/>
           </a-step>
           <a-step
-              :title="$t('dismountData')"
+              :title="$t('libraryPreparation')"
               :status="setpStatu(2)"
               :disabled="isDisabled(2)"
           >
-            <a-icon slot="icon" type="loading"/>
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '03'"/>
           </a-step>
           <a-step
-              :title="$t('bioinformaticsAnalysis')"
+              :title="$t('dismountData')"
               :status="setpStatu(3)"
               :disabled="isDisabled(3)"
           >
-            <a-icon slot="icon" type="loading"/>
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '04'"/>
+          </a-step>
+          <a-step
+              :title="$t('bioinformaticsAnalysis')"
+              :status="setpStatu(4)"
+              :disabled="isDisabled(4)"
+          >
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '05'"/>
           </a-step>
         </a-steps>
         <div class="steps-content">
-          <process-step1 :process="process" :task-id="taskId" v-if="current == 0"></process-step1>
+          <process-step1 :process="process" :task-id="taskId" v-if="current == 1"></process-step1>
+          <process-step1-new :process="process"></process-step1-new>
         </div>
       </div>
     </div>
@@ -44,9 +52,10 @@
 <script>
 import TopNav from "@/components/publib/TopNav";
 import ProcessStep1 from "@/components/task/processHandle/processStep1";
+import ProcessStep1New from "@/components/task/processHandle/processStep1New";
 export default {
   name: "processDetail",
-  components: {ProcessStep1, TopNav},
+  components: {ProcessStep1New, ProcessStep1, TopNav},
   data : function (){
     return{
       current:0,
@@ -67,9 +76,14 @@ export default {
     initPage : function (){
       var _this = this;
       var postData={
-        processId : this.process.id
+        taskId : this.taskId
       }
+      if (this.taskId == "" || this.taskId == undefined){
+        return;
+      }
+
       this.$axios.post("/task/process/init",postData).then(function (res){
+        console.log(res);
         if (res.data.code != 200){
           _this.$message.error(_this.$t(res.data.code));
         }else {
@@ -95,15 +109,17 @@ export default {
   },
   watch : {
     getTaskId(newVal){
+      console.log(newVal);
       this.taskId = newVal;
       this.initPage();
-    },
+    }
   },
   computed : {
     getTaskId : function (){
       return this.$route.query.taskId;
     },
-  }
+  },
+
 }
 </script>
 

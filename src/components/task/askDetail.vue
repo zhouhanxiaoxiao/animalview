@@ -72,7 +72,7 @@ export default {
       var postData = {
         taskId : this.taskId
       };
-      if (this.taskId == "" || this.taskId == null){
+      if (this.taskId == "" || this.taskId == null || this.taskId == undefined){
         return;
       }
       this.$axios.post("/task/askTaskDetail",postData).then(function (res) {

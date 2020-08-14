@@ -57,7 +57,9 @@
                     <div>
                       {{$t("expectionObject")}}：
                     </div>
-                    <order-item-detail v-for="row in rows" :key="row.stock.id" :row="row" :all-drosophila="allDrosophila"
+                    <order-item-detail v-for="row in rows" :key="row.stock.id" :row="row"
+                                       :all-drosophila="allDrosophila"
+                                       :all-merial="allMerial"
                                        @updateData="updateDetailData"></order-item-detail>
 
                     <!--  备注  -->
@@ -98,7 +100,8 @@
               studyDirectors : [],
               allDrosophila : [],
               detailData : {},
-              urgent : ""
+              urgent : "",
+              allMerial:[]
           }
         },
         methods : {
@@ -154,10 +157,12 @@
                     if (res.data.code != '200'){
                         _this.$message.error(_this.$t(res.data.code));
                     }else {
+                      console.log(res);
                         _this.rows = res.data.retMap.stockTable;
                         _this.studyDirectors = res.data.retMap.researchers;
                         _this.allDrosophila = res.data.retMap.allDrosophila;
                         _this.supporters = res.data.retMap.supporters;
+                        _this.allMerial = res.data.retMap.allMerial;
                         for (var item in _this.detailData){
                             _this.$delete(_this.detailData,item);
                         }

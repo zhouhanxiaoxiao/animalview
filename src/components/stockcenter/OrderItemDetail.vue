@@ -154,6 +154,136 @@
                                id="orderNumber"  v-model="orderNumber"
                                placeholder="例：36">
                     </div>
+                    <!-- 唯一资源占用
+                    <div class="form-group-sm col-md-3">
+                      <label for="meterial">{{$t("meterial")}}</label>
+                      <multiselect id="meterial"
+                                   v-model="meterial"
+                                   :options="allMerial"
+                                   :searchable="true"
+                                   :close-on-select="true"
+                                   :show-labels="false"
+                                   :allow-empty="true"
+                                   :multiple="true"
+                                   :taggable="true"
+                                   track-by="name"
+                                   label="name">
+                        <span slot="noResult"></span>
+                      </multiselect>
+                    </div>
+                    <div class="form-group-sm col-md-12" v-for="item in meterial" :key="item.id">
+                      <label for="timeselect">选择{{item.name}}占用时间</label>
+                      <section id="timeselect">
+                        <date-picker
+                            :itemId="item.id"
+                            v-model="item.time"
+                            type="datetime"
+                            placeholder="Select datetime range"
+                            range
+                            format="YYYY-MM-DD HH:mm"
+                            :disabled-date="disableSelct"
+                            :disabled-time="disableSelct"
+                            :minute-step="10"
+                            :show-time-panel="showTimeRangePanel"
+                            @close="handleRangeClose"
+                        >
+                          <template v-slot:footer>
+                            <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">
+                              {{ showTimeRangePanel ? 'select date' : 'select time' }}
+                            </button>
+                          </template>
+                        </date-picker>
+                      </section>
+                    </div> -->
+                  <hr class="my-5"/>
+                  <!--  是否需要魏依协助  -->
+                  <div class="form-group col-md-3">
+                    <label for="needWy">是否需要魏依协助</label>
+                    <div id="needWy">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" :name="'needWy'+ row.stock.id"
+                               v-model="needWy"
+                               :id="'yes2' + row.stock.id" value="Y">
+                        <label class="form-check-label" :for="'yes4' + row.stock.id">{{$t('yes')}}</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" :name="'needWy'+ row.stock.id"
+                               v-model="needWy"
+                               :id="'no2' + row.stock.id" checked value="N">
+                        <label class="form-check-label" :for="'no4' + row.stock.id">{{$t('no')}}</label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group-sm col-md-8">
+                    <label for="timeselect">选择时间</label>
+                    <section id="timeselect">
+                      <date-picker
+                          v-model="wyTime"
+                          type="datetime"
+                          placeholder="Select datetime range"
+                          range
+                          format="YYYY-MM-DD HH:mm"
+                          :disabled-date="disableSelctwy"
+                          :disabled-time="disableSelctwy"
+                          :disabled="needWy == 'N'"
+                          :minute-step="10"
+                          :show-time-panel="showTimeRangePanel"
+                          @close="handleRangeClose"
+                      >
+                        <template v-slot:footer>
+                          <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">
+                            {{ showTimeRangePanel ? 'select date' : 'select time' }}
+                          </button>
+                        </template>
+                      </date-picker>
+                    </section>
+                  </div>
+
+                  <!--  是否需要魏依协助  -->
+                  <div class="form-group col-md-3">
+                    <label for="needPhoto">是否需要拍摄行为</label>
+                    <div id="needPhoto">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" :name="'needPhoto'+ row.stock.id"
+                               v-model="needPhoto"
+                               :id="'yes2' + row.stock.id" value="Y">
+                        <label class="form-check-label" :for="'yes5' + row.stock.id">{{$t('yes')}}</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" :name="'needPhoto'+ row.stock.id"
+                               v-model="needPhoto"
+                               :id="'no2' + row.stock.id" checked value="N">
+                        <label class="form-check-label" :for="'no5' + row.stock.id">{{$t('no')}}</label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group-sm col-md-8">
+                    <label for="photoTime">选择时间</label>
+                    <section id="photoTime">
+                      <date-picker
+                          v-model="photoTime"
+                          type="datetime"
+                          placeholder="Select datetime range"
+                          range
+                          :disabled="needPhoto == 'N'"
+                          format="YYYY-MM-DD HH:mm"
+                          :disabled-date="disableSelctwy"
+                          :disabled-time="disableSelctwy"
+                          :minute-step="10"
+                          :show-time-panel="showTimeRangePanel"
+                          @close="handleRangeClose"
+                      >
+                        <template v-slot:footer>
+                          <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">
+                            {{ showTimeRangePanel ? 'select date' : 'select time' }}
+                          </button>
+                        </template>
+                      </date-picker>
+                    </section>
+                  </div>
+
                     <!--  操作流程  -->
                     <div class="form-group-sm col-md-12">
                       <label for="operationProcess">{{$t("operationProcess")}}</label>
@@ -170,10 +300,13 @@
         name: "OrderItemDetail",
         props : {
             row : Object,
-            allDrosophila : Array
+            allDrosophila : Array,
+            allMerial : Array
         },
         data:function () {
             return{
+                value2: [],
+                showTimeRangePanel: false,
                 purpose : "",
                 operationProcess : "",
                 expectedTime : "",
@@ -185,10 +318,45 @@
                 specificFeeding : "",
                 age : 0,
                 orderNumber : 0,
+                singleSource : [],
                 allReady : false,
+                needWy : "N",
+                wyTime:"",
+                needPhoto:"N",
+                photoTime : "",
             }
         },
         methods : {
+            toggleTimeRangePanel() {
+              this.showTimeRangePanel = !this.showTimeRangePanel;
+            },
+            handleRangeClose() {
+              this.showTimeRangePanel = false;
+            },
+          disableSelctwy:function (date){
+            if (date < new Date()){
+              return true;
+            }
+            for (var i in this.allMerial){
+              if (this.allMerial[i].name == "dfasdf"){
+                for (var j in this.allMerial[i].records){
+                  if (date > new Date(this.allMerial[i].records[j].starttime)
+                      && date < new Date(this.allMerial[i].records[j].endtime)
+                  ){
+                    console.log(111);
+                    return true;
+                  }
+                }
+              }
+            }
+            return false;
+          },
+            disableSelct : function (date){
+              if (date < new Date()){
+                return true;
+              }
+              return false;
+            },
             handleData(){
                 this.allReady = this.checkData();
                 var hybridStrainId = "";
@@ -205,6 +373,10 @@
                     specialFeeding : this.specialFeeding,
                     specificFeeding : this.specificFeeding,
                     age : this.age,
+                    needWy : this.needWy,
+                    wyTime : this.wyTime,
+                    needPhoto: this.needPhoto,
+                    photoTime: this.photoTime,
                     operationProcess : this.operationProcess,
                     orderNumber : this.orderNumber,
                     allReady : this.allReady
@@ -231,6 +403,12 @@
                 }
                 if (this.orderNumber<=0){
                     return false;
+                }
+                if (this.needWy == "Y" && this.wyTime == ""){
+                  return  false;
+                }
+                if (this.needPhoto == "Y" && this.photoTime == ""){
+                  return false;
                 }
                 return true;
             },
@@ -280,6 +458,10 @@
             orderNumber(){
                 this.handleData();
             },
+            wyTime(){
+              this.handleData();
+            }
+
         },
         computed : {
             btnText : function () {
