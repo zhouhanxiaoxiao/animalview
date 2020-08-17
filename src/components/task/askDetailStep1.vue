@@ -6,7 +6,9 @@
     <div style="text-align: left">
       {{$t("expectionObject")}}：
     </div>
-    <ask-task-detail-item v-for="item in rows" :key="item.id" :row="item" @handler="handlerStat" ></ask-task-detail-item>
+    <ask-task-detail-item
+        :task="task"
+        v-for="item in rows" :key="item.id" :row="item" @handler="handlerStat" ></ask-task-detail-item>
     <div class="form-row">
       <!--  备注  -->
       <div class="form-group-sm col-md-12">
@@ -33,7 +35,8 @@ export default {
   props : {
     taskId : String,
     rows : Array,
-    ask : Object
+    ask : Object,
+    task : Object
   },
   data: function(){
     return{

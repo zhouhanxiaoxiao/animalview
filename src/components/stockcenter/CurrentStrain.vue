@@ -14,7 +14,9 @@
                     </select>
                 </div>
                 <div class="col-4" style="text-align: right">
-                  <button type="button" class="btn btn-primary" @click="showAdd">{{$t("add")}}</button>
+                  <button type="button" class="btn btn-primary"
+                          v-if="this.$store.getters.isFeeder"
+                          @click="showAdd">{{$t("add")}}</button>
                 </div>
             </div>
             <div class="strain-table">

@@ -6,6 +6,13 @@
     >
       {{ $t("add") }}
     </a-button>
+    <a-upload
+        name="file"
+        :headers="{token:this.$cookies.get('token')}"
+        :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
+    >
+      <a-button> <a-icon type="upload" />{{ $t("input") }}</a-button>
+    </a-upload>
     <a-table :columns="columns" :data-source="data" bordered
              :scroll="scroll" :pagination="{ pageSize: 50 }" size="middle">
       <template
@@ -186,6 +193,7 @@ export default {
       if (!this.checkRowData(target)){
         return;
       }
+      target.add = false;
       const targetCache = newCacheData.filter(item => key === item.key)[0];
       if (target && targetCache) {
         this.data = newData;
@@ -199,6 +207,11 @@ export default {
     cancel(key) {
       const newData = [...this.data];
       const target = newData.filter(item => key === item.key)[0];
+      if (target.add == true){
+        this.editingKey ="";
+        this.onDelete(target.key);
+        return ;
+      }
       this.editingKey = '';
       if (target) {
         Object.assign(target, this.cacheData.filter(item => key === item.key)[0]);
@@ -260,7 +273,7 @@ export default {
         this.$message.error(this.$t("databaseType") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.databaseType)){
+      if (this.isNull(rowData.SequencingPlatform)){
         this.$message.error(this.$t("SequencingPlatform") + this.$t("not_null"));
         return false;
       }
@@ -283,6 +296,7 @@ export default {
       const newData = this.createNewRowData();
       newData.key = this.editingKey;
       newData.editable = true;
+      newData.add = true;
       this.data = [...this.data, newData];
       this.cacheData = this.data.map(item => ({ ...item }));
     },
@@ -325,7 +339,6 @@ export default {
         title: this.$t("sampleName"),
         dataIndex: 'sampleName',
         width: '150px',
-        fixed: 'left',
         scopedSlots: { customRender: 'sampleName' },
       });
       scorllLength +=150;
@@ -461,7 +474,7 @@ export default {
       clom.push({
         title: this.$t("operation"),
         dataIndex: 'operation',
-        width: '200px',
+        width: '100px',
         fixed: 'right',
         scopedSlots: { customRender: 'operation' },
       });

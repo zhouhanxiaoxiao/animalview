@@ -42,7 +42,7 @@
                         {{row.number}}
                     </td>
                     <td style="width: 5%">
-                        {{row.usagetype}}
+                        {{usageType(row.usagetype)}}
                     </td>
                     <td style="width: 15%">
                         {{row.environment}}
@@ -50,11 +50,15 @@
                     <td style="width: 10%">
                         <button type="button" class="btn btn-primary btn-sm stock-action"
                                 @click="makeAppointment(row.id)"
+                                v-if="canOrder"
                                 :disabled="row.number<1 || row.number == null">
                             预约
                         </button>
                         &nbsp;
-                        <button type="button" class="btn btn-primary btn-sm stock-action">
+                        <button type="button"
+                                class="btn btn-primary btn-sm stock-action"
+                                v-if="canEdit"
+                        >
                             编辑</button>
                     </td>
                 </tr>
@@ -224,7 +228,15 @@
                     _this.$("#submitting").modal('hide');
                     _this.$message.error(_this.$t("systemErr"));
                 })
-            }
+            },
+          usageType : function (t){
+              if (t == "keep"){
+                return this.$t("keep");
+              }else if (t == "stock"){
+                return this.$t("personnal_btn_stock");
+              }
+              return t;
+          }
         },
         computed : {
             pageTotal : function () {
@@ -238,6 +250,24 @@
             selectallDisable : function () {
               return this.selectedList.length == 0;
             },
+            canEdit : function (){
+              for (var i = 0;i<this.$store.getters.getUser.roles.length;i++){
+                var role = this.$store.getters.getUser.roles[i];
+                if (role.roletype == "999999" || role.roletype == "02"){
+                  return true;
+                }
+              }
+              return false;
+            },
+            canOrder : function (){
+              for (var i = 0;i<this.$store.getters.getUser.roles.length;i++){
+                var role = this.$store.getters.getUser.roles[i];
+                if (role.roletype == "999999" || role.roletype == "01"){
+                  return true;
+                }
+              }
+              return false;
+            }
         }
     }
 </script>

@@ -53,8 +53,10 @@
             </div>
             <div class="form-group col-md-3">
               <label for="useType">{{$t("useType")}}</label>
-              <input type="text" class="form-control" :class="useTypeValid" id="useType" v-model="useType" required
-               placeholder="例：保种">
+              <select class="form-control" :class="useTypeValid" id="useType" v-model="useType" required>
+                <option value="keep">{{$t("keep")}}</option>
+                <option value="stock">{{$t("personnal_btn_stock")}}</option>
+              </select>
             </div>
             <div class="form-group col-md-3">
               <label for="birthday">{{$t("birthday")}}</label>
@@ -103,7 +105,7 @@ export default {
       containerValid : "",
       number : 0,
       numberValid : "",
-      useType : "",
+      useType : "keep",
       useTypeValid : "",
       birthday : "",
       environmentId: "",

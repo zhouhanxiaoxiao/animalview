@@ -25,10 +25,21 @@
         <ask-detail-setp1 v-if="current == 0"
                           :ask="ask"
                           :rows="rows"
+                          :task="task"
                           @initAskDetail = this.init
                           :task-id="taskId"></ask-detail-setp1>
-        <ask-detail-step2 v-if="current == 1" :task-id="taskId" :ask="ask"></ask-detail-step2>
-        <ask-detail-step3 v-if="current == 2" :task-id="taskId" :ask="ask"></ask-detail-step3>
+
+        <ask-detail-step2
+                          v-if="current == 1"
+                          :task-id="taskId"
+                          :task="task"
+                          @initAskDetail="this.init"
+                          :ask="ask"></ask-detail-step2>
+
+        <ask-detail-step3 v-if="current == 2"
+                          :task-id="taskId"
+                          :task="task"
+                          :ask="ask"></ask-detail-step3>
       </div>
     </div>
   </div>
@@ -48,6 +59,7 @@ export default {
       current: 0,
       canClick : 0,
       taskId : "",
+      task : {},
       rows : [],
       ask : {},
       stepStyle: {
@@ -72,16 +84,18 @@ export default {
       var postData = {
         taskId : this.taskId
       };
-      if (this.taskId == "" || this.taskId == null || this.taskId == undefined){
-        return;
-      }
       this.$axios.post("/task/askTaskDetail",postData).then(function (res) {
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
         }else {
+          console.log(res)
           _this.rows = res.data.retMap.rows;
           _this.ask = res.data.retMap.ask;
-          if (res.data.retMap.ask.currentstatu == "01" || res.data.retMap.ask.currentstatu == "00"){
+          _this.task = res.data.retMap.task;
+          if (res.data.retMap.ask.currentstatu == "01"
+              || res.data.retMap.ask.currentstatu == "00"
+              || res.data.retMap.ask.currentstatu == "09"
+          ){
             _this.current = 0;
             _this.canClick = 0;
           }else if (res.data.retMap.ask.currentstatu == "02"
@@ -93,7 +107,7 @@ export default {
             _this.canClick = 2;
           }else {
             _this.current = 2;
-            _this.canClick = 3;
+            _this.canClick = 2;
           }
         }
       }).catch(function (res) {

@@ -1,7 +1,9 @@
 <template>
   <div>
     <div>{{$t("expectionPrep")}}</div>
-    <prepare-detail @refresh="init" v-for="row in rows" :key="row.prepare.id" :row="row" @confirm="handleConfirm"></prepare-detail>
+    <prepare-detail
+        :task="task"
+        @refresh="init" v-for="row in rows" :key="row.prepare.id" :row="row" @confirm="handleConfirm"></prepare-detail>
     <comfirm-prepare @comfirmPrep="confirmPrep" :preid="prepareId"></comfirm-prepare>
     <refuse-alert :modalTitle="$t('refuse')"></refuse-alert>
     <submitting :title="$t('submitting')"></submitting>
@@ -17,7 +19,8 @@ export default {
   components: {Submitting, RefuseAlert, ComfirmPrepare, PrepareDetail},
   props : {
     taskId : String,
-    ask : Object
+    ask : Object,
+    task : Object
   },
   data : function (){
     return{
@@ -35,7 +38,7 @@ export default {
       }
       var _this = this;
       this.$axios.post("/task/ask/getPrepare",postData).then(function (res){
-        console.log(res);
+        // console.log(res);
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
         }else {
@@ -63,6 +66,7 @@ export default {
         }else {
           console.log(res);
           _this.init();
+          _this.$emit("initAskDetail");
         }
       }).catch(function (res){
         _this.$("#submitting").modal("hide");

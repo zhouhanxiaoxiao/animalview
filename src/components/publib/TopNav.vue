@@ -34,6 +34,9 @@
                             <router-link to="/personal/animalStock"><a class="dropdown-item">{{$t("current_stock")}}</a></router-link>
                         </div>
                     </li>
+                    <li class="nav-item active">
+                      <router-link to="/about"><a class="nav-link" href="#">{{$t("about")}}</a></router-link>
+                    </li>
                 </ul>
             </div>
             <div>
@@ -45,6 +48,7 @@
                         {{$t("nav_hello") + " , " + userName}}
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" id="personalPage" @click="personalPage">{{$t("nav_personal")}}</a>
                         <a class="dropdown-item" id="exit" @click="sysExit">{{$t("exit")}}</a>
                     </div>
                 </div>
@@ -84,6 +88,9 @@
                     console.log(res);
                     _this.$message.error(_this.$t("systemErr"));
                 })
+            },
+            personalPage : function (){
+
             }
         },
         beforeMount : function(){
@@ -92,6 +99,7 @@
         },
         computed : {
             userName:function () {
+                // console.log(this.$store.getters.getUser);
                 return this.$store.getters.getUser.name;
             }
         }

@@ -87,7 +87,7 @@
                     <textarea class="form-control" :id="'refuseReason'+row.detail.id" rows="1" disabled="disabled" :value="row.fail.reason"></textarea>
                   </div>
                 </div>
-                <div class="modal-footer" style="margin-top: 10px" v-if="row.detail.confirmstatu == '00'">
+                <div class="modal-footer" style="margin-top: 10px" v-if="row.detail.confirmstatu == '00' && this.$store.getters.isCurrentUser(task.currentuser)">
                   <button type="button" class="btn btn-danger" @click="handleState('refuse')">{{$t("refuse")}}</button>
                   <button type="button" class="btn btn-primary" @click="handleState('confirm')">{{$t("confirm")}}</button>
                 </div>
@@ -101,7 +101,8 @@
     export default {
       name: "AskTaskDetailItem",
       props : {
-            row : Object
+            row : Object,
+        task:Object,
         },
         methods : {
             handleState(stat){

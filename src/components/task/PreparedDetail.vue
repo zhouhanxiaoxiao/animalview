@@ -46,12 +46,11 @@
             <textarea class="form-control" id="remarks" rows="2" disabled :value="row.confirm.remarks"></textarea>
           </div>
         </div>
-        <div class="modal-footer" v-if="row.prepare.prestatu == '02'">
+        <div class="modal-footer" v-if="row.prepare.prestatu == '02' || this.$store.getters.isCurrentUser(this.task.createuser)">
           <button type="button" class="btn btn-primary"  @click="handleState('confirm')">{{$t("confirm")}}</button>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -61,7 +60,8 @@ import {formatDate} from "@/components/publib/date";
 export default {
   name: "PreparedDetail",
   props:{
-    row:Object
+    row : Object,
+    task : Object
   },
   methods: {
     longToStr : function (date) {

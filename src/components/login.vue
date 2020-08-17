@@ -7,11 +7,15 @@
             <br/><br/><br/>
             <InputwhitName ref="loginEmail" :inp-data="loginEmailData" @updateData="updateLogin"></InputwhitName>
             <InputwhitName ref="loginPwd" :inp-data="loginPwdData" @updateData="updateLogin"></InputwhitName>
+          <div class="noPassword">
+            <a>忘记密码？</a>
+          </div>
             <div class="but-div">
                 <button type="button" class="btn btn-primary login-btn" @click="submitLogin">{{$t('userLogin')}}</button>
                 <br/>
                 <button type="button" class="btn btn-light login-btn" @click="userRegister()">{{$t('userRegister')}}</button>
             </div>
+
         </div>
         <language></language>
     </div>
@@ -90,5 +94,11 @@
     }
     .btn-link{
         color: white !important;
+    }
+    .noPassword{
+      margin-top: 10px;
+      text-align: left;
+      font-size: 12px;
+      color: #4e555b;
     }
 </style>

@@ -1,7 +1,9 @@
 <template>
   <div>
     已准备完成：
-    <prepared-detail @confirmTask="confirmTask" v-for="row in rows" :key="row.prepare.id" :row="row"></prepared-detail>
+    <prepared-detail @confirmTask="confirmTask" v-for="row in rows" :key="row.prepare.id"
+                     :task="task"
+                     :row="row"></prepared-detail>
     <comfirm-prepared :prepare-id="prepareId" @submitData="submitData"></comfirm-prepared>
     <submitting :title="$t('submitting')"></submitting>
   </div>
@@ -15,7 +17,8 @@ export default {
   components: {Submitting, ComfirmPrepared, PreparedDetail},
   props:{
     taskId : String,
-    ask : Object
+    ask : Object,
+    task : Object
   },
   data : function (){
     return {
@@ -54,12 +57,12 @@ export default {
       }
       var _this = this;
       this.$axios.post("/task/ask/getPrepare",postData).then(function (res){
-        console.log(res);
+        // console.log(res);
         _this.$("#submitting").modal('hide');
         if (res.data.code != 200){
           _this.$message.error(_this.$t(res.data.code));
         }else {
-          console.log(res);
+          // console.log(res);
           _this.rows = res.data.retMap.rows;
         }
       }).catch(function (res){

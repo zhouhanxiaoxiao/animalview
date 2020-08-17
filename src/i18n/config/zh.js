@@ -22,7 +22,7 @@ const zh={
     edit:"编辑",
     delete:"删除",
     save:"保存",
-
+    input : "导入",
     nav_hello : "你好",
     nav_home : "主页",
     nav_task : "任务",
@@ -67,6 +67,8 @@ const zh={
     empty : "无",
     yes : "是",
     no : "否",
+    keep : "保种",
+
     isHybridizationNecessary : "是否需要杂交",
     hybridStrain:"对应的杂交品系",
     specialFeeding : "特殊饲养条件",
@@ -153,6 +155,7 @@ const zh={
     SequencingPlatform :"测序平台",
     numberErr : "必须大于1",
     systemErr : "系统异常！",
+    about : "关于",
     E501 : "该邮箱已注册，请等待管理员审核！",
     E502 : "该邮箱已注册，请直接登录！",
     E500 : "系统异常！",
@@ -161,6 +164,7 @@ const zh={
     E505 : "邮箱不存在！",
     E511 : "密码错误！",
     E510 : "用户不存在！",
+    E520 : "基因型已存在！"
 
 }
 export default zh;

@@ -60,7 +60,9 @@
         </div>
         <div class="modal-footer">
 <!--          <button type="button" class="btn btn-danger" @click="handleState('refuse')">{{$t("refuse")}}</button>-->
-          <button type="button" v-if="row.prepare.prestatu == '01'" class="btn btn-primary"  @click="handleState('confirm')">{{$t("confirm")}}</button>
+          <button type="button" v-if="row.prepare.prestatu == '01'
+            && this.$store.getters.isCurrentUser(task.currentuser)" class="btn btn-primary"
+                  @click="handleState('confirm')">{{$t("confirm")}}</button>
         </div>
       </div>
     </div>
@@ -72,7 +74,8 @@ import {formatDate} from "@/components/publib/date";
 export default {
   name: "PrepareDetail",
   props:{
-    row : Object
+    row : Object,
+    task : Object
   },
   data : function (){
     return {

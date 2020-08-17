@@ -223,6 +223,7 @@
                           type="datetime"
                           placeholder="Select datetime range"
                           range
+                          value-type="format"
                           format="YYYY-MM-DD HH:mm"
                           :disabled-date="disableSelctwy"
                           :disabled-time="disableSelctwy"
@@ -262,25 +263,35 @@
                   <div class="form-group-sm col-md-8">
                     <label for="photoTime">选择时间</label>
                     <section id="photoTime">
-                      <date-picker
+                      <a-range-picker
                           v-model="photoTime"
-                          type="datetime"
-                          placeholder="Select datetime range"
-                          range
-                          :disabled="needPhoto == 'N'"
-                          format="YYYY-MM-DD HH:mm"
-                          :disabled-date="disableSelctwy"
-                          :disabled-time="disableSelctwy"
                           :minute-step="10"
-                          :show-time-panel="showTimeRangePanel"
-                          @close="handleRangeClose"
-                      >
-                        <template v-slot:footer>
-                          <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">
-                            {{ showTimeRangePanel ? 'select date' : 'select time' }}
-                          </button>
-                        </template>
-                      </date-picker>
+                          :disabled-date="disableSelctPhoto"
+                          format="YYYY-MM-DD HH"
+                          :disabled="needPhoto == 'N'"
+                          @change="onChange"
+                          :show-time="{ defaultValue: moment('00:00:00', 'HH:mm:ss') }"
+                      />
+<!--                      <date-picker-->
+<!--                          v-model="photoTime"-->
+<!--                          type="datetime"-->
+<!--                          placeholder="Select datetime range"-->
+<!--                          range-->
+<!--                          :disabled="needPhoto == 'N'"-->
+<!--                          value-type="format"-->
+<!--                          format="YYYY-MM-DD HH:mm"-->
+<!--                          :disabled-date="disableSelctPhoto"-->
+<!--                          :disabled-time="disableSelctPhoto"-->
+<!--                          :minute-step="10"-->
+<!--                          :show-time-panel="showTimeRangePanel"-->
+<!--                          @close="handleRangeClose"-->
+<!--                      >-->
+<!--                        <template v-slot:footer>-->
+<!--                          <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">-->
+<!--                            {{ showTimeRangePanel ? 'select date' : 'select time' }}-->
+<!--                          </button>-->
+<!--                        </template>-->
+<!--                      </date-picker>-->
                     </section>
                   </div>
 
@@ -296,6 +307,7 @@
 </template>
 
 <script>
+    import moment from 'moment';
     export default {
         name: "OrderItemDetail",
         props : {
@@ -321,29 +333,50 @@
                 singleSource : [],
                 allReady : false,
                 needWy : "N",
-                wyTime:"",
+                wyTime:[],
                 needPhoto:"N",
-                photoTime : "",
+                photoTime : [],
             }
         },
         methods : {
+            moment,
+            onChange(dates, dateStrings) {
+              console.log('From: ', dates[0], ', to: ', dates[1]);
+              console.log('From: ', dateStrings[0], ', to: ', dateStrings[1]);
+            },
             toggleTimeRangePanel() {
               this.showTimeRangePanel = !this.showTimeRangePanel;
             },
             handleRangeClose() {
               this.showTimeRangePanel = false;
             },
+            disableSelctPhoto:function (date){
+            if (date < new Date()){
+              return true;
+            }
+            for (var i in this.allMerial){
+              if (this.allMerial[i].name == "拍照片"){
+                for (var j in this.allMerial[i].records){
+                  if (date > new Date(this.allMerial[i].records[j].starttime)
+                      && date < new Date(this.allMerial[i].records[j].endtime)
+                  ){
+                    return true;
+                  }
+                }
+              }
+            }
+            return false;
+          },
           disableSelctwy:function (date){
             if (date < new Date()){
               return true;
             }
             for (var i in this.allMerial){
-              if (this.allMerial[i].name == "dfasdf"){
+              if (this.allMerial[i].name == "魏依协助"){
                 for (var j in this.allMerial[i].records){
                   if (date > new Date(this.allMerial[i].records[j].starttime)
                       && date < new Date(this.allMerial[i].records[j].endtime)
                   ){
-                    console.log(111);
                     return true;
                   }
                 }
@@ -458,6 +491,22 @@
             orderNumber(){
                 this.handleData();
             },
+            needWy(newVal){
+              if (newVal == "N"){
+                this.wyTime = "";
+              }
+              this.handleData();
+            },
+            needPhoto(newVal){
+              if (newVal == "N"){
+                this.photoTime = "";
+              }
+              this.handleData();
+            },
+          photoTime(newVal){
+            console.log(newVal)
+            this.handleData();
+          },
             wyTime(){
               this.handleData();
             }

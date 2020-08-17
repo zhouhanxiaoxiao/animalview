@@ -12,6 +12,7 @@ import askDetail from "@/components/task/askDetail";
 import userallow from "@/components/task/userallow";
 import createProcess from "@/components/task/processHandle/createProcess";
 import processDetail from "@/components/task/processHandle/processDetail";
+import about from "@/components/about/about";
 
 /*配置路由*/
 const routes=[
@@ -23,6 +24,7 @@ const routes=[
     {path: '/personal/enterAnimalStock',component: EnterAnimalStock,meta: {index: 0}},
     {path: '/personal/animalStock',component: AnimalStock,meta: {index: 0}},
     {path: '/task',component: TaskMain,meta: {index: 0}},
+    {path: '/about',component: about,meta: {index: 0}},
     {path: '/task/process',component: createProcess,meta: {index: 0}},
     {path: '/task/askDetail',name:"askDetail",component: askDetail,meta: {index: 0}},
     {path: '/task/processDetail',name:"processDetail",component: processDetail,meta: {index: 0}},

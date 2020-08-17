@@ -78,10 +78,9 @@ export default {
       var postData={
         taskId : this.taskId
       }
-      if (this.taskId == "" || this.taskId == undefined){
+      if (this.taskId == "" || this.taskId == undefined || this.taskId == null){
         return;
       }
-
       this.$axios.post("/task/process/init",postData).then(function (res){
         console.log(res);
         if (res.data.code != 200){

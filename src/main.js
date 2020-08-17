@@ -37,6 +37,7 @@ Vue.prototype.$cookies = VueCookies;
 * axios 全局设置
 * */
 axios.defaults.baseURL = 'http://localhost:8081/';
+// axios.defaults.baseURL = 'http://119.90.33.35:3566/';
 axios.interceptors.request.use(config => {
   var token = VueCookies.get("token");
   if (token){

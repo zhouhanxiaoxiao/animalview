@@ -157,7 +157,7 @@
                     if (res.data.code != '200'){
                         _this.$message.error(_this.$t(res.data.code));
                     }else {
-                      console.log(res);
+                        console.log(res);
                         _this.rows = res.data.retMap.stockTable;
                         _this.studyDirectors = res.data.retMap.researchers;
                         _this.allDrosophila = res.data.retMap.allDrosophila;
