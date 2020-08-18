@@ -9,8 +9,10 @@
     &nbsp;
     <a-upload
         name="file"
-        :headers="{token:this.$cookies.get('token')}"
-        : ="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
+        accept=".xls,.xlsx"
+        :headers="{token:this.$cookies.get('token'),processId : process.id}"
+        @change="handUploadChange"
+        :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
     >
       <a-tooltip placement="topLeft" :title="$t('overText')">
         <a-button> <a-icon type="upload" />{{ $t("input") }}</a-button>
@@ -169,6 +171,12 @@ export default {
     this.initPage();
   },
   methods: {
+    handUploadChange :function (dat){
+      console.log(dat);
+      if (dat.file.status == "done"){
+        this.initPage();
+      }
+    },
     handleChange(value, key, column) {
       const newData = [...this.data];
       const target = newData.filter(item => key === item.key)[0];
@@ -291,6 +299,7 @@ export default {
     },
     initPage : function (){
       this.initColumns(this.process.sampletype);
+
       if (this.data.length == 0){
         this.handleAdd();
       }
@@ -486,7 +495,7 @@ export default {
         fixed: 'right',
         scopedSlots: { customRender: 'operation' },
       });
-      scorllLength += 200;
+      scorllLength += 100;
 
       this.scroll.x = scorllLength;
       this.columns = clom;

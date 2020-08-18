@@ -97,7 +97,7 @@
     }
     .noPassword{
       margin-top: 10px;
-      text-align: left;
+      text-align: right;
       font-size: 12px;
       color: #4e555b;
     }
