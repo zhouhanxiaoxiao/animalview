@@ -126,6 +126,8 @@ const zh={
     dataType : "数据类型",
     principal:"负责人",
 
+    overText : "导入文件将覆盖本页内容！",
+
     samplePreparation :"样品制备",
     sampleInput : "样品录入",
     libraryPreparation :"文库制备",

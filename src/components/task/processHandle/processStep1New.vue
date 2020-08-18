@@ -6,13 +6,17 @@
     >
       {{ $t("add") }}
     </a-button>
+    &nbsp;
     <a-upload
         name="file"
         :headers="{token:this.$cookies.get('token')}"
-        :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
+        : ="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
     >
-      <a-button> <a-icon type="upload" />{{ $t("input") }}</a-button>
+      <a-tooltip placement="topLeft" :title="$t('overText')">
+        <a-button> <a-icon type="upload" />{{ $t("input") }}</a-button>
+      </a-tooltip>
     </a-upload>
+    <br/>
     <a-table :columns="columns" :data-source="data" bordered
              :scroll="scroll" :pagination="{ pageSize: 50 }" size="middle">
       <template
@@ -291,6 +295,9 @@ export default {
         this.handleAdd();
       }
     },
+    handleIndex : function (){
+
+    },
     handleAdd : function (){
       this.editingKey = new Date().getTime();
       const newData = this.createNewRowData();
@@ -302,6 +309,7 @@ export default {
     },
     createNewRowData : function (){
       return {
+        index:1,
         sampleName : "",
         species : "",
         tissue : "",
@@ -326,14 +334,14 @@ export default {
       var scorllLength = 0;
       var clom = new Array();
       /**序号*/
-      // clom.push({
-      //   title: this.$t("index"),
-      //   dataIndex: 'index',
-      //   width: '100px',
-      //   fixed: 'left',
-      //   scopedSlots: { customRender: 'name' },
-      // });
-      // scorllLength +=150;
+      clom.push({
+        title: this.$t("index"),
+        dataIndex: 'index',
+        width: '50px',
+        fixed: 'left',
+        scopedSlots: { customRender: 'name' },
+      });
+      scorllLength +=50;
       /**样本名称*/
       clom.push({
         title: this.$t("sampleName"),
