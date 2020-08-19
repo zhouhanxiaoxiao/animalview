@@ -218,26 +218,35 @@
                   <div class="form-group-sm col-md-8">
                     <label for="timeselect">选择时间</label>
                     <section id="timeselect">
-                      <date-picker
+<!--                      <date-picker-->
+<!--                          v-model="wyTime"-->
+<!--                          type="datetime"-->
+<!--                          placeholder="Select datetime range"-->
+<!--                          range-->
+<!--                          value-type="format"-->
+<!--                          format="YYYY-MM-DD HH:mm"-->
+<!--                          :disabled-date="disableSelctwy"-->
+<!--                          :disabled-time="disableSelctwy"-->
+<!--                          :disabled="needWy == 'N'"-->
+<!--                          :minute-step="10"-->
+<!--                          :show-time-panel="showTimeRangePanel"-->
+<!--                          @close="handleRangeClose"-->
+<!--                      >-->
+<!--                        <template v-slot:footer>-->
+<!--                          <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">-->
+<!--                            {{ showTimeRangePanel ? 'select date' : 'select time' }}-->
+<!--                          </button>-->
+<!--                        </template>-->
+<!--                      </date-picker>-->
+                      <a-range-picker
                           v-model="wyTime"
-                          type="datetime"
-                          placeholder="Select datetime range"
-                          range
-                          value-type="format"
-                          format="YYYY-MM-DD HH:mm"
-                          :disabled-date="disableSelctwy"
-                          :disabled-time="disableSelctwy"
-                          :disabled="needWy == 'N'"
                           :minute-step="10"
-                          :show-time-panel="showTimeRangePanel"
-                          @close="handleRangeClose"
-                      >
-                        <template v-slot:footer>
-                          <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">
-                            {{ showTimeRangePanel ? 'select date' : 'select time' }}
-                          </button>
-                        </template>
-                      </date-picker>
+                          :disabled-date="disableSelctwy"
+                          format="YYYY-MM-DD HH"
+                          :disabled="needWy == 'N'"
+                          @change="onChange"
+                          :show-time="{ defaultValue: moment('00:00:00', 'HH:mm:ss') }"
+                      />
                     </section>
                   </div>
 

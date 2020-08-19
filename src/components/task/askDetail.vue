@@ -88,6 +88,9 @@ export default {
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
         }else {
+          if (res.data.retMap == null|| res.data.retMap == undefined){
+            return ;
+          }
           console.log(res)
           _this.rows = res.data.retMap.rows;
           _this.ask = res.data.retMap.ask;

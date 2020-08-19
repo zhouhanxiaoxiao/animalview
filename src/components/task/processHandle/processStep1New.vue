@@ -12,6 +12,8 @@
         accept=".xls,.xlsx"
         :headers="{token:this.$cookies.get('token'),processId : process.id}"
         @change="handUploadChange"
+        @reject="handUnaccept"
+        :beforeUpload="handBeforeUpload"
         :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
     >
       <a-tooltip placement="topLeft" :title="$t('overText')">
@@ -20,17 +22,18 @@
     </a-upload>
     <br/>
     <a-table :columns="columns" :data-source="data" bordered
+             :loading="tableLoad"
              :scroll="scroll" :pagination="{ pageSize: 50 }" size="middle">
       <template
           v-for="col in this.columnNames"
           :slot="col"
-          slot-scope="text, record"
+          slot-scope="text, record,index"
       >
         <div :key="col">
           <template v-if="record.editable">
             <!-- 样本类型 -->
-            <a-select  style="width: 100%" v-if="col == 'sampleMsg'"
-                       v-model="record.sampleMsg"
+            <a-select  style="width: 100%" v-if="col == 'samplemsg'"
+                       v-model="record.samplemsg"
                        @change="e => handleChange(e.target.value, record.key, col)"
             >
               <a-select-option v-for="item in sampletypes" :key="item.key" :value="item.key">
@@ -38,8 +41,8 @@
               </a-select-option>
             </a-select>
             <!-- 样本状态 -->
-            <a-select  style="width: 100%" v-else-if="col == 'sampleStatu'"
-                       v-model="record.sampleStatu"
+            <a-select  style="width: 100%" v-else-if="col == 'samplestatu'"
+                       v-model="record.samplestatu"
                        @change="e => handleChange(e.target.value, record.key, col)"
             >
               <a-select-option v-for="item in sampleStatu" :key="item.key" :value="item.key">
@@ -47,8 +50,8 @@
               </a-select-option>
             </a-select>
             <!-- 细胞分选法 -->
-            <a-select  style="width: 100%" v-else-if="col == 'cellSort'"
-                       v-model="record.cellSort"
+            <a-select  style="width: 100%" v-else-if="col == 'cellsort'"
+                       v-model="record.cellsort"
                        @change="e => handleChange(e.target.value, record.key, col)"
             >
               <a-select-option v-for="item in cellSortMethods" :key="item.key" :value="item.key">
@@ -57,8 +60,8 @@
             </a-select>
 
             <!-- 建库类型 -->
-            <a-select  style="width: 100%" v-else-if="col == 'databaseType'"
-                       v-model="record.databaseType"
+            <a-select  style="width: 100%" v-else-if="col == 'databasetype'"
+                       v-model="record.databasetype"
                        @change="e => handleChange(e.target.value, record.key, col)"
             >
               <a-select-option v-for="item in databaseTypes" :key="item.key" :value="item.key">
@@ -67,8 +70,8 @@
             </a-select>
 
             <!-- 测序平台 -->
-            <a-select  style="width: 100%" v-else-if="col == 'SequencingPlatform'"
-                       v-model="record.SequencingPlatform"
+            <a-select  style="width: 100%" v-else-if="col == 'sequencingplatform'"
+                       v-model="record.sequencingplatform"
                        @change="e => handleChange(e.target.value, record.key, col)"
             >
               <a-select-option v-for="item in seqPlants" :key="item.key" :value="item.key">
@@ -76,23 +79,23 @@
               </a-select-option>
             </a-select>
             <a-input-number
-                v-else-if="col == 'sampleVolume'"
+                v-else-if="col == 'samplevolume'"
                 style="margin: -5px 0"
-                v-model="record.sampleVolume"
+                v-model="record.samplevolume"
                 :min="0"
                 @change="e => handleChange(e.target.value, record.key, col)"
             />
             <a-input-number
-                v-else-if="col == 'tissueNumber'"
+                v-else-if="col == 'tissuenumber'"
                 style="margin: -5px 0"
-                v-model="record.tissueNumber"
+                v-model="record.tissuenumber"
                 :min="0"
                 @change="e => handleChange(e.target.value, record.key, col)"
             />
             <a-input-number
-                v-else-if="col == 'bloodVolume'"
+                v-else-if="col == 'bloodvolume'"
                 style="margin: -5px 0"
-                v-model="record.bloodVolume"
+                v-model="record.bloodvolume"
                 :min="0"
                 @change="e => handleChange(e.target.value, record.key, col)"
             />
@@ -104,21 +107,24 @@
                 @change="e => handleChange(e.target.value, record.key, col)"
             />
             <a-input-number
-                v-else-if="col == 'totalNumber'"
+                v-else-if="col == 'totalnumber'"
                 style="margin: -5px 0"
-                v-model="record.totalNumber"
+                v-model="record.totalnumber"
                 :min="0"
                 @change="e => handleChange(e.target.value, record.key, col)"
             />
             <a-input
-                v-else
+                v-else-if="col != 'index'"
                 style="margin: -5px 0"
                 :value="text"
                 @change="e => handleChange(e.target.value, record.key, col)"
             />
+            <template v-else>
+              {{ showText(col,text,index) }}
+            </template>
           </template>
           <template v-else>
-            {{ showText(col,text) }}
+            {{ showText(col,text,index) }}
           </template>
         </div>
       </template>
@@ -146,24 +152,29 @@
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" data-dismiss="modal">{{$t("cancel")}}</button>
       <button type="button" class="btn btn-primary"
-              :disabled="editingKey !== ''">{{$t("submit")}}</button>
+              :disabled="editingKey !== ''" @click="submitData">{{$t("submit")}}</button>
     </div>
+    <submitting :title="$t('submitting')"></submitting>
   </div>
 </template>
 
 <script>
+import util from "@/components/publib/util";
+import Submitting from "@/components/publib/submitting";
 export default {
   name: "processStep1New",
+  components: {Submitting},
   props : {
     process : Object
   },
   data() {
     this.cacheData = [];
     return {
+      tableLoad:false,
       data : [],
       columns : [],
       columnNames : [],
-      scroll :{x:1500,y:400},
+      scroll :{x:1500},
       editingKey: '',
     };
   },
@@ -171,6 +182,46 @@ export default {
     this.initPage();
   },
   methods: {
+    submitData : function (){
+      this.$("#submitting").modal("show");
+      var _this = this;
+      var postData = {
+        processId : this.process.id,
+        datas : JSON.stringify(this.data)
+      }
+      this.$axios.post("/task/process/commitDatas",postData).then(function (res){
+        _this.$("#submitting").modal("hide");
+        if (res.data.code != "200"){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          _this.$message.success(_this.$t("commitSucc"));
+        }
+      }).catch(function (res){
+        console.log(res);
+        _this.$("#submitting").modal("hide");
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
+    handBeforeUpload : function (file){
+      if (file.name.indexOf("样本录入-") != 0){
+        this.$message.error(this.$t("fileNameErr"));
+        return false;
+      }
+      if (this.process.sampletype == "01" && file.name.indexOf("-核酸-") == -1){
+        this.$message.error(this.$t("fileNameErr"));
+        return false;
+      }else if (this.process.sampletype == "02" && file.name.indexOf("-组织-") == -1){
+        this.$message.error(this.$t("fileNameErr"));
+        return false;
+      }else if (this.process.sampletype == "02" && !file.name.indexOf("-组织-") == -1){
+        this.$message.error(this.$t("fileNameErr"));
+        return false;
+      }
+      return true;
+    },
+    handUnaccept : function (){
+      this.$message.error(this.$t("unAcceptFile"));
+    },
     handUploadChange :function (dat){
       console.log(dat);
       if (dat.file.status == "done"){
@@ -233,7 +284,7 @@ export default {
     },
     checkRowData : function (rowData){
       console.log(rowData);
-      if (this.isNull(rowData.sampleName)){
+      if (this.isNull(rowData.samplename)){
         this.$message.error(this.$t("sampleName") + this.$t("not_null"));
         return false;
       }
@@ -245,11 +296,11 @@ export default {
         this.$message.error(this.$t("tissue") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.sampleMsg)){
+      if (this.isNull(rowData.samplemsg)){
         this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.sampleStatu)){
+      if (this.isNull(rowData.samplestatu)){
         this.$message.error(this.$t("sampleStatu") + this.$t("not_null"));
         return false;
       }
@@ -273,19 +324,19 @@ export default {
       //   this.$message.error(this.$t("totalNumber") + this.$t("not_null"));
       //   return false;
       // }
-      if (this.process.sampletype == "03" && this.isNull(rowData.cellLife)){
-        this.$message.error(this.$t("cellLife") + this.$t("not_null"));
+      if (this.process.sampletype == "03" && this.isNull(rowData.celllife)){
+        this.$message.error(this.$t("celllife") + this.$t("not_null"));
         return false;
       }
-      if (this.process.sampletype == "03" && this.isNull(rowData.cellSort)){
-        this.$message.error(this.$t("cellSort") + this.$t("not_null"));
+      if (this.process.sampletype == "03" && this.isNull(rowData.cellsort)){
+        this.$message.error(this.$t("cellsort") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.databaseType)){
+      if (this.isNull(rowData.databasetype)){
         this.$message.error(this.$t("databaseType") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.SequencingPlatform)){
+      if (this.isNull(rowData.sequencingplatform)){
         this.$message.error(this.$t("SequencingPlatform") + this.$t("not_null"));
         return false;
       }
@@ -299,10 +350,39 @@ export default {
     },
     initPage : function (){
       this.initColumns(this.process.sampletype);
-
-      if (this.data.length == 0){
-        this.handleAdd();
+      if (util.isNull(this.process) || util.isNull(this.process.id)){
+        return ;
       }
+      var postData = {
+        processId : this.process.id
+      }
+      var _this = this;
+      this.tableLoad = true;
+      _this.data = new Array();
+      this.$axios.post("/task/process/sampleInput",postData).then(function (res){
+        console.log(res);
+        _this.tableLoad = false;
+        if (res.data.code != "200"){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          if (res.data.retMap.sampleInputs == undefined
+              ||res.data.retMap.sampleInputs == null
+              ||res.data.retMap.sampleInputs.length == 0){
+            _this.handleAdd();
+          }else {
+            _this.editingKey = "";
+            for (var i=0;i<res.data.retMap.sampleInputs.length;i++){
+              var d = res.data.retMap.sampleInputs[i];
+              d.key = d.id;
+              _this.data.push(d);
+            }
+          }
+        }
+      }).catch(function (res){
+        console.log(res);
+        _this.tableLoad = false;
+        _this.$message.error(_this.$t("systemErr"));
+      })
     },
     handleIndex : function (){
 
@@ -319,25 +399,24 @@ export default {
     createNewRowData : function (){
       return {
         index:1,
-        sampleName : "",
+        samplename : "",
         species : "",
         tissue : "",
-        sampleMsg : "",
-        sampleStatu : "",
-        tissueNumber : 0,
-        bloodVolume : 0,
+        samplemsg : "",
+        samplestatu : "",
+        tissuenumber : 0,
+        bloodvolume : 0,
         concentration : 0,
-        sampleVolume : 0,
-        totalNumber : 0,
-        cellLife:"",
-        cellSort :"",
-        databaseType : "",
-        SequencingPlatform : "",
+        samplevolume : 0,
+        totalnumber : 0,
+        celllife:"",
+        cellsort :"",
+        databasetype : "",
+        sequencingplatform : "",
         remarks : "",
         files:[]
       }
     },
-
     initColumns : function (type){
       console.log(type)
       var scorllLength = 0;
@@ -348,15 +427,15 @@ export default {
         dataIndex: 'index',
         width: '50px',
         fixed: 'left',
-        scopedSlots: { customRender: 'name' },
+        scopedSlots: { customRender: 'index' },
       });
       scorllLength +=50;
       /**样本名称*/
       clom.push({
         title: this.$t("sampleName"),
-        dataIndex: 'sampleName',
+        dataIndex: 'samplename',
         width: '150px',
-        scopedSlots: { customRender: 'sampleName' },
+        scopedSlots: { customRender: 'samplename' },
       });
       scorllLength +=150;
       /**物种*/
@@ -378,17 +457,17 @@ export default {
       /**样本类型*/
       clom.push({
         title: this.$t("sampleMsg"),
-        dataIndex: 'sampleMsg',
+        dataIndex: 'samplemsg',
         width: '150px',
-        scopedSlots: { customRender: 'sampleMsg' },
+        scopedSlots: { customRender: 'samplemsg' },
       });
       scorllLength += 150;
       /**样本状态*/
       clom.push({
         title: this.$t("sampleStatu"),
-        dataIndex: 'sampleStatu',
+        dataIndex: 'samplestatu',
         width: '150px',
-        scopedSlots: { customRender: 'sampleStatu' },
+        scopedSlots: { customRender: 'samplestatu' },
       });
       scorllLength += 150;
 
@@ -396,9 +475,9 @@ export default {
         /** 组织量（g）*/
         clom.push({
           title: this.$t("tissueNumber") + "（g）",
-          dataIndex: 'tissueNumber',
+          dataIndex: 'tissuenumber',
           width: '100px',
-          scopedSlots: { customRender: 'tissueNumber' },
+          scopedSlots: { customRender: 'tissuenumber' },
         });
         scorllLength += 100;
       }
@@ -406,9 +485,9 @@ export default {
         /** 血液体积(ml)*/
         clom.push({
           title: this.$t("bloodVolume") + "(ml)",
-          dataIndex: 'bloodVolume',
+          dataIndex: 'bloodvolume',
           width: '100px',
-          scopedSlots: { customRender: 'bloodVolume' },
+          scopedSlots: { customRender: 'bloodvolume' },
         });
         scorllLength += 100;
       }
@@ -426,9 +505,9 @@ export default {
         /** 样本体积(ul) */
         clom.push({
           title: this.$t("sampleVolume") + "(ul)",
-          dataIndex: 'sampleVolume',
+          dataIndex: 'samplevolume',
           width: '150px',
-          scopedSlots: { customRender: 'sampleVolume' },
+          scopedSlots: { customRender: 'samplevolume' },
         });
         scorllLength += 150;
       }
@@ -436,9 +515,9 @@ export default {
         /** 核酸/细胞总量（ug/细胞个数） */
         clom.push({
           title: this.totalNumberTitle,
-          dataIndex: 'totalNumber',
+          dataIndex: 'totalnumber',
           width: '150px',
-          scopedSlots: { customRender: 'totalNumber' },
+          scopedSlots: { customRender: 'totalnumber' },
         });
         scorllLength += 150;
       }
@@ -446,9 +525,9 @@ export default {
         /** 细胞活性 */
         clom.push({
           title: this.$t("cellLife"),
-          dataIndex: 'cellLife',
+          dataIndex: 'celllife',
           width: '100px',
-          scopedSlots: { customRender: 'cellLife' },
+          scopedSlots: { customRender: 'celllife' },
         });
         scorllLength += 100;
       }
@@ -456,27 +535,27 @@ export default {
         /** 细胞分选法 */
         clom.push({
           title: this.$t("cellSort"),
-          dataIndex: 'cellSort',
+          dataIndex: 'cellsort',
           width: '200px',
-          scopedSlots: { customRender: 'cellSort' },
+          scopedSlots: { customRender: 'cellsort' },
         });
         scorllLength += 200;
       }
       /**建库类型*/
       clom.push({
         title: this.$t("databaseType"),
-        dataIndex: 'databaseType',
+        dataIndex: 'databasetype',
         width: '200px',
-        scopedSlots: { customRender: 'databaseType' },
+        scopedSlots: { customRender: 'databasetype' },
       });
       scorllLength += 200;
 
       /**测序平台*/
       clom.push({
         title: this.$t("SequencingPlatform"),
-        dataIndex: 'SequencingPlatform',
+        dataIndex: 'sequencingplatform',
         width: '200px',
-        scopedSlots: { customRender: 'SequencingPlatform' },
+        scopedSlots: { customRender: 'sequencingplatform' },
       });
       scorllLength += 200;
       /**备注*/
@@ -504,8 +583,9 @@ export default {
         this.columnNames.push(clom[item].dataIndex);
       }
     },
-    showText : function (clo,text){
-      if (clo == "sampleMsg"){
+    showText : function (clo,text,ind){
+      console.log(clo,text,ind);
+      if (clo == "samplemsg"){
         for (var index in this.sampletypes){
           var item = this.sampletypes[index];
           if (item.key == text){
@@ -513,7 +593,7 @@ export default {
           }
         }
       }
-      if (clo == "sampleStatu"){
+      if (clo == "samplestatu"){
         for (var statuIndex in this.sampleStatu){
           var statu = this.sampleStatu[statuIndex];
           if (statu.key == text){
@@ -521,7 +601,7 @@ export default {
           }
         }
       }
-      if (clo == "cellSort"){
+      if (clo == "cellsort"){
         for (var cellSortIndex in this.cellSortMethods){
           var cellSort = this.cellSortMethods[cellSortIndex];
           if (cellSort.key == text){
@@ -529,7 +609,7 @@ export default {
           }
         }
       }
-      if (clo == "databaseType"){
+      if (clo == "databasetype"){
         for (var databaseTypeIndex in this.databaseTypes){
           var databaseType = this.databaseTypes[databaseTypeIndex];
           if (databaseType.key == text){
@@ -537,7 +617,7 @@ export default {
           }
         }
       }
-      if (clo == "SequencingPlatform"){
+      if (clo == "sequencingplatform"){
         for (var seqPlantsIndex in this.seqPlants){
           var seqPlant = this.seqPlants[seqPlantsIndex];
           if (seqPlant.key == text){
@@ -547,7 +627,7 @@ export default {
       }
 
       if (clo == "index"){
-        return index;
+        return ind + 1;
       }
       return text;
     },
@@ -656,9 +736,9 @@ export default {
         /** 细胞样本类型 */
         array.push({key:"41",val:"10X单细胞转录组"});
         array.push({key:"42",val:"10X ATAC"});
-        array.push({key:"42",val:"smart-seq"});
-        array.push({key:"42",val:"ATAC"});
-        array.push({key:"42",val:"HI-C"});
+        array.push({key:"43",val:"smart-seq"});
+        array.push({key:"44",val:"ATAC"});
+        array.push({key:"45",val:"HI-C"});
       }
       return array;
     },

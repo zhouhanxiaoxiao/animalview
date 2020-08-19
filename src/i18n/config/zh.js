@@ -69,6 +69,8 @@ const zh={
     no : "否",
     keep : "保种",
 
+    fileNameErr : "文件命名错误！",
+
     isHybridizationNecessary : "是否需要杂交",
     hybridStrain:"对应的杂交品系",
     specialFeeding : "特殊饲养条件",
@@ -125,9 +127,8 @@ const zh={
     projectName : "项目名称",
     dataType : "数据类型",
     principal:"负责人",
-
-    overText : "导入文件将覆盖本页内容！",
-
+    overText : "导入excel文件将覆盖本页内容！命名规则例：样本录入-核酸-xxx.xls",
+    unAcceptFile : "不合法文件，请上传.xls或.xlsx文件",
     samplePreparation :"样品制备",
     sampleInput : "样品录入",
     libraryPreparation :"文库制备",
