@@ -41,8 +41,9 @@
           </a-step>
         </a-steps>
         <div class="steps-content">
-          <process-step1 :process="process" :task-id="taskId" v-if="current == 1"></process-step1>
-          <process-step1-new :process="process"></process-step1-new>
+<!--          <process-step1 :process="process" :task-id="taskId" v-if="current == 1"></process-step1>-->
+          <process-step1-new :process="process" v-if="current == 0" ></process-step1-new>
+          <process-step2 :process="process" :task-id="taskId" v-if="current == 1"></process-step2>
         </div>
       </div>
     </div>
@@ -51,11 +52,11 @@
 
 <script>
 import TopNav from "@/components/publib/TopNav";
-import ProcessStep1 from "@/components/task/processHandle/processStep1";
 import ProcessStep1New from "@/components/task/processHandle/processStep1New";
+import ProcessStep2 from "@/components/task/processHandle/processStep2";
 export default {
   name: "processDetail",
-  components: {ProcessStep1New, ProcessStep1, TopNav},
+  components: {ProcessStep2, ProcessStep1New, TopNav},
   data : function (){
     return{
       current:0,
@@ -82,11 +83,22 @@ export default {
         return;
       }
       this.$axios.post("/task/process/init",postData).then(function (res){
-        console.log(res);
+        // console.log(res);
         if (res.data.code != 200){
           _this.$message.error(_this.$t(res.data.code));
         }else {
           _this.process = res.data.retMap.process;
+          console.log(_this.process);
+          if (_this.process.taskstatu == "10"){
+            _this.current = 0;
+            _this.canClick = 0;
+          }else if (_this.process.taskstatu == "20"){
+            _this.current = 1;
+            _this.canClick = 1;
+          }else {
+            _this.current = 0;
+            _this.canClick = 0;
+          }
         }
       }).catch(function (res){
         console.log(res);

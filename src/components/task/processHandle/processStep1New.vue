@@ -23,7 +23,7 @@
     <br/>
     <a-table :columns="columns" :data-source="data" bordered
              :loading="tableLoad"
-             :scroll="scroll" :pagination="{ pageSize: 50 }" size="middle">
+             :scroll="scroll" :pagination="{ pageSize: 20 }" size="middle">
       <template
           v-for="col in this.columnNames"
           :slot="col"
@@ -150,7 +150,6 @@
       </template>
     </a-table>
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-dismiss="modal">{{$t("cancel")}}</button>
       <button type="button" class="btn btn-primary"
               :disabled="editingKey !== ''" @click="submitData">{{$t("submit")}}</button>
     </div>
@@ -194,6 +193,7 @@ export default {
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
         }else {
+          _this.initPage();
           _this.$message.success(_this.$t("commitSucc"));
         }
       }).catch(function (res){
@@ -223,7 +223,7 @@ export default {
       this.$message.error(this.$t("unAcceptFile"));
     },
     handUploadChange :function (dat){
-      console.log(dat);
+      // console.log(dat);
       if (dat.file.status == "done"){
         this.initPage();
       }
@@ -265,7 +265,7 @@ export default {
       }
       target.editable = false;
       this.editingKey = '';
-      console.log(this.data);
+      // console.log(this.data);
     },
     cancel(key) {
       const newData = [...this.data];
@@ -283,7 +283,7 @@ export default {
       }
     },
     checkRowData : function (rowData){
-      console.log(rowData);
+      // console.log(rowData);
       if (this.isNull(rowData.samplename)){
         this.$message.error(this.$t("sampleName") + this.$t("not_null"));
         return false;
@@ -360,7 +360,7 @@ export default {
       this.tableLoad = true;
       _this.data = new Array();
       this.$axios.post("/task/process/sampleInput",postData).then(function (res){
-        console.log(res);
+        // console.log(res);
         _this.tableLoad = false;
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
@@ -383,9 +383,6 @@ export default {
         _this.tableLoad = false;
         _this.$message.error(_this.$t("systemErr"));
       })
-    },
-    handleIndex : function (){
-
     },
     handleAdd : function (){
       this.editingKey = new Date().getTime();
@@ -418,7 +415,7 @@ export default {
       }
     },
     initColumns : function (type){
-      console.log(type)
+      // console.log(type)
       var scorllLength = 0;
       var clom = new Array();
       /**序号*/
@@ -584,7 +581,6 @@ export default {
       }
     },
     showText : function (clo,text,ind){
-      console.log(clo,text,ind);
       if (clo == "samplemsg"){
         for (var index in this.sampletypes){
           var item = this.sampletypes[index];
@@ -593,6 +589,7 @@ export default {
           }
         }
       }
+
       if (clo == "samplestatu"){
         for (var statuIndex in this.sampleStatu){
           var statu = this.sampleStatu[statuIndex];
@@ -601,6 +598,7 @@ export default {
           }
         }
       }
+
       if (clo == "cellsort"){
         for (var cellSortIndex in this.cellSortMethods){
           var cellSort = this.cellSortMethods[cellSortIndex];
@@ -609,6 +607,7 @@ export default {
           }
         }
       }
+
       if (clo == "databasetype"){
         for (var databaseTypeIndex in this.databaseTypes){
           var databaseType = this.databaseTypes[databaseTypeIndex];
@@ -617,6 +616,7 @@ export default {
           }
         }
       }
+
       if (clo == "sequencingplatform"){
         for (var seqPlantsIndex in this.seqPlants){
           var seqPlant = this.seqPlants[seqPlantsIndex];
@@ -648,113 +648,25 @@ export default {
       }
     },
     sampletypes : function (){
-      var array = new Array();
-      if (this.process.sampletype == "01"){
-        /** 核酸样本类型 */
-        array.push({key:"01",val:"基因组DNA"});
-        array.push({key:"02",val:"total RNA"});
-        array.push({key:"03",val:"PCR产物"});
-        array.push({key:"04",val:"chip-seq DNA"});
-        array.push({key:"05",val:"单细胞扩增产物"});
-        array.push({key:"06",val:"FFPE"});
-        array.push({key:"00",val:"其它"});
-      }else if (this.process.sampletype == "02"){
-        /** 组织样本类型 */
-        array.push({key:"21",val:"组织"});
-        array.push({key:"22",val:"全血"});
-        array.push({key:"23",val:"石蜡组织"});
-        array.push({key:"24",val:"血清"});
-        array.push({key:"25",val:"口腔拭子"});
-        array.push({key:"26",val:"菌体"});
-        array.push({key:"20",val:"其它"});
-      }else if (this.process.sampletype == "03"){
-        /** 细胞样本类型 */
-      }
-      return array;
+      return util.sampletypes(this.process.sampletype);
     },
     sampleStatu : function (){
-      var array = new Array();
-      if (this.process.sampletype == "01"){
-        /** 核酸样本类型 */
-        array.push({key:"01",val:"溶于纯水"});
-        array.push({key:"02",val:"溶于TE"});
-        array.push({key:"03",val:"溶于无Rnase水"});
-        array.push({key:"04",val:"溶于EB"});
-        array.push({key:"05",val:"干粉"});
-        array.push({key:"00",val:"其它"});
-      }else if (this.process.sampletype == "02"){
-        /** 组织样本类型 */
-        array.push({key:"21",val:"速冻组织"});
-        array.push({key:"22",val:"活体"});
-        array.push({key:"23",val:"RNAlater保存"});
-        array.push({key:"24",val:"Trlzol保存"});
-        array.push({key:"20",val:"其它"});
-      }else if (this.process.sampletype == "03"){
-        /** 细胞样本类型 */
-        array.push({key:"41",val:"裂解液"});
-        array.push({key:"42",val:"液氮速冻"});
-        array.push({key:"40",val:"其它"});
-      }
-      return array;
+      return util.sampleStatu(this.process.sampletype);
     },
     cellSortMethods : function (){
-      return[
-        {key:"01",val:"过筛网"},
-        {key:"02",val:"磁珠分选"},
-        {key:"03",val:"口吸管法"},
-        {key:"04",val:"BD流式分选"},
-        {key:"05",val:"NanoCellect 流式分选"}
-      ]
+      return util.cellSortMethods();
     },
     databaseTypes : function (){
-      var array = new Array();
-      if (this.process.sampletype == "01"){
-        /** 核酸样本类型 */
-        array.push({key:"01",val:"DNA常规小片段"});
-        array.push({key:"02",val:"DNA非常规小片段"});
-        array.push({key:"03",val:"人外显子"});
-        array.push({key:"04",val:"PCR-free文库"});
-        array.push({key:"05",val:"真核普通转录组"});
-        array.push({key:"06",val:"真核链特异性"});
-        array.push({key:"07",val:"LncRNA"});
-      }else if (this.process.sampletype == "02"){
-        /** 组织样本类型 */
-        array.push({key:"21",val:"10X单细胞转录组"});
-        array.push({key:"22",val:"10X空间转录组"});
-        array.push({key:"23",val:"10X ATAC"});
-        array.push({key:"24",val:"smart-seq"});
-        array.push({key:"25",val:"ATAC"});
-        array.push({key:"26",val:"HI-C"});
-        array.push({key:"27",val:"DNA常规小片段"});
-        array.push({key:"28",val:"DNA非常规小片段"});
-        array.push({key:"29",val:"人外显子"});
-        array.push({key:"30",val:"PCR-free文库"});
-        array.push({key:"31",val:"真核普通转录组"});
-        array.push({key:"32",val:"真核链特异性"});
-        array.push({key:"33",val:"LncRNA"});
-      }else if (this.process.sampletype == "03"){
-        /** 细胞样本类型 */
-        array.push({key:"41",val:"10X单细胞转录组"});
-        array.push({key:"42",val:"10X ATAC"});
-        array.push({key:"43",val:"smart-seq"});
-        array.push({key:"44",val:"ATAC"});
-        array.push({key:"45",val:"HI-C"});
-      }
-      return array;
+      return util.databaseTypes(this.process.sampletype);
     },
     seqPlants : function (){
-      var array = new Array();
-      array.push({key:"01",val:"Hiseq-SE50"});
-      array.push({key:"02",val:"Hiseq-PE150"});
-      array.push({key:"03",val:"Hiseq-PE250"});
-      array.push({key:"00",val:"其它"});
-      return array;
+      return util.seqPlants();
     }
   },
   watch : {
     process:{
-      handler:function (newVal){
-        console.log(newVal)
+      handler:function (){
+        // console.log(newVal)
         this.initPage();
       },
       deep : true

@@ -156,6 +156,16 @@ const zh={
     cellSort : "细胞分选法",
     databaseType : "建库类型",
     SequencingPlatform :"测序平台",
+
+    sampleIndex : "样本编号",
+    testDate :"检测日期",
+    extractMethod : "提取方法",
+    checkResult : "检测结果",
+    checkRemarks : "检测备注",
+    checkUser :"检测员",
+    reviewer :"审核人",
+    remaining : "剩余量",
+
     numberErr : "必须大于1",
     systemErr : "系统异常！",
     about : "关于",
