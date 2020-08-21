@@ -28,6 +28,24 @@
                 {{item.val}}
               </a-select-option>
             </a-select>
+            <!-- 检测员 -->
+            <a-select  style="width: 100%" v-else-if="col == 'checkuser'"
+                       v-model="record.checkuser"
+                       @change="e => handleChange(e.target.value, record.key, col)"
+            >
+              <a-select-option v-for="item in allUsers" :key="item.id" :value="item.id">
+                {{item.name}}
+              </a-select-option>
+            </a-select>
+            <!-- 审核人 -->
+            <a-select  style="width: 100%" v-else-if="col == 'reviewer'"
+                       v-model="record.reviewer"
+                       @change="e => handleChange(e.target.value, record.key, col)"
+            >
+              <a-select-option v-for="item in allUsers" :key="item.id" :value="item.id">
+                {{item.name}}
+              </a-select-option>
+            </a-select>
             <!-- 提取方法 -->
             <a-select  style="width: 100%" v-else-if="col == 'extractmethod'"
                        v-model="record.extractmethod"
@@ -39,6 +57,7 @@
             </a-select>
             <a-date-picker v-else-if="col == 'testdate'"
                            format="YYYY-MM-DD"
+                           @change="e => handleChange(e.target.value, record.key, col)"
                            v-model="record.testdate"/>
             <!-- 建库类型 -->
             <a-select  style="width: 100%" v-else-if="col == 'databasetype'"
@@ -98,13 +117,15 @@
         <div class="editable-row-operations">
         <span v-if="record.editable">
           <a @click="() => save(record.key)">{{$t("save")}}</a>
+           &nbsp;
           <a-popconfirm title="Sure to cancel?" @confirm="() => cancel(record.key)">
             <a>{{$t("cancel")}}</a>
           </a-popconfirm>
         </span>
           <span v-else>
           <a :disabled="editingKey !== ''" @click="() => edit(record.key)">{{$t("edit")}}</a>
-          <a-popconfirm
+          &nbsp;
+            <a-popconfirm
               v-if="data.length>1"
               title="Sure to delete?"
               @confirm="() => onDelete(record.key)"
@@ -115,15 +136,24 @@
         </div>
       </template>
     </a-table>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-warning"
+              :disabled="editingKey !== ''" @click="submitData('tmp')">{{$t("tmpSave")}}</button>
+      <button type="button" class="btn btn-primary"
+              :disabled="editingKey !== ''" @click="submitData('real')">{{$t("submit")}}</button>
+    </div>
+    <submitting :title="$t('submitting')"></submitting>
   </div>
 </template>
 
 <script>
 import util from "@/components/publib/util";
 import {formatDate} from "@/components/publib/date";
+import Submitting from "@/components/publib/submitting";
 
 export default {
   name: "processStep2",
+  components: {Submitting},
   props : {
     taskId : String,
     process : Object
@@ -137,23 +167,56 @@ export default {
       columnNames : [],
       scroll :{x:1500},
       editingKey: '',
+      allUsers : []
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods : {
+    submitData : function (flag){
+      var postData = {
+        processId : this.process.id,
+        data : JSON.stringify(this.data),
+        flag : flag
+      }
+      var _this = this;
+      this.$("#submitting").modal("show");
+      this.$axios.post("/task/process/submitMakes",postData).then(function (res){
+        console.log(res);
+        _this.$("#submitting").modal("hide");
+        if (res.data.code != "200"){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.value = "";
+          _this.initPage();
+        }
+      }).catch(function (res){
+        _this.$("#submitting").modal("hide");
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      })
+    },
     initPage : function (){
       this.initColumns(this.process.sampletype);
       var _this = this;
+      _this.data = new Array();
       this.$axios.post("/task/process/makeInit",
           {processId:this.process.id}).then(function (res){
         console.log(res);
         if (res.data.code != "200") {
-          console.log(res);
           _this.$message.error(_this.$t(res.data.code));
         } else {
-          _this.data = res.data.retMap.makes;
+          if (res.data.retMap.makes.length != 0){
+            for (var ind in res.data.retMap.makes){
+              var make = res.data.retMap.makes[ind];
+              make.key = make.inputid;
+              _this.data.push(make);
+            }
+          }
+          _this.cacheData = _this.data.map(item => ({ ...item }));
+          _this.allUsers = res.data.retMap.allUsers;
         }
       }).catch(function (res){
         console.log(res);
@@ -261,43 +324,43 @@ export default {
         clom.push({
           title: this.$t("extractMethod"),
           dataIndex: 'extractmethod',
-          width: '100px',
+          width: '150px',
           scopedSlots: { customRender: 'extractmethod' },
         });
       }
-      scorllLength += 100;
+      scorllLength += 150;
       /** 检测结果 */
       clom.push({
         title: this.$t("checkResult"),
         dataIndex: 'checkresult',
-        width: '100px',
+        width: '150px',
         scopedSlots: { customRender: 'checkresult' },
       });
-      scorllLength += 100;
+      scorllLength += 150;
       /** 检测备注 */
       clom.push({
         title: this.$t("checkRemarks"),
         dataIndex: 'checkremarks',
-        width: '100px',
+        width: '200px',
         scopedSlots: { customRender: 'checkremarks' },
       });
-      scorllLength += 100;
+      scorllLength += 200;
       /** 检测员 */
       clom.push({
         title: this.$t("checkUser"),
         dataIndex: 'checkuser',
-        width: '100px',
+        width: '150px',
         scopedSlots: { customRender: 'checkuser' },
       });
-      scorllLength += 100;
+      scorllLength += 150;
       /** 审核人 */
       clom.push({
         title: this.$t("reviewer"),
         dataIndex: 'reviewer',
-        width: '100px',
+        width: '150px',
         scopedSlots: { customRender: 'reviewer' },
       });
-      scorllLength += 100;
+      scorllLength += 150;
       /**建库类型*/
       clom.push({
         title: this.$t("databaseType"),
@@ -421,11 +484,11 @@ export default {
         util.$message.error(this.$t("testDate") + this.$t("not_null"));
         return false;
       }
-      if (util.isNull(rowData.concentration)){
+      if (rowData.concentration < 0){
         this.$message.error(this.$t("concentration") + this.$t("not_null"));
         return false;
       }
-      if (util.isNull(rowData.samplevolume)){
+      if (rowData.samplevolume < 0){
         this.$message.error(this.$t("sampleVolume") + this.$t("not_null"));
         return false;
       }
@@ -441,7 +504,7 @@ export default {
         this.$message.error(this.$t("extractMethod") + this.$t("not_null"));
         return false;
       }
-      if (util.isNull(rowData.totalNumber)){
+      if (rowData.totalNumber < 0){
         this.$message.error(this.$t("totalNumber") + this.$t("not_null"));
         return false;
       }
@@ -509,6 +572,33 @@ export default {
         }
       }
 
+      if (clo == "checkuser" || clo == "reviewer"){
+        for (var userIndex in this.allUsers){
+          var user = this.allUsers[userIndex];
+          if (user.id == text){
+            return user.name;
+          }
+        }
+      }
+
+      if (clo == "extractmethod"){
+        for (var extractIndex in this.extractmethods){
+          var extract = this.extractmethods[extractIndex];
+          if (extract.key == text){
+            return extract.val;
+          }
+        }
+      }
+
+      if (clo == "checkresult"){
+        for (var checkresultIndex in this.checkresults){
+          var checkresult = this.checkresults[checkresultIndex];
+          if (checkresult.key == text){
+            return checkresult.val;
+          }
+        }
+      }
+
       if (clo == "testdate"){
         if (util.isNull(text)){
           return "";
@@ -551,6 +641,15 @@ export default {
     },
     checkresults : function (){
       return util.checkresults();
+    },
+    canOperating : function (){
+      if (this.process.taskstatu != "20"){
+        return false;
+      }
+      if (this.$store.getters.getUser.id != this.process.samplepreparation){
+        return false;
+      }
+      return true;
     }
   },
   watch :{

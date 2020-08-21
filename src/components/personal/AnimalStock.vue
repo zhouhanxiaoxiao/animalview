@@ -222,6 +222,7 @@
                         _this.$message.error(_this.$t(res.data.code));
                     }else {
                         _this.$message.success(_this.$t("commitSucc"));
+                        window.location.reload();
                     }
                 }).catch(function (res) {
                     console.log(res);

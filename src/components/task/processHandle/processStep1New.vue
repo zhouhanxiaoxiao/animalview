@@ -1,29 +1,30 @@
 <template>
   <div>
-    <a-button class="editable-add-btn"
-              @click="handleAdd"
-              :disabled="editingKey !== ''"
-    >
-      {{ $t("add") }}
-    </a-button>
-    &nbsp;
-    <a-upload
-        name="file"
-        accept=".xls,.xlsx"
-        :headers="{token:this.$cookies.get('token'),processId : process.id}"
-        @change="handUploadChange"
-        @reject="handUnaccept"
-        :beforeUpload="handBeforeUpload"
-        :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
-    >
-      <a-tooltip placement="topLeft" :title="$t('overText')">
-        <a-button> <a-icon type="upload" />{{ $t("input") }}</a-button>
-      </a-tooltip>
-    </a-upload>
-    <br/>
+    <div style="margin-bottom: 10px">
+      <a-button class="editable-add-btn"
+                @click="handleAdd"
+                :disabled="editingKey !== ''"
+      >
+        {{ $t("add") }}
+      </a-button>
+      &nbsp;
+      <a-upload
+          name="file"
+          accept=".xls,.xlsx"
+          :headers="{token:this.$cookies.get('token'),processId : process.id}"
+          @change="handUploadChange"
+          @reject="handUnaccept"
+          :beforeUpload="handBeforeUpload"
+          :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
+      >
+        <a-tooltip placement="topLeft" :title="$t('overText')">
+          <a-button> <a-icon type="upload" />{{ $t("input") }}</a-button>
+        </a-tooltip>
+      </a-upload>
+    </div>
     <a-table :columns="columns" :data-source="data" bordered
              :loading="tableLoad"
-             :scroll="scroll" :pagination="{ pageSize: 20 }" size="middle">
+             :scroll="scroll" :pagination="{ pageSize: 20 ,showSizeChanger:true}" size="middle">
       <template
           v-for="col in this.columnNames"
           :slot="col"
@@ -149,7 +150,7 @@
         </div>
       </template>
     </a-table>
-    <div class="modal-footer">
+    <div class="modal-footer" v-if="canOperating">
       <button type="button" class="btn btn-primary"
               :disabled="editingKey !== ''" @click="submitData">{{$t("submit")}}</button>
     </div>
@@ -376,6 +377,7 @@ export default {
               d.key = d.id;
               _this.data.push(d);
             }
+            _this.cacheData = _this.data.map(item => ({ ...item }));
           }
         }
       }).catch(function (res){
@@ -563,16 +565,17 @@ export default {
         scopedSlots: { customRender: 'remarks' },
       });
       scorllLength += 200;
-      /**操作*/
-      clom.push({
-        title: this.$t("operation"),
-        dataIndex: 'operation',
-        width: '100px',
-        fixed: 'right',
-        scopedSlots: { customRender: 'operation' },
-      });
-      scorllLength += 100;
-
+      if (this.canOperating){
+        /**操作*/
+        clom.push({
+          title: this.$t("operation"),
+          dataIndex: 'operation',
+          width: '100px',
+          fixed: 'right',
+          scopedSlots: { customRender: 'operation' },
+        });
+        scorllLength += 100;
+      }
       this.scroll.x = scorllLength;
       this.columns = clom;
       this.columnNames = new Array();
@@ -661,6 +664,15 @@ export default {
     },
     seqPlants : function (){
       return util.seqPlants();
+    },
+    canOperating : function (){
+      if (this.process.taskstatu != "10"){
+        return false;
+      }
+      if (this.$store.getters.getUser.id != this.process.sampleinput){
+        return false;
+      }
+      return true;
     }
   },
   watch : {

@@ -166,6 +166,23 @@ const zh={
     reviewer :"审核人",
     remaining : "剩余量",
 
+    tmpSave : "暂存",
+    createdbtime : "建库时间",
+    useNumber : "样本使用量(ug)/细胞使用量（细胞个数）",
+    partsize : "片段大小（bp）",
+    cyclenumber : "常规PCR循环数",
+    databasetype2 : "文库类型",
+    databaseindex : "文库编号",
+    createdbuser : "建库人",
+    qbit : "Qubit浓度",
+    libsize  : "文库体积（ul）",
+    seqmethods : "测序策略",
+    uploadsize : "上机数据量",
+    databaseunit : "数据量单位",
+    libremark:"建库备注",
+    uploadremark : "上机备注",
+
+
     numberErr : "必须大于1",
     systemErr : "系统异常！",
     about : "关于",

@@ -9,41 +9,42 @@
               :status="setpStatu(0)"
               :disabled="isDisabled(0)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '01'"/>
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '10'"/>
           </a-step>
           <a-step
               :title="$t('samplePreparation')"
               :status="setpStatu(1)"
               :disabled="isDisabled(1)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '02'"/>
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '20'"/>
           </a-step>
           <a-step
               :title="$t('libraryPreparation')"
               :status="setpStatu(2)"
               :disabled="isDisabled(2)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '03'"/>
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '30'"/>
           </a-step>
           <a-step
               :title="$t('dismountData')"
               :status="setpStatu(3)"
               :disabled="isDisabled(3)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '04'"/>
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '40'"/>
           </a-step>
           <a-step
               :title="$t('bioinformaticsAnalysis')"
               :status="setpStatu(4)"
               :disabled="isDisabled(4)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '05'"/>
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '50'"/>
           </a-step>
         </a-steps>
         <div class="steps-content">
 <!--          <process-step1 :process="process" :task-id="taskId" v-if="current == 1"></process-step1>-->
           <process-step1-new :process="process" v-if="current == 0" ></process-step1-new>
           <process-step2 :process="process" :task-id="taskId" v-if="current == 1"></process-step2>
+          <process-step3 :process="process" v-if="current == 2"></process-step3>
         </div>
       </div>
     </div>
@@ -54,9 +55,10 @@
 import TopNav from "@/components/publib/TopNav";
 import ProcessStep1New from "@/components/task/processHandle/processStep1New";
 import ProcessStep2 from "@/components/task/processHandle/processStep2";
+import ProcessStep3 from "@/components/task/processHandle/processStep3";
 export default {
   name: "processDetail",
-  components: {ProcessStep2, ProcessStep1New, TopNav},
+  components: {ProcessStep3, ProcessStep2, ProcessStep1New, TopNav},
   data : function (){
     return{
       current:0,
@@ -95,6 +97,15 @@ export default {
           }else if (_this.process.taskstatu == "20"){
             _this.current = 1;
             _this.canClick = 1;
+          }else if (_this.process.taskstatu == "30"){
+            _this.current = 2;
+            _this.canClick = 2;
+          }else if (_this.process.taskstatu == "40"){
+            _this.current = 3;
+            _this.canClick = 3;
+          }else if (_this.process.taskstatu == "50"){
+            _this.current = 4;
+            _this.canClick = 4;
           }else {
             _this.current = 0;
             _this.canClick = 0;
