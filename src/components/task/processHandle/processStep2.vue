@@ -136,7 +136,7 @@
         </div>
       </template>
     </a-table>
-    <div class="modal-footer">
+    <div class="modal-footer" v-if="canEdit">
       <button type="button" class="btn btn-warning"
               :disabled="editingKey !== ''" @click="submitData('tmp')">{{$t("tmpSave")}}</button>
       <button type="button" class="btn btn-primary"
@@ -392,15 +392,17 @@ export default {
         scopedSlots: { customRender: 'remarks' },
       });
       scorllLength += 200;
-      /**操作*/
-      clom.push({
-        title: this.$t("operation"),
-        dataIndex: 'operation',
-        width: '100px',
-        fixed: 'right',
-        scopedSlots: { customRender: 'operation' },
-      });
-      scorllLength += 100;
+      if (this.canEdit){
+        /**操作*/
+        clom.push({
+          title: this.$t("operation"),
+          dataIndex: 'operation',
+          width: '100px',
+          fixed: 'right',
+          scopedSlots: { customRender: 'operation' },
+        });
+        scorllLength += 100;
+      }
 
       this.scroll.x = scorllLength;
       this.columns = clom;
@@ -647,6 +649,18 @@ export default {
         return false;
       }
       if (this.$store.getters.getUser.id != this.process.samplepreparation){
+        return false;
+      }
+      return true;
+    },
+    canEdit : function (){
+      if (
+          !this.$store.getters.isCurrentUser(this.process.samplepreparation)
+          && !this.$store.getters.isAdmin
+      ){
+        return false;
+      }
+      if (this.process.taskstatu != "20"){
         return false;
       }
       return true;

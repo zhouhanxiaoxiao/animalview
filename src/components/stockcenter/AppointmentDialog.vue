@@ -57,7 +57,9 @@
                     <div>
                       {{$t("expectionObject")}}：
                     </div>
-                    <order-item-detail v-for="row in rows" :key="row.stock.id" :row="row"
+                    <order-item-detail v-for="row in rows"
+                                       :key="row.stock.id"
+                                       :row="row"
                                        :all-drosophila="allDrosophila"
                                        :all-merial="allMerial"
                                        @updateData="updateDetailData"></order-item-detail>

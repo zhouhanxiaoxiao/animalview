@@ -14,9 +14,18 @@
                     </select>
                 </div>
                 <div class="col-4" style="text-align: right">
-                  <button type="button" class="btn btn-primary"
-                          v-if="this.$store.getters.isFeeder"
-                          @click="showAdd">{{$t("add")}}</button>
+                  <a-button type="primary" v-if="this.$store.getters.isFeeder" @click="showAdd">
+                    {{$t("add")}}
+                  </a-button>
+                  &nbsp;
+                  <a-upload
+                      name="file"
+                      :multiple="false"
+                      :action="this.$axios.defaults.baseURL + '/file/import/initDrop'"
+                      :headers="{token:this.$cookies.get('token')}"
+                  >
+                    <a-button> <a-icon type="upload" />{{$t("input")}}</a-button>
+                  </a-upload>
                 </div>
             </div>
             <div class="strain-table">

@@ -25,7 +25,7 @@
                   <div class="form-group-sm col-md-3">
                     <label for="expectedTime">{{$t("expectedTime")}}</label>
                     <div id="expectedTime" >
-                      <date-picker v-model="expectedTime" value-type="format" format="YYYY-MM-DD" :disabled-date="disabledDate"></date-picker>
+                      <date-picker v-model="expectedTime" value-type="format" format="YYYY-MM-DD" :disabled-date="disabledDate(row.stock.usagetype)"></date-picker>
                     </div>
                   </div>
                     <!--  物种  -->
@@ -154,7 +154,7 @@
                                id="orderNumber"  v-model="orderNumber"
                                placeholder="例：36">
                     </div>
-                    <!-- 唯一资源占用
+                    <!-- 唯一资源占用-->
                     <div class="form-group-sm col-md-3">
                       <label for="meterial">{{$t("meterial")}}</label>
                       <multiselect id="meterial"
@@ -171,139 +171,17 @@
                         <span slot="noResult"></span>
                       </multiselect>
                     </div>
-                    <div class="form-group-sm col-md-12" v-for="item in meterial" :key="item.id">
+                    <div class="form-group-sm col-md-6" v-for="item in meterial" :key="item.id">
                       <label for="timeselect">选择{{item.name}}占用时间</label>
                       <section id="timeselect">
-                        <date-picker
-                            :itemId="item.id"
-                            v-model="item.time"
-                            type="datetime"
-                            placeholder="Select datetime range"
-                            range
-                            format="YYYY-MM-DD HH:mm"
-                            :disabled-date="disableSelct"
-                            :disabled-time="disableSelct"
-                            :minute-step="10"
-                            :show-time-panel="showTimeRangePanel"
-                            @close="handleRangeClose"
-                        >
-                          <template v-slot:footer>
-                            <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">
-                              {{ showTimeRangePanel ? 'select date' : 'select time' }}
-                            </button>
-                          </template>
-                        </date-picker>
+                        <a-range-picker
+                            :show-time="{ format: 'HH',disabledHours:disableHour(item.id) }"
+                            format="YYYY-MM-DD HH"
+                            :disabledDate="disabledMeterDate(item.id)"
+                            @change="onChange"
+                        />
                       </section>
-                    </div> -->
-                  <hr class="my-5"/>
-                  <!--  是否需要魏依协助  -->
-                  <div class="form-group col-md-3">
-                    <label for="needWy">是否需要魏依协助</label>
-                    <div id="needWy">
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" :name="'needWy'+ row.stock.id"
-                               v-model="needWy"
-                               :id="'yes2' + row.stock.id" value="Y">
-                        <label class="form-check-label" :for="'yes4' + row.stock.id">{{$t('yes')}}</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" :name="'needWy'+ row.stock.id"
-                               v-model="needWy"
-                               :id="'no2' + row.stock.id" checked value="N">
-                        <label class="form-check-label" :for="'no4' + row.stock.id">{{$t('no')}}</label>
-                      </div>
                     </div>
-                  </div>
-
-                  <div class="form-group-sm col-md-8">
-                    <label for="timeselect">选择时间</label>
-                    <section id="timeselect">
-<!--                      <date-picker-->
-<!--                          v-model="wyTime"-->
-<!--                          type="datetime"-->
-<!--                          placeholder="Select datetime range"-->
-<!--                          range-->
-<!--                          value-type="format"-->
-<!--                          format="YYYY-MM-DD HH:mm"-->
-<!--                          :disabled-date="disableSelctwy"-->
-<!--                          :disabled-time="disableSelctwy"-->
-<!--                          :disabled="needWy == 'N'"-->
-<!--                          :minute-step="10"-->
-<!--                          :show-time-panel="showTimeRangePanel"-->
-<!--                          @close="handleRangeClose"-->
-<!--                      >-->
-<!--                        <template v-slot:footer>-->
-<!--                          <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">-->
-<!--                            {{ showTimeRangePanel ? 'select date' : 'select time' }}-->
-<!--                          </button>-->
-<!--                        </template>-->
-<!--                      </date-picker>-->
-                      <a-range-picker
-                          v-model="wyTime"
-                          :minute-step="10"
-                          :disabled-date="disableSelctwy"
-                          format="YYYY-MM-DD HH"
-                          :disabled="needWy == 'N'"
-                          @change="onChange"
-                          :show-time="{ defaultValue: moment('00:00:00', 'HH:mm:ss') }"
-                      />
-                    </section>
-                  </div>
-
-                  <!--  是否需要魏依协助  -->
-                  <div class="form-group col-md-3">
-                    <label for="needPhoto">是否需要拍摄行为</label>
-                    <div id="needPhoto">
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" :name="'needPhoto'+ row.stock.id"
-                               v-model="needPhoto"
-                               :id="'yes2' + row.stock.id" value="Y">
-                        <label class="form-check-label" :for="'yes5' + row.stock.id">{{$t('yes')}}</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" :name="'needPhoto'+ row.stock.id"
-                               v-model="needPhoto"
-                               :id="'no2' + row.stock.id" checked value="N">
-                        <label class="form-check-label" :for="'no5' + row.stock.id">{{$t('no')}}</label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="form-group-sm col-md-8">
-                    <label for="photoTime">选择时间</label>
-                    <section id="photoTime">
-                      <a-range-picker
-                          v-model="photoTime"
-                          :minute-step="10"
-                          :disabled-date="disableSelctPhoto"
-                          format="YYYY-MM-DD HH"
-                          :disabled="needPhoto == 'N'"
-                          @change="onChange"
-                          :show-time="{ defaultValue: moment('00:00:00', 'HH:mm:ss') }"
-                      />
-<!--                      <date-picker-->
-<!--                          v-model="photoTime"-->
-<!--                          type="datetime"-->
-<!--                          placeholder="Select datetime range"-->
-<!--                          range-->
-<!--                          :disabled="needPhoto == 'N'"-->
-<!--                          value-type="format"-->
-<!--                          format="YYYY-MM-DD HH:mm"-->
-<!--                          :disabled-date="disableSelctPhoto"-->
-<!--                          :disabled-time="disableSelctPhoto"-->
-<!--                          :minute-step="10"-->
-<!--                          :show-time-panel="showTimeRangePanel"-->
-<!--                          @close="handleRangeClose"-->
-<!--                      >-->
-<!--                        <template v-slot:footer>-->
-<!--                          <button class="mx-btn mx-btn-text" @click="toggleTimeRangePanel">-->
-<!--                            {{ showTimeRangePanel ? 'select date' : 'select time' }}-->
-<!--                          </button>-->
-<!--                        </template>-->
-<!--                      </date-picker>-->
-                    </section>
-                  </div>
-
                     <!--  操作流程  -->
                     <div class="form-group-sm col-md-12">
                       <label for="operationProcess">{{$t("operationProcess")}}</label>
@@ -341,6 +219,7 @@
                 orderNumber : 0,
                 singleSource : [],
                 allReady : false,
+                meterial:[],
                 needWy : "N",
                 wyTime:[],
                 needPhoto:"N",
@@ -349,6 +228,31 @@
         },
         methods : {
             moment,
+          disableHour : function (id){
+              console.log(id);
+          },
+          disabledMeterDate:function (id){
+            var records = [];
+            for (var i in this.allMerial){
+              if (this.allMerial[i].id == id){
+                records = this.allMerial[i].records;
+              }
+            }
+            return function (date){
+              var now = new Date();
+              var now0 = new Date(now.getFullYear() + '-' + (now.getMonth()+1) + '-' + now.getDate())
+              if (date < now0){
+                return true;
+              }
+              for (var j in records){
+                if (date > new Date(records[j].starttime)
+                    && date < new Date(records[j].endtime)
+                ){
+                  return true;
+                }
+              }
+            }
+          },
             onChange(dates, dateStrings) {
               console.log('From: ', dates[0], ', to: ', dates[1]);
               console.log('From: ', dateStrings[0], ', to: ', dateStrings[1]);
@@ -394,6 +298,7 @@
             return false;
           },
             disableSelct : function (date){
+
               if (date < new Date()){
                 return true;
               }
@@ -454,10 +359,17 @@
                 }
                 return true;
             },
-            disabledDate : function (time) {
-              var now = Date.now();
-              var before = now + (1000*60*60*24) * 14;
-              return time.getTime() < new Date(before);
+            disabledDate : function (usage) {
+              console.log(usage);
+              var late = 14;
+              if (usage == "stock"){
+                late = 0;
+              }
+              return function (time){
+                var now = Date.now();
+                var before = now + (1000*60*60*24) * late;
+                return time.getTime() < new Date(before);
+              }
             },
         },
         watch : {

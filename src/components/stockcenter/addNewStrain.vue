@@ -10,23 +10,25 @@
         </div>
         <div class="modal-body" style="text-align: left">
           <form class="was-validated">
-            <a-divider orientation="left">基本信息</a-divider>
+            <a-divider orientation="left">
+              基本信息
+            </a-divider>
           <br>
           <div class="form-row">
             <div class="col-md-3 mb-3">
               <label for="animalName">{{$t("animalName")}}</label>
-              <input type="text" class="form-control" id="animalName" :class="animalNameValid" v-model="animalName" required
+              <input type="text" class="form-control" id="animalName" v-model="animalName" required
                 placeholder="例：果蝇">
             </div>
             <div class="form-group col-md-3 mb-3">
               <label for="stockID">{{$t("animal_stock_stockID")}}</label>
-              <input type="text" class="form-control" :class="stockIDValid" id="stockID" v-model="stockID" required
+              <input type="text" class="form-control" id="stockID" v-model="stockID" required
                 placeholder="例：bc4f93">
             </div>
             <div class="form-group col-md-3 mb-3">
               <label for="genotype">{{$t("animal_stock_genotype")}}</label>
               <div class="input-group">
-                <input type="text" class="form-control" :class="genotypeValid" id="genotype" v-model="genotype" required
+                <input type="text" class="form-control" id="genotype" v-model="genotype" required
                        aria-describedby="checkExist" placeholder="例：w1118">
                 <div class="input-group-append">
                   <button class="btn btn-outline-primary" type="button" id="checkExist"
@@ -36,47 +38,54 @@
             </div>
             <div class="form-group col-md-3 mb-3">
               <label for="resource">{{$t("animal_stock_resource")}}</label>
-              <input type="text" class="form-control" :class="resourceValid" id="resource" v-model="resource" required
+              <input type="text" class="form-control"  id="resource" v-model="resource" required
                 placeholder="例：中科院上化学与细胞生物学研究所果蝇资源与技术平台">
             </div>
-          </div>
-            <a-divider orientation="left">{{ $t("personnal_btn_stock")}}</a-divider>
-          <div class="form-row">
-            <div class="form-group col-md-3">
-              <label for="container">{{$t("animal_stock_container")}}</label>
-              <input type="text" class="form-control" :class="containerValid" id="container" v-model="container" required
-              placeholder="例：小管">
-            </div>
-            <div class="form-group col-md-3">
-              <label for="number">{{$t("animal_stock_number")}}</label>
-              <input type="number" class="form-control" :class="numberValid" id="number" v-model="number" required>
-            </div>
-            <div class="form-group col-md-3">
-              <label for="useType">{{$t("useType")}}</label>
-              <select class="form-control" :class="useTypeValid" id="useType" v-model="useType" required>
-                <option value="keep">{{$t("keep")}}</option>
-                <option value="stock">{{$t("personnal_btn_stock")}}</option>
-              </select>
-            </div>
-            <div class="form-group col-md-3">
-              <label for="birthday">{{$t("birthday")}}</label>
-              <div id="birthday">
-                <date-picker value-type="format" format="YYYY-MM-DD"
-                             v-model="birthday" required></date-picker>
+          </div >
+            <div class="stock-statu" v-for="(row, index) in rows" :key="index">
+              <a-divider orientation="left">{{ $t("personnal_btn_stock")}}
+                <a-icon type="plus-square" theme="twoTone" style="font-size: 24px" @click="addNewRow"
+                  v-if="rows.length < 2"/>
+                <a-icon type="close-square" theme="twoTone" style="font-size: 24px" @click="delRow(index)"
+                  v-if="rows.length > 1"/>
+              </a-divider>
+              <div class="form-row">
+                <div class="form-group col-md-3">
+                  <label for="container">{{$t("animal_stock_container")}}</label>
+                  <input type="text" class="form-control" id="container" v-model="row.container" required
+                         placeholder="例：小管">
+                </div>
+                <div class="form-group col-md-3">
+                  <label for="number">{{$t("animal_stock_number")}}</label>
+                  <input type="number" min="0" class="form-control" id="number" v-model="row.number" required>
+                </div>
+                <div class="form-group col-md-3">
+                  <label for="useType">{{$t("useType")}}</label>
+                  <select class="form-control" id="useType" v-model="row.useType" required>
+                    <option value="keep">{{$t("keep")}}</option>
+                    <option value="stock">{{$t("personnal_btn_stock")}}</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-3">
+                  <label for="birthday">{{$t("birthday")}}</label>
+                  <div id="birthday">
+                    <date-picker value-type="format" format="YYYY-MM-DD"
+                                 v-model="row.birthday" required></date-picker>
+                  </div>
+                </div>
+                <div class="form-group col-md-3">
+                  <label for="environment">{{$t("animal_stock_environment")}}</label>
+                  <select id="environment" class="form-control" v-model="row.environmentId" required>
+                    <option selected value="">{{$t("choose")}}</option>
+                    <option :value="evn.id" v-for="evn in environment" v-bind:key="evn.id">{{evn.displayname}}</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-3">
+                  <label for="location">{{$t("location")}}</label>
+                  <input type="text" class="form-control" id="location" v-model="row.location" required>
+                </div>
               </div>
             </div>
-            <div class="form-group col-md-3">
-              <label for="environment">{{$t("animal_stock_environment")}}</label>
-              <select id="environment" class="form-control" :class="environmentValid" v-model="environmentId" required>
-                <option selected value="">{{$t("choose")}}</option>
-                <option :value="evn.id" v-for="evn in environment" v-bind:key="evn.id">{{evn.displayname}}</option>
-              </select>
-            </div>
-            <div class="form-group col-md-3">
-              <label for="location">{{$t("location")}}</label>
-              <input type="text" class="form-control" id="location" v-model="location" required>
-            </div>
-          </div>
           </form>
         </div>
         <div class="modal-footer">
@@ -94,28 +103,38 @@ export default {
   data: function (){
     return {
       animalName : "",
-      animalNameValid : "",
       stockID : "",
-      stockIDValid : "",
       genotype : "",
-      genotypeValid : "",
       resource : "",
-      resourceValid : "",
-      container : "",
-      containerValid : "",
-      number : 0,
-      numberValid : "",
-      useType : "keep",
-      useTypeValid : "",
-      birthday : "",
-      environmentId: "",
-      environmentValid : "",
       environment : [],
-      location : "",
-      checkExistFlag : true
+      checkExistFlag : true,
+      rows :[
+        {
+          container : "",
+          number : 0,
+          useType : "keep",
+          birthday : "",
+          environmentId: "",
+          location : "",
+        }
+      ]
     }
   },
   methods : {
+    delRow : function (index){
+      this.$delete(this.rows,index);
+    },
+    addNewRow : function (){
+      var row = {
+        container : "",
+        number : 0,
+        useType : "keep",
+        birthday : "",
+        environmentId: "",
+        location : "",
+      };
+      this.rows.push(row);
+    },
     checkSumitData : function (){
       if (this.animalName == ""){
         this.$message.error(this.$t("animalName") + this.$t("not_null"));
@@ -133,29 +152,32 @@ export default {
         this.$message.error(this.$t("animal_stock_resource") + this.$t("not_null"));
         return false;
       }
-      if (this.container == ""){
-        this.$message.error(this.$t("animal_stock_container") + this.$t("not_null"));
-        return false;
-      }
-      if (this.number < 0){
-        this.$message.error(this.$t("animal_stock_number") + this.$t("not_null"));
-        return false;
-      }
-      if (this.useType == ""){
-        this.$message.error(this.$t("useType") + this.$t("not_null"));
-        return false;
-      }
-      if (this.birthday == ""){
-        this.$message.error(this.$t("birthday") + this.$t("not_null"));
-        return false;
-      }
-      if (this.environmentId == ""){
-        this.$message.error(this.$t("animal_stock_environment") + this.$t("not_null"));
-        return false;
-      }
-      if (this.location == ""){
-        this.$message.error(this.$t("location") + this.$t("not_null"));
-        return false;
+      for (var i in this.rows){
+        var row = this.rows[i];
+        if (row.container == ""){
+          this.$message.error(this.$t("animal_stock_container") + this.$t("not_null"));
+          return false;
+        }
+        if (row.number < 0){
+          this.$message.error(this.$t("animal_stock_number") + this.$t("not_null"));
+          return false;
+        }
+        if (row.useType == ""){
+          this.$message.error(this.$t("useType") + this.$t("not_null"));
+          return false;
+        }
+        if (row.birthday == ""){
+          this.$message.error(this.$t("birthday") + this.$t("not_null"));
+          return false;
+        }
+        if (row.environmentId == ""){
+          this.$message.error(this.$t("animal_stock_environment") + this.$t("not_null"));
+          return false;
+        }
+        if (row.location == ""){
+          this.$message.error(this.$t("location") + this.$t("not_null"));
+          return false;
+        }
       }
       return true;
     },
@@ -168,36 +190,28 @@ export default {
         stockID : this.stockID,
         genotype : this.genotype,
         resource : this.resource,
-        container : this.container,
-        number : this.number,
-        useType : this.useType,
-        birthday : this.birthday,
-        environmentId : this.environmentId,
-        location : this.location
+        rows : this.rows
       }
       this.$("#addNewStrain").modal("hide");
       this.$emit("submitData",postData);
     },
     reset : function () {
       this.animalName = "";
-      this.location = "";
-      this.useType = "";
-      this.birthday = "";
-      this.errall = "";
       this.stockID = "";
-      this.stockIDValid = "";
       this.genotype = "";
-      this.genotypeValid = "";
       this.resource = "";
-      this.resourceValid = "";
-      this.container = "";
-      this.containerValid = "";
-      this.number = 0;
-      this.numberValid = "";
-      this.environmentId= "";
       this.environment = [];
-      this.environmentValid = "";
       this.checkExistFlag = true;
+      this.rows = [
+        {
+          container : "",
+          number : 0,
+          useType : "keep",
+          birthday : "",
+          environmentId: "",
+          location : "",
+        }
+      ];
       this.initEvn();
     },
     initEvn : function () {
@@ -245,12 +259,7 @@ export default {
   },
   computed: {
     submitOk: function () {
-      return this.numberValid == "is-valid"
-          && this.stockIDValid == "is-valid"
-          && this.genotypeValid == "is-valid"
-          && this.resourceValid == "is-valid"
-          && this.containerValid == "is-valid"
-          && this.environmentId != ""
+      return true;
     },
     canCheckRepe : function (){
       if (this.genotype == ""){

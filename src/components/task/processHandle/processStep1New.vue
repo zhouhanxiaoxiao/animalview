@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div style="margin-bottom: 10px">
+    <div style="margin-bottom: 10px" v-if="this.canOperating">
       <a-button class="editable-add-btn"
                 @click="handleAdd"
                 :disabled="editingKey !== ''"
@@ -669,7 +669,9 @@ export default {
       if (this.process.taskstatu != "10"){
         return false;
       }
-      if (this.$store.getters.getUser.id != this.process.sampleinput){
+      if (!this.$store.getters.getUser.isCurrentUser(this.process.sampleinput)
+        && !this.isAdmin
+      ){
         return false;
       }
       return true;
