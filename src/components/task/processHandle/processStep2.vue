@@ -191,6 +191,7 @@ export default {
           _this.$message.success(_this.$t("commitSucc"));
           _this.value = "";
           _this.initPage();
+          window.location.reload();
         }
       }).catch(function (res){
         _this.$("#submitting").modal("hide");
@@ -249,6 +250,14 @@ export default {
         dataIndex: 'selfnumber',
         width: '150px',
         scopedSlots: { customRender: 'selfnumber' },
+      });
+      scorllLength +=150;
+      /**样本编号*/
+      clom.push({
+        title: this.$t("derivativeindex"),
+        dataIndex: 'derivativeindex',
+        width: '150px',
+        scopedSlots: { customRender: 'derivativeindex' },
       });
       scorllLength +=150;
       /**物种*/

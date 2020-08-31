@@ -1,3 +1,4 @@
+import i18n from "@/i18n";
 var util = {
     isNull: function (obj) {
         if (obj == null) {
@@ -36,6 +37,8 @@ var util = {
             array.push({key:"20",val:"其它"});
         }else if (sampletype == "03"){
             /** 细胞样本类型 */
+            array.push({key:"41",val:"单细胞悬液"})
+            array.push({key:"40",val:"其他"})
         }
         return array;
     },
@@ -129,6 +132,13 @@ var util = {
         array.push({key:"01",val:"合格"});
         array.push({key:"02",val:"风险"});
         array.push({key:"03",val:"不合格"});
+        return array;
+    },
+    sampleInits : function (){
+        var array = new Array();
+        array.push({key:"01",val:i18n.t("nucleicAcid") + i18n.t("sample")});
+        array.push({key:"02",val:i18n.t("tissue") + i18n.t("sample")});
+        array.push({key:"03",val:i18n.t("cell") + i18n.t("sample")});
         return array;
     }
 }

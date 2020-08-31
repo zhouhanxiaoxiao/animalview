@@ -97,8 +97,6 @@
                 :value="text"
                 @change="e => handleChange(e.target.value, record.key, col)"
             />
-
-
             <template v-else>
               {{ showText(col,text,index) }}
             </template>
@@ -132,7 +130,7 @@
         </div>
       </template>
     </a-table>
-    <div class="modal-footer">
+    <div class="modal-footer" v-if="this.canOperating">
       <button type="button" class="btn btn-warning"
               :disabled="editingKey !== ''" @click="submitData('tmp')">{{$t("tmpSave")}}</button>
       <button type="button" class="btn btn-primary"
@@ -144,8 +142,13 @@
 
 <script>
 
+import util from "@/components/publib/util";
+import {formatDate} from "@/components/publib/date";
+import Submitting from "@/components/publib/submitting";
+
 export default {
   name: "processStep3",
+  components: {Submitting},
   props : {
     process : Object
   },
@@ -165,6 +168,38 @@ export default {
     this.initPage();
   },
   methods:{
+    submitData : function (type){
+      var _this = this;
+      /**暂存*/
+      if (type == "real"){
+        for (var inde=0;inde<this.data.length;inde++){
+          var tmpD = this.data[inde];
+          if (!this.checkRowData(tmpD,(inde + 1))){
+            return ;
+          }
+        }
+      }
+      var postData = {
+        processId : this.process.id,
+        datas : JSON.stringify(this.data),
+        type : type
+      }
+      this.$("#submitting").modal("show");
+      this.$axios.post("/task/process/tempSaveLib",postData).then(function (res){
+        _this.$("#submitting").modal("hide");
+        if (res.data.code != "200") {
+          console.log(res);
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.$message.success(_this.$t("commitSucc"));
+          window.location.reload();
+        }
+      }).catch(function (res){
+        _this.$("#submitting").modal("hide");
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
     initPage : function (){
       this.initColumns();
       var _this = this;
@@ -173,6 +208,7 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         }else {
           if (res.data.retMap.libs.length != 0){
+            _this.data = new Array();
             for (var ind in res.data.retMap.libs){
               var lib = res.data.retMap.libs[ind];
               lib.key = lib.id;
@@ -383,17 +419,17 @@ export default {
         scopedSlots: { customRender: 'uploadremark' },
       });
       scorllLength += 150;
-
-      /**操作*/
-      clom.push({
-        title: this.$t("operation"),
-        dataIndex: 'operation',
-        width: '100px',
-        fixed: 'right',
-        scopedSlots: { customRender: 'operation' },
-      });
-      scorllLength += 100;
-
+      if (this.canOperating){
+        /**操作*/
+        clom.push({
+          title: this.$t("operation"),
+          dataIndex: 'operation',
+          width: '100px',
+          fixed: 'right',
+          scopedSlots: { customRender: 'operation' },
+        });
+        scorllLength += 100;
+      }
       this.scroll.x = scorllLength;
       this.columns = clom;
       this.columnNames = new Array();
@@ -426,9 +462,9 @@ export default {
       const newData = [...this.data];
       const newCacheData = [...this.cacheData];
       const target = newData.filter(item => key === item.key)[0];
-      if (!this.checkRowData(target)){
-        return;
-      }
+      // if (!this.checkRowData(target)){
+      //   return;
+      // }
       target.add = false;
       const targetCache = newCacheData.filter(item => key === item.key)[0];
       if (target && targetCache) {
@@ -455,9 +491,107 @@ export default {
         this.data = newData;
       }
     },
+    checkRowData : function (rowData,rowIndex){
+      var prefix = "第【" + rowIndex + "】行，";
+      if (util.isNull(rowData.createdbtime)){
+        this.$message.error(prefix + this.$t("createdbtime") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.selfnumber)){
+        this.$message.error(prefix +this.$t("sampleIndex") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.samplename)){
+        this.$message.error(prefix +this.$t("sampleName") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.species)){
+        this.$message.error(prefix +this.$t("species") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.concentration)){
+        this.$message.error(prefix +this.$t("concentration") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.totalnumber)){
+        this.$message.error(prefix +this.$t("totalNumber") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.celllife)){
+        this.$message.error(prefix +this.$t("cellLife") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.usenumber)){
+        this.$message.error(prefix +this.$t("useNumber") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.partsize)){
+        this.$message.error(prefix +this.$t("partsize") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.libindex)){
+        this.$message.error(prefix +"index" + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.libbarcode)){
+        this.$message.error(prefix +"libbarcode" + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.cyclenumber)){
+        this.$message.error(prefix +this.$t("cyclenumber") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.databasetype)){
+        this.$message.error(prefix +this.$t("databaseType") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.databaseindex)){
+        this.$message.error(prefix +this.$t("databaseindex") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.createdbuser)){
+        this.$message.error(prefix +this.$t("createdbuser") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.reviewer)){
+        this.$message.error(prefix +this.$t("reviewer") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.qbit)){
+        this.$message.error(prefix +this.$t("qbit") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.libsize)){
+        this.$message.error(prefix +this.$t("libsize") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.seqmethods)){
+        this.$message.error(prefix +this.$t("seqmethods") + this.$t("not_null"));
+        return false;
+      }
+      if (util.isNull(rowData.uploadsize)){
+        this.$message.error(prefix +this.$t("uploadsize") + this.$t("not_null"));
+        return false;
+      }
+      return true;
+    },
     showText : function (clo,text,ind){
       if (clo == "index"){
         return ind + 1;
+      }
+      if (clo == "createdbtime"){
+        if (util.isNull(text)){
+          return "";
+        }
+        return formatDate(new Date(text),"yyyy-MM-dd");
+      }
+      if (clo == "createdbuser" || clo == "reviewer"){
+        for (var userIndex in this.allUsers){
+          var user = this.allUsers[userIndex];
+          if (user.id == text){
+            return user.name;
+          }
+        }
       }
       return text;
     },
@@ -477,6 +611,17 @@ export default {
         return this.$t("cell") + this.$t("totalNumber") +"(" + this.$t("cellNumber") + ")";
       }
     },
+    canOperating : function (){
+      if (this.process.taskstatu != "30"){
+        return false;
+      }
+      if (!this.$store.getters.isCurrentUser(this.process.sampleinput)
+          && !this.isAdmin
+      ){
+        return false;
+      }
+      return true;
+    }
   },
   watch :{
     process:{

@@ -24,20 +24,22 @@
     </div>
     <a-table :columns="columns" :data-source="data" bordered
              :loading="tableLoad"
-             :scroll="scroll" :pagination="{ pageSize: 20 ,showSizeChanger:true}" size="middle">
+             :scroll="scroll" :pagination="{ pageSize: 20 ,showSizeChanger:true}"
+             :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+             size="middle">
       <template
           v-for="col in this.columnNames"
           :slot="col"
           slot-scope="text, record,index"
       >
         <div :key="col">
-          <template v-if="record.editable">
+<!--          <template v-if="record.editable">-->
             <!-- 样本类型 -->
             <a-select  style="width: 100%" v-if="col == 'samplemsg'"
                        v-model="record.samplemsg"
                        @change="e => handleChange(e.target.value, record.key, col)"
             >
-              <a-select-option v-for="item in sampletypes" :key="item.key" :value="item.key">
+              <a-select-option v-for="item in sampletypes(record.initSample)" :key="item.key" :value="item.key">
                 {{item.val}}
               </a-select-option>
             </a-select>
@@ -46,7 +48,7 @@
                        v-model="record.samplestatu"
                        @change="e => handleChange(e.target.value, record.key, col)"
             >
-              <a-select-option v-for="item in sampleStatu" :key="item.key" :value="item.key">
+              <a-select-option v-for="item in sampleStatu(record.initSample)" :key="item.key" :value="item.key">
                 {{item.val}}
               </a-select-option>
             </a-select>
@@ -65,11 +67,19 @@
                        v-model="record.databasetype"
                        @change="e => handleChange(e.target.value, record.key, col)"
             >
-              <a-select-option v-for="item in databaseTypes" :key="item.key" :value="item.key">
+              <a-select-option v-for="item in databaseTypes(record.initSample)" :key="item.key" :value="item.key">
                 {{item.val}}
               </a-select-option>
             </a-select>
-
+            <!-- initSample -->
+            <a-select  style="width: 100%" v-else-if="col == 'initSample'"
+                       v-model="record.initSample"
+                       @change="e => handleChange(e.target.value, record.key, col)"
+            >
+              <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
+                {{item.val}}
+              </a-select-option>
+            </a-select>
             <!-- 测序平台 -->
             <a-select  style="width: 100%" v-else-if="col == 'sequencingplatform'"
                        v-model="record.sequencingplatform"
@@ -121,12 +131,12 @@
                 @change="e => handleChange(e.target.value, record.key, col)"
             />
             <template v-else>
-              {{ showText(col,text,index) }}
+              {{ showText(col,text,index,record) }}
             </template>
-          </template>
-          <template v-else>
-            {{ showText(col,text,index) }}
-          </template>
+<!--          </template>-->
+<!--          <template v-else>-->
+<!--            {{ showText(col,text,index,record) }}-->
+<!--          </template>-->
         </div>
       </template>
       <template slot="operation" slot-scope="text, record">
@@ -151,8 +161,10 @@
       </template>
     </a-table>
     <div class="modal-footer" v-if="canOperating">
+      <button type="button" class="btn btn-warning"
+              :disabled="editingKey !== ''" @click="submitData('tmp')">{{$t("tmpSave")}}</button>
       <button type="button" class="btn btn-primary"
-              :disabled="editingKey !== ''" @click="submitData">{{$t("submit")}}</button>
+              :disabled="editingKey !== ''" @click="submitData('real')">{{$t("submit")}}</button>
     </div>
     <submitting :title="$t('submitting')"></submitting>
   </div>
@@ -174,6 +186,7 @@ export default {
       data : [],
       columns : [],
       columnNames : [],
+      selectedRowKeys : [],
       scroll :{x:1500},
       editingKey: '',
     };
@@ -182,20 +195,25 @@ export default {
     this.initPage();
   },
   methods: {
-    submitData : function (){
-      this.$("#submitting").modal("show");
+    onSelectChange : function (selectedRowKeys){
+      console.log('selectedRowKeys changed: ', selectedRowKeys);
+      this.selectedRowKeys = selectedRowKeys;
+    },
+    submitData : function (type){
       var _this = this;
       var postData = {
         processId : this.process.id,
-        datas : JSON.stringify(this.data)
+        datas : JSON.stringify(this.data),
+        type : type
       }
+      this.$("#submitting").modal("show");
       this.$axios.post("/task/process/commitDatas",postData).then(function (res){
         _this.$("#submitting").modal("hide");
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
         }else {
-          _this.initPage();
           _this.$message.success(_this.$t("commitSucc"));
+          window.location.reload();
         }
       }).catch(function (res){
         console.log(res);
@@ -229,14 +247,15 @@ export default {
         this.initPage();
       }
     },
-    handleChange(value, key, column) {
-      const newData = [...this.data];
-      const target = newData.filter(item => key === item.key)[0];
-      if (target) {
-        target[column] = value;
-        this.data = newData;
-      }
-    },
+    // handleChange(value, key, column) {
+    //   console.log(value, key, column);
+    //   const newData = [...this.data];
+    //   const target = newData.filter(item => key === item.key)[0];
+    //   if (target) {
+    //     target[column] = value;
+    //     this.data = newData;
+    //   }
+    // },
     onDelete(key) {
       const data = [...this.data];
       this.data = data.filter(item => item.key !== key);
@@ -251,6 +270,7 @@ export default {
       }
     },
     save(key) {
+      console.log(key);
       const newData = [...this.data];
       const newCacheData = [...this.cacheData];
       const target = newData.filter(item => key === item.key)[0];
@@ -378,6 +398,7 @@ export default {
               _this.data.push(d);
             }
             _this.cacheData = _this.data.map(item => ({ ...item }));
+            console.log(_this.data);
           }
         }
       }).catch(function (res){
@@ -417,7 +438,7 @@ export default {
       }
     },
     initColumns : function (type){
-      // console.log(type)
+      console.log(type)
       var scorllLength = 0;
       var clom = new Array();
       /**序号*/
@@ -429,12 +450,28 @@ export default {
         scopedSlots: { customRender: 'index' },
       });
       scorllLength +=50;
+      /**初始样本*/
+      clom.push({
+        title: this.$t("initSample"),
+        dataIndex: 'initSample',
+        width: '150px',
+        scopedSlots: { customRender: 'initSample' },
+      });
+      scorllLength +=150;
       /**样本名称*/
       clom.push({
         title: this.$t("sampleName"),
         dataIndex: 'samplename',
         width: '150px',
         scopedSlots: { customRender: 'samplename' },
+      });
+      scorllLength +=150;
+      /**样本编号*/
+      clom.push({
+        title: this.$t("sampleIndex"),
+        dataIndex: 'selfnumber',
+        width: '150px',
+        scopedSlots: { customRender: 'selfnumber' },
       });
       scorllLength +=150;
       /**物种*/
@@ -470,7 +507,7 @@ export default {
       });
       scorllLength += 150;
 
-      if (type == "02"){
+      // if (type == "02"){
         /** 组织量（g）*/
         clom.push({
           title: this.$t("tissueNumber") + "（g）",
@@ -479,8 +516,8 @@ export default {
           scopedSlots: { customRender: 'tissuenumber' },
         });
         scorllLength += 100;
-      }
-      if (type == "02"){
+      // }
+      // if (type == "02"){
         /** 血液体积(ml)*/
         clom.push({
           title: this.$t("bloodVolume") + "(ml)",
@@ -489,8 +526,8 @@ export default {
           scopedSlots: { customRender: 'bloodvolume' },
         });
         scorllLength += 100;
-      }
-      if (type != "02"){
+      // }
+      // if (type != "02"){
         /** 浓度(ng/ul)/（细胞个数/μl) */
         clom.push({
           title: this.concentrationName,
@@ -499,8 +536,8 @@ export default {
           scopedSlots: { customRender: 'concentration' },
         });
         scorllLength += 150;
-      }
-      if (type != "02"){
+      // }
+      // if (type != "02"){
         /** 样本体积(ul) */
         clom.push({
           title: this.$t("sampleVolume") + "(ul)",
@@ -509,8 +546,8 @@ export default {
           scopedSlots: { customRender: 'samplevolume' },
         });
         scorllLength += 150;
-      }
-      if (type != "02"){
+      // }
+      // if (type != "02"){
         /** 核酸/细胞总量（ug/细胞个数） */
         clom.push({
           title: this.totalNumberTitle,
@@ -519,8 +556,8 @@ export default {
           scopedSlots: { customRender: 'totalnumber' },
         });
         scorllLength += 150;
-      }
-      if (type == "03"){
+      // }
+      // if (type == "03"){
         /** 细胞活性 */
         clom.push({
           title: this.$t("cellLife"),
@@ -529,8 +566,8 @@ export default {
           scopedSlots: { customRender: 'celllife' },
         });
         scorllLength += 100;
-      }
-      if (type == "03"){
+      // }
+      // if (type == "03"){
         /** 细胞分选法 */
         clom.push({
           title: this.$t("cellSort"),
@@ -539,7 +576,7 @@ export default {
           scopedSlots: { customRender: 'cellsort' },
         });
         scorllLength += 200;
-      }
+      // }
       /**建库类型*/
       clom.push({
         title: this.$t("databaseType"),
@@ -548,7 +585,6 @@ export default {
         scopedSlots: { customRender: 'databasetype' },
       });
       scorllLength += 200;
-
       /**测序平台*/
       clom.push({
         title: this.$t("SequencingPlatform"),
@@ -565,17 +601,17 @@ export default {
         scopedSlots: { customRender: 'remarks' },
       });
       scorllLength += 200;
-      if (this.canOperating){
-        /**操作*/
-        clom.push({
-          title: this.$t("operation"),
-          dataIndex: 'operation',
-          width: '100px',
-          fixed: 'right',
-          scopedSlots: { customRender: 'operation' },
-        });
-        scorllLength += 100;
-      }
+      // if (this.canOperating){
+      //   /**操作*/
+      //   clom.push({
+      //     title: this.$t("operation"),
+      //     dataIndex: 'operation',
+      //     width: '100px',
+      //     fixed: 'right',
+      //     scopedSlots: { customRender: 'operation' },
+      //   });
+      //   scorllLength += 100;
+      // }
       this.scroll.x = scorllLength;
       this.columns = clom;
       this.columnNames = new Array();
@@ -583,9 +619,9 @@ export default {
         this.columnNames.push(clom[item].dataIndex);
       }
     },
-    showText : function (clo,text,ind){
+    showText : function (clo,text,ind,record){
       if (clo == "samplemsg"){
-        for (var index in this.sampletypes){
+        for (var index in this.sampletypes(record.initSample)){
           var item = this.sampletypes[index];
           if (item.key == text){
             return item.val;
@@ -594,7 +630,7 @@ export default {
       }
 
       if (clo == "samplestatu"){
-        for (var statuIndex in this.sampleStatu){
+        for (var statuIndex in this.sampleStatu(record.initSample)){
           var statu = this.sampleStatu[statuIndex];
           if (statu.key == text){
             return statu.val;
@@ -612,7 +648,7 @@ export default {
       }
 
       if (clo == "databasetype"){
-        for (var databaseTypeIndex in this.databaseTypes){
+        for (var databaseTypeIndex in this.databaseTypes(record.initSample)){
           var databaseType = this.databaseTypes[databaseTypeIndex];
           if (databaseType.key == text){
             return databaseType.val;
@@ -629,10 +665,29 @@ export default {
         }
       }
 
+      if (clo == "initSample"){
+        for (var initSampleIndex in this.sampleInits){
+          var sampleInit = this.sampleInits[initSampleIndex];
+          if (sampleInit.key == sampleInit){
+            return sampleInit.val;
+          }
+        }
+      }
+
       if (clo == "index"){
         return ind + 1;
       }
       return text;
+    },
+    sampletypes : function (sampleType){
+      return util.sampletypes(sampleType);
+    },
+    sampleStatu : function (sampleType){
+
+      return util.sampleStatu(sampleType);
+    },
+    databaseTypes : function (sampleType){
+      return util.databaseTypes(sampleType);
     },
   },
   computed : {
@@ -650,26 +705,20 @@ export default {
         return this.$t("cell") + this.$t("totalNumber") +"(" + this.$t("cellNumber") + ")";
       }
     },
-    sampletypes : function (){
-      return util.sampletypes(this.process.sampletype);
+    seqPlants : function (){
+      return util.seqPlants();
     },
-    sampleStatu : function (){
-      return util.sampleStatu(this.process.sampletype);
+    sampleInits : function (){
+      return util.sampleInits();
     },
     cellSortMethods : function (){
       return util.cellSortMethods();
-    },
-    databaseTypes : function (){
-      return util.databaseTypes(this.process.sampletype);
-    },
-    seqPlants : function (){
-      return util.seqPlants();
     },
     canOperating : function (){
       if (this.process.taskstatu != "10"){
         return false;
       }
-      if (!this.$store.getters.getUser.isCurrentUser(this.process.sampleinput)
+      if (!this.$store.getters.isCurrentUser(this.process.sampleinput)
         && !this.isAdmin
       ){
         return false;

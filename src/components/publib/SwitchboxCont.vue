@@ -23,7 +23,6 @@
                 this.$emit('getValue',this.value);
             }
         }
-
     }
 </script>
 

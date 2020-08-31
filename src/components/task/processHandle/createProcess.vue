@@ -37,7 +37,7 @@
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="sampleMsg">{{$t("sampleMsg")  }}</label>
           <div id="sampleMsg">
-            <a-select style="width: 100%" v-model="sampleMsg">
+            <a-select style="width: 100%" v-model="sampleMsg" mode="multiple">
               <a-select-option value="01">{{$t("nucleicAcid") + $t("sample")}}</a-select-option>
               <a-select-option value="02">{{$t("tissue") + $t("sample")}}</a-select-option>
               <a-select-option value="03">{{$t("cell") + $t("sample")}}</a-select-option>
@@ -130,7 +130,7 @@ export default {
       emails : [],
       users : [],
       remarks:"",
-      sampleMsg : "",
+      sampleMsg : [],
       samplePreparation:"",
       libraryPreparation:"",
       sampleInput : "",
@@ -164,7 +164,7 @@ export default {
         dataType : this.dataType,
         principal : this.principal,
         emails : this.emails,
-        sampleMsg : this.sampleMsg,
+        sampleMsg : this.sampleMsg.join("##"),
         samplePreparation :this.samplePreparation,
         libraryPreparation : this.libraryPreparation,
         dismountData : this.dismountData,
@@ -212,7 +212,7 @@ export default {
         this.$message.error(this.$t("userEmail") + this.$t("not_null"));
         return false;
       }
-      if (this.sampleMsg == ""){
+      if (this.sampleMsg.length == 0){
         this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
         return false;
       }

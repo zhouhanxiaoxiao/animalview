@@ -39,12 +39,22 @@
           >
             <a-icon slot="icon" type="loading" v-if="process.taskstatu == '50'"/>
           </a-step>
+          <a-step
+              :title="$t('complete')"
+              :status="setpStatu(5)"
+              :disabled="isDisabled(5)"
+          >
+            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '60'"/>
+          </a-step>
         </a-steps>
         <div class="steps-content">
 <!--          <process-step1 :process="process" :task-id="taskId" v-if="current == 1"></process-step1>-->
           <process-step1-new :process="process" v-if="current == 0" ></process-step1-new>
           <process-step2 :process="process" :task-id="taskId" v-if="current == 1"></process-step2>
           <process-step3 :process="process" v-if="current == 2"></process-step3>
+          <process-step4 :process="process" v-if="current == 3"></process-step4>
+          <process-step5 :process="process" v-if="current == 4"></process-step5>
+          <process-step6 :process="process" v-if="current == 5"></process-step6>
         </div>
       </div>
     </div>
@@ -56,9 +66,12 @@ import TopNav from "@/components/publib/TopNav";
 import ProcessStep1New from "@/components/task/processHandle/processStep1New";
 import ProcessStep2 from "@/components/task/processHandle/processStep2";
 import ProcessStep3 from "@/components/task/processHandle/processStep3";
+import ProcessStep4 from "@/components/task/processHandle/processStep4";
+import ProcessStep5 from "@/components/task/processHandle/processStep5";
+import ProcessStep6 from "@/components/task/processHandle/processStep6";
 export default {
   name: "processDetail",
-  components: {ProcessStep3, ProcessStep2, ProcessStep1New, TopNav},
+  components: {ProcessStep6, ProcessStep5, ProcessStep4, ProcessStep3, ProcessStep2, ProcessStep1New, TopNav},
   data : function (){
     return{
       current:0,
@@ -106,6 +119,9 @@ export default {
           }else if (_this.process.taskstatu == "50"){
             _this.current = 4;
             _this.canClick = 4;
+          }else if (_this.process.taskstatu == "60"){
+            _this.current = 5;
+            _this.canClick = 5;
           }else {
             _this.current = 0;
             _this.canClick = 0;
@@ -141,7 +157,6 @@ export default {
       return this.$route.query.taskId;
     },
   },
-
 }
 </script>
 

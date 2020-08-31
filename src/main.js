@@ -30,7 +30,7 @@ Vue.prototype.$ = $;
 
 Vue.prototype.$md5 = md5;
 
-VueCookies.config('1h');
+// VueCookies.config('1h');
 Vue.prototype.$cookies = VueCookies;
 
 /*

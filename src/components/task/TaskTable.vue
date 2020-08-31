@@ -17,14 +17,15 @@
         <th scope="row">{{ index + 1 + currentPage * pageSize }}</th>
         <td>{{ taskType(task.task) }}</td>
         <td>
-          <div class="progress">
-            <div class="progress-bar"
-                 :class="taskstatu(task.task)"
-                 role="progressbar"
-                 :style="taskPro(task)"
-                 aria-valuenow="25" aria-valuemin="0"
-                 aria-valuemax="100">{{ tastStatu(task.task) }}
-            </div>
+          <div>
+<!--            <div class="progress-bar"-->
+<!--                 :class="taskstatu(task.task)"-->
+<!--                 role="progressbar"-->
+<!--                 :style="taskPro(task)"-->
+<!--                 aria-valuenow="25" aria-valuemin="0"-->
+<!--                 aria-valuemax="100">{{ tastStatu(task.task) }}-->
+<!--            </div>-->
+            <a-progress :percent="taskPro(task)" size="small" :status="taskstatu(task.task)" />
           </div>
         </td>
         <td>{{ task.creater.name }}</td>
@@ -116,51 +117,58 @@ export default {
     taskPro: function (task) {
       if (task.task.tasktype == "01"){
         if (task.task.taskstatu == "01"){
-          return "width: 50%";
+          return 50;
         }else {
-          return "width : 100%";
+          return 100;
         }
       }else if (task.task.tasktype == "02"){
         var ask = task.ask;
         if (ask.currentstatu == "00") {
-          return "width: 10%";
+          return 10;
         }
         if (ask.currentstatu == "01") {
-          return "width:30%";
+          return 30;
         }
         if (ask.currentstatu == "02" || ask.currentstatu == "03") {
-          return "width:50%";
+          return 50;
         }
         if (ask.currentstatu == "04") {
-          return "width:75%";
+          return 75;
         }else {
-          return "width:100%";
+          return 100;
         }
       }else if (task.task.tasktype == "03"){
         var process = task.process;
-        if (process.taskstatu == "01"){
-          return "width:20%";
+        if (process.taskstatu == "10"){
+          return 10;
+        }else
+        if (process.taskstatu == "20"){
+          return 25;
+        }else
+        if (process.taskstatu == "30"){
+          return 40;
+        }else
+        if (process.taskstatu == "40"){
+          return 55;
+        }else
+        if (process.taskstatu == "50"){
+          return 75;
+        }else
+        if (process.taskstatu == "60"){
+          return 90;
         }
-        if (process.taskstatu == "02"){
-          return "width:40%";
-        }
-        if (process.taskstatu == "03"){
-          return "width:60%";
-        }
-        if (process.taskstatu == "04"){
-          return "width:80%";
-        }else {
-          return "width:100%";
+        else {
+          return 100;
         }
       }
     },
     taskstatu : function(task){
       if (task.taskstatu == "01") {
-        return "bg-warning";
+        return "active";
       } else if (task.taskstatu == "02") {
-        return "bg-success";
+        return "";
       } else if (task.taskstatu == "03") {
-        return "bg-danger";
+        return "exception";
       }
     },
     askremarks : function (task){

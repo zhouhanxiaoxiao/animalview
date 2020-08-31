@@ -23,6 +23,7 @@
 <!--                            <a class="dropdown-item">{{$t("newStrain")}}</a>-->
 <!--                            <a class="dropdown-item">{{$t("useTask")}}</a>-->
                           <router-link to="/task/process"><a class="dropdown-item">{{$t("processHandle")}}</a></router-link>
+                          <router-link to="/task/resourceOrder"><a class="dropdown-item">{{$t("resourceOrder")}}</a></router-link>
                         </div>
                     </li>
                     <li class="nav-item dropdown">

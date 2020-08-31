@@ -175,8 +175,9 @@
                       <label for="timeselect">选择{{item.name}}占用时间</label>
                       <section id="timeselect">
                         <a-range-picker
-                            :show-time="{ format: 'HH',disabledHours:disableHour(item.id) }"
+                            :show-time="{ format: 'HH'}"
                             format="YYYY-MM-DD HH"
+                            :disabledTime="disableHour(item.id)"
                             :disabledDate="disabledMeterDate(item.id)"
                             @change="onChange"
                         />
@@ -195,6 +196,7 @@
 
 <script>
     import moment from 'moment';
+    import {formatDate} from "@/components/publib/date";
     export default {
         name: "OrderItemDetail",
         props : {
@@ -228,8 +230,99 @@
         },
         methods : {
             moment,
+          range(start, end) {
+            const result = [];
+            for (let i = start; i < end; i++) {
+              result.push(i);
+            }
+            return result;
+          },
           disableHour : function (id){
-              console.log(id);
+            console.log(id);
+            var records = [];
+            for (var i in this.allMerial){
+              if (this.allMerial[i].id == id){
+                records = this.allMerial[i].records;
+              }
+            }
+            console.log(records);
+            var _this = this;
+            return function(time,type){
+              console.log(time,type);
+              if (time == undefined || time.length == 0 || time.length == 2 || time.length ==1){
+                return  true;
+              }
+              if (type === "start" || type === "end"){
+                return {
+                disabledHours : function (){
+                  var result = _this.range(0,24);
+                  var now = new Date();
+                  var now0 = new Date(now.getFullYear() + '-' + (now.getMonth()+1) + '-' + now.getDate())
+                    for (var j in records){
+                      var start = new Date(records[j].starttime);
+                      var end = new Date(records[j].endtime);
+                      if (formatDate(time.toDate(),"yyyy-MM-dd") == formatDate(start,"yyyy-MM-dd")
+                        && formatDate(time.toDate(),"yyyy-MM-dd") == formatDate(end,"yyyy-MM-dd")
+                      ){
+                        for (var k=start.getHours();k<end.getHours();k++){
+                          for(var n=result.length-1;n>-1;n--){
+                            if (result[n] == k){
+                              result.splice(n,1);
+                            }
+                          }
+                        }
+                      }
+                    }
+                    if (formatDate(time.toDate(),"yyyy-MM-dd") == formatDate(now0,"yyyy-MM-dd")){
+                      for (var m=0;m<now.getHours();m++){
+                        for(var o=result.length-1;o>-1;o--){
+                          if (result[o] == m){
+                            result.splice(o,1);
+                          }
+                        }
+                      }
+                    }
+                  console.log(result);
+                  // return result;
+                  return _this.range(0, 24).splice(4, 20);
+                  }
+                }
+              }
+            };
+            // return function (date,type){
+            //   console.log(date,type)
+            //   if (date == undefined || date.length == 0){
+            //     return true;
+            //   }
+            //   console.log("ddd",date);
+            //   for (var j in records){
+            //       if (date.length > 1){
+            //         for (var k in date){
+            //           var d = date[k];
+            //           console.log(d.toDate() < new Date());
+            //           if (d.toDate() < new Date()){
+            //             return true;
+            //           }
+            //           console.log(d.toDate())
+            //           if (d.toDate() >= new Date(records[j].starttime)
+            //               &&d.toDate() < new Date(records[j].endtime)
+            //           ){
+            //             return true;
+            //           }
+            //         }
+            //       }else{
+            //         console.log(date.toDate() < new Date());
+            //         if (date.toDate() < new Date()){
+            //           return true;
+            //         }
+            //         if ( date.toDate() >= new Date(records[j].starttime)
+            //             &&  date.toDate() < new Date(records[j].endtime)
+            //         ){
+            //           return true;
+            //         }
+            //       }
+            //   }
+            // }
           },
           disabledMeterDate:function (id){
             var records = [];
@@ -263,40 +356,6 @@
             handleRangeClose() {
               this.showTimeRangePanel = false;
             },
-            disableSelctPhoto:function (date){
-            if (date < new Date()){
-              return true;
-            }
-            for (var i in this.allMerial){
-              if (this.allMerial[i].name == "拍照片"){
-                for (var j in this.allMerial[i].records){
-                  if (date > new Date(this.allMerial[i].records[j].starttime)
-                      && date < new Date(this.allMerial[i].records[j].endtime)
-                  ){
-                    return true;
-                  }
-                }
-              }
-            }
-            return false;
-          },
-          disableSelctwy:function (date){
-            if (date < new Date()){
-              return true;
-            }
-            for (var i in this.allMerial){
-              if (this.allMerial[i].name == "魏依协助"){
-                for (var j in this.allMerial[i].records){
-                  if (date > new Date(this.allMerial[i].records[j].starttime)
-                      && date < new Date(this.allMerial[i].records[j].endtime)
-                  ){
-                    return true;
-                  }
-                }
-              }
-            }
-            return false;
-          },
             disableSelct : function (date){
 
               if (date < new Date()){

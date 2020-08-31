@@ -68,6 +68,7 @@ const zh={
     yes : "是",
     no : "否",
     keep : "保种",
+    resourceOrder : "预约",
 
     fileNameErr : "文件命名错误！",
 
@@ -165,6 +166,7 @@ const zh={
     checkUser :"检测员",
     reviewer :"审核人",
     remaining : "剩余量",
+    selectOrderTime : "选择预约时间",
 
     tmpSave : "暂存",
     createdbtime : "建库时间",
@@ -181,6 +183,16 @@ const zh={
     databaseunit : "数据量单位",
     libremark:"建库备注",
     uploadremark : "上机备注",
+    dateaccount : "数据账号",
+    datepassword : "数据密码",
+    datepath :"数据目录",
+    resultpath : "结果主路径",
+    args : "分析流程/参数",
+    reportpath : "报告地址",
+    analyst : "分析人",
+    complete : "完成",
+    derivativeindex : "样本衍生编号",
+    initSample:"初始样本",
 
 
     numberErr : "必须大于1",
