@@ -88,6 +88,7 @@
             <!-- 细胞分选法 -->
             <a-select  style="width: 100%" v-else-if="col == 'cellsort'"
                        v-model="record.cellsort"
+                       :disabled="colIsDisabed(record.initsample,'cellsort')"
             >
               <a-select-option v-for="item in cellSortMethods" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -123,35 +124,41 @@
                 style="margin: -5px 0"
                 v-model="record.samplevolume"
                 :min="0"
+                :disabled="colIsDisabed(record.initsample,'samplevolume')"
             />
             <a-input-number
                 v-else-if="col == 'tissuenumber'"
                 style="margin: -5px 0"
                 v-model="record.tissuenumber"
                 :min="0"
+                :disabled="colIsDisabed(record.initsample,'tissuenumber')"
             />
             <a-input-number
                 v-else-if="col == 'bloodvolume'"
                 style="margin: -5px 0"
                 v-model="record.bloodvolume"
                 :min="0"
+                :disabled="colIsDisabed(record.initsample,'bloodvolume')"
             />
             <a-input-number
                 v-else-if="col == 'concentration'"
                 style="margin: -5px 0"
                 v-model="record.concentration"
                 :min="0"
+                :disabled="colIsDisabed(record.initsample,'concentration')"
             />
             <a-input-number
                 v-else-if="col == 'totalnumber'"
                 style="margin: -5px 0"
                 v-model="record.totalnumber"
                 :min="0"
+                :disabled="colIsDisabed(record.initsample,'totalnumber')"
             />
             <a-input
                 v-else-if="col != 'index'"
                 style="margin: -5px 0"
                 v-model="record[col]"
+                :disabled="colIsDisabed(record.initsample,col)"
             />
             <template v-else>
               {{ showText(col,text,index,record) }}
@@ -219,6 +226,34 @@ export default {
     this.initPage();
   },
   methods: {
+    colIsDisabed : function (sampleType,col){
+      if (
+          (
+              col == "tissuenumber"
+              || col == "bloodvolume"
+          )
+          && sampleType != "02"
+      ){
+        return true;
+      }else if (
+          (
+              col == "concentration"
+              || col == "samplevolume"
+              || col == "totalnumber"
+          )
+          && sampleType == "02"){
+        return true;
+      }else if (
+          (
+              col == "cellsort"
+              || col == "celllife"
+          )
+          && sampleType != "03"
+      ){
+        return true;
+      }
+      return false;
+    },
     startProcess : function (){
       var postData = {
         datas : JSON.stringify(this.selectedRows),

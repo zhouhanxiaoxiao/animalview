@@ -155,34 +155,34 @@
                                placeholder="例：36">
                     </div>
                     <!-- 唯一资源占用-->
-                    <div class="form-group-sm col-md-3">
-                      <label for="meterial">{{$t("meterial")}}</label>
-                      <multiselect id="meterial"
-                                   v-model="meterial"
-                                   :options="allMerial"
-                                   :searchable="true"
-                                   :close-on-select="true"
-                                   :show-labels="false"
-                                   :allow-empty="true"
-                                   :multiple="true"
-                                   :taggable="true"
-                                   track-by="name"
-                                   label="name">
-                        <span slot="noResult"></span>
-                      </multiselect>
-                    </div>
-                    <div class="form-group-sm col-md-6" v-for="item in meterial" :key="item.id">
-                      <label for="timeselect">选择{{item.name}}占用时间</label>
-                      <section id="timeselect">
-                        <a-range-picker
-                            :show-time="{ format: 'HH'}"
-                            format="YYYY-MM-DD HH"
-                            :disabledTime="disableHour(item.id)"
-                            :disabledDate="disabledMeterDate(item.id)"
-                            @change="onChange"
-                        />
-                      </section>
-                    </div>
+<!--                    <div class="form-group-sm col-md-3">-->
+<!--                      <label for="meterial">{{$t("meterial")}}</label>-->
+<!--                      <multiselect id="meterial"-->
+<!--                                   v-model="meterial"-->
+<!--                                   :options="allMerial"-->
+<!--                                   :searchable="true"-->
+<!--                                   :close-on-select="true"-->
+<!--                                   :show-labels="false"-->
+<!--                                   :allow-empty="true"-->
+<!--                                   :multiple="true"-->
+<!--                                   :taggable="true"-->
+<!--                                   track-by="name"-->
+<!--                                   label="name">-->
+<!--                        <span slot="noResult"></span>-->
+<!--                      </multiselect>-->
+<!--                    </div>-->
+<!--                    <div class="form-group-sm col-md-6" v-for="item in meterial" :key="item.id">-->
+<!--                      <label for="timeselect">选择{{item.name}}占用时间</label>-->
+<!--                      <section id="timeselect">-->
+<!--                        <a-range-picker-->
+<!--                            :show-time="{ format: 'HH'}"-->
+<!--                            format="YYYY-MM-DD HH"-->
+<!--                            :disabledTime="disableHour(item.id)"-->
+<!--                            :disabledDate="disabledMeterDate(item.id)"-->
+<!--                            @change="onChange"-->
+<!--                        />-->
+<!--                      </section>-->
+<!--                    </div>-->
                     <!--  操作流程  -->
                     <div class="form-group-sm col-md-12">
                       <label for="operationProcess">{{$t("operationProcess")}}</label>
@@ -379,10 +379,10 @@
                     specialFeeding : this.specialFeeding,
                     specificFeeding : this.specificFeeding,
                     age : this.age,
-                    needWy : this.needWy,
-                    wyTime : this.wyTime,
-                    needPhoto: this.needPhoto,
-                    photoTime: this.photoTime,
+                    // needWy : this.needWy,
+                    // wyTime : this.wyTime,
+                    // needPhoto: this.needPhoto,
+                    // photoTime: this.photoTime,
                     operationProcess : this.operationProcess,
                     orderNumber : this.orderNumber,
                     allReady : this.allReady
@@ -410,12 +410,12 @@
                 if (this.orderNumber<=0){
                     return false;
                 }
-                if (this.needWy == "Y" && this.wyTime == ""){
-                  return  false;
-                }
-                if (this.needPhoto == "Y" && this.photoTime == ""){
-                  return false;
-                }
+                // if (this.needWy == "Y" && this.wyTime == ""){
+                //   return  false;
+                // }
+                // if (this.needPhoto == "Y" && this.photoTime == ""){
+                //   return false;
+                // }
                 return true;
             },
             disabledDate : function (usage) {
