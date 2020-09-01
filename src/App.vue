@@ -81,5 +81,15 @@ export default {
 .modal-backdrop {
   z-index: 998 !important;
 }
+.main-container{
+  background-color: white;
+  margin-top: 100px;
+  width: 90%;
+  margin-left: 5%;
+  min-height: 500px;
+  border-radius: 5px;
+  padding: 10px 10px;
+  text-align: left;
+}
 </style>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

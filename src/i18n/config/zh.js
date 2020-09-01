@@ -167,6 +167,7 @@ const zh={
     reviewer :"审核人",
     remaining : "剩余量",
     selectOrderTime : "选择预约时间",
+    start : "开始",
 
     tmpSave : "暂存",
     createdbtime : "建库时间",
@@ -193,6 +194,7 @@ const zh={
     complete : "完成",
     derivativeindex : "样本衍生编号",
     initSample:"初始样本",
+    arrindex : "批次",
 
 
     numberErr : "必须大于1",

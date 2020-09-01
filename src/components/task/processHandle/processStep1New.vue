@@ -1,31 +1,66 @@
 <template>
   <div>
-    <div style="margin-bottom: 10px" v-if="this.canOperating">
-      <a-button class="editable-add-btn"
-                @click="handleAdd"
-                :disabled="editingKey !== ''"
-      >
-        {{ $t("add") }}
-      </a-button>
-      &nbsp;
-      <a-upload
-          name="file"
-          accept=".xls,.xlsx"
-          :headers="{token:this.$cookies.get('token'),processId : process.id}"
-          @change="handUploadChange"
-          @reject="handUnaccept"
-          :beforeUpload="handBeforeUpload"
-          :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
-      >
-        <a-tooltip placement="topLeft" :title="$t('overText')">
-          <a-button> <a-icon type="upload" />{{ $t("input") }}</a-button>
-        </a-tooltip>
-      </a-upload>
-    </div>
+    <a-page-header
+        style="border: 1px solid rgb(235, 237, 240)"
+        :title="$t('sampleInput')"
+    >
+      <template slot="extra">
+        <a-button @click="startProcess" :disabled="selectedRows.length == 0" type="primary">
+          {{$t("start")}}
+        </a-button>
+        <a-button @click="submitData('tmp')" color="orange">
+          {{$t("tmpSave")}}
+        </a-button>
+        <a-button @click="submitData('real')">
+          {{$t("submit")}}
+        </a-button>
+        <a-button class="editable-add-btn"
+                  @click="handleAdd"
+        >
+          {{ $t("add") }}
+        </a-button>
+        <a-upload
+            name="file"
+            accept=".xls,.xlsx"
+            :headers="{token:this.$cookies.get('token'),processId : process.id}"
+            @change="handUploadChange"
+            @reject="handUnaccept"
+            :beforeUpload="handBeforeUpload"
+            :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
+        >
+          <a-tooltip placement="topLeft" :title="$t('overText')">
+            <a-button><a-icon type="upload" />{{ $t("input") }}</a-button>
+          </a-tooltip>
+        </a-upload>
+      </template>
+      <a-row type="flex">
+        <a-tag color="pink">
+          pink
+        </a-tag>
+        <a-tag color="red">
+          red
+        </a-tag>
+        <a-tag color="orange">
+          orange
+        </a-tag>
+        <a-tag color="green">
+          green
+        </a-tag>
+        <a-tag color="cyan">
+          cyan
+        </a-tag>
+        <a-tag color="blue">
+          blue
+        </a-tag>
+        <a-tag color="purple">
+          purple
+        </a-tag>
+      </a-row>
+    </a-page-header>
     <a-table :columns="columns" :data-source="data" bordered
              :loading="tableLoad"
-             :scroll="scroll" :pagination="{ pageSize: 20 ,showSizeChanger:true}"
-             :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+             :scroll="scroll"
+             :row-selection="rowSelection"
              size="middle">
       <template
           v-for="col in this.columnNames"
@@ -37,25 +72,22 @@
             <!-- 样本类型 -->
             <a-select  style="width: 100%" v-if="col == 'samplemsg'"
                        v-model="record.samplemsg"
-                       @change="e => handleChange(e.target.value, record.key, col)"
             >
-              <a-select-option v-for="item in sampletypes(record.initSample)" :key="item.key" :value="item.key">
+              <a-select-option v-for="item in sampletypes(record.initsample)" :key="item.key" :value="item.key">
                 {{item.val}}
               </a-select-option>
             </a-select>
             <!-- 样本状态 -->
             <a-select  style="width: 100%" v-else-if="col == 'samplestatu'"
                        v-model="record.samplestatu"
-                       @change="e => handleChange(e.target.value, record.key, col)"
             >
-              <a-select-option v-for="item in sampleStatu(record.initSample)" :key="item.key" :value="item.key">
+              <a-select-option v-for="item in sampleStatu(record.initsample)" :key="item.key" :value="item.key">
                 {{item.val}}
               </a-select-option>
             </a-select>
             <!-- 细胞分选法 -->
             <a-select  style="width: 100%" v-else-if="col == 'cellsort'"
                        v-model="record.cellsort"
-                       @change="e => handleChange(e.target.value, record.key, col)"
             >
               <a-select-option v-for="item in cellSortMethods" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -65,16 +97,14 @@
             <!-- 建库类型 -->
             <a-select  style="width: 100%" v-else-if="col == 'databasetype'"
                        v-model="record.databasetype"
-                       @change="e => handleChange(e.target.value, record.key, col)"
             >
-              <a-select-option v-for="item in databaseTypes(record.initSample)" :key="item.key" :value="item.key">
+              <a-select-option v-for="item in databaseTypes(record.initsample)" :key="item.key" :value="item.key">
                 {{item.val}}
               </a-select-option>
             </a-select>
             <!-- initSample -->
-            <a-select  style="width: 100%" v-else-if="col == 'initSample'"
-                       v-model="record.initSample"
-                       @change="e => handleChange(e.target.value, record.key, col)"
+            <a-select  style="width: 100%" v-else-if="col == 'initsample'"
+                       v-model="record.initsample"
             >
               <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -83,7 +113,6 @@
             <!-- 测序平台 -->
             <a-select  style="width: 100%" v-else-if="col == 'sequencingplatform'"
                        v-model="record.sequencingplatform"
-                       @change="e => handleChange(e.target.value, record.key, col)"
             >
               <a-select-option v-for="item in seqPlants" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -94,41 +123,35 @@
                 style="margin: -5px 0"
                 v-model="record.samplevolume"
                 :min="0"
-                @change="e => handleChange(e.target.value, record.key, col)"
             />
             <a-input-number
                 v-else-if="col == 'tissuenumber'"
                 style="margin: -5px 0"
                 v-model="record.tissuenumber"
                 :min="0"
-                @change="e => handleChange(e.target.value, record.key, col)"
             />
             <a-input-number
                 v-else-if="col == 'bloodvolume'"
                 style="margin: -5px 0"
                 v-model="record.bloodvolume"
                 :min="0"
-                @change="e => handleChange(e.target.value, record.key, col)"
             />
             <a-input-number
                 v-else-if="col == 'concentration'"
                 style="margin: -5px 0"
                 v-model="record.concentration"
                 :min="0"
-                @change="e => handleChange(e.target.value, record.key, col)"
             />
             <a-input-number
                 v-else-if="col == 'totalnumber'"
                 style="margin: -5px 0"
                 v-model="record.totalnumber"
                 :min="0"
-                @change="e => handleChange(e.target.value, record.key, col)"
             />
             <a-input
                 v-else-if="col != 'index'"
                 style="margin: -5px 0"
-                :value="text"
-                @change="e => handleChange(e.target.value, record.key, col)"
+                v-model="record[col]"
             />
             <template v-else>
               {{ showText(col,text,index,record) }}
@@ -160,12 +183,12 @@
         </div>
       </template>
     </a-table>
-    <div class="modal-footer" v-if="canOperating">
-      <button type="button" class="btn btn-warning"
-              :disabled="editingKey !== ''" @click="submitData('tmp')">{{$t("tmpSave")}}</button>
-      <button type="button" class="btn btn-primary"
-              :disabled="editingKey !== ''" @click="submitData('real')">{{$t("submit")}}</button>
-    </div>
+<!--    <div class="modal-footer" v-if="canOperating">-->
+<!--      <button type="button" class="btn btn-warning"-->
+<!--              :disabled="editingKey !== ''" @click="submitData('tmp')">{{$t("tmpSave")}}</button>-->
+<!--      <button type="button" class="btn btn-primary"-->
+<!--              :disabled="editingKey !== ''" @click="submitData('real')">{{$t("submit")}}</button>-->
+<!--    </div>-->
     <submitting :title="$t('submitting')"></submitting>
   </div>
 </template>
@@ -187,6 +210,7 @@ export default {
       columns : [],
       columnNames : [],
       selectedRowKeys : [],
+      selectedRows : [],
       scroll :{x:1500},
       editingKey: '',
     };
@@ -195,10 +219,32 @@ export default {
     this.initPage();
   },
   methods: {
-    onSelectChange : function (selectedRowKeys){
-      console.log('selectedRowKeys changed: ', selectedRowKeys);
-      this.selectedRowKeys = selectedRowKeys;
+    startProcess : function (){
+      var postData = {
+        datas : JSON.stringify(this.selectedRows),
+        processId : this.process.id,
+        type : "sub"
+      }
+      var _this = this;
+      this.$("#submitting").modal("show");
+      this.$axios.post("/task/process/commitDatas",postData).then(function (res){
+        _this.$("#submitting").modal("hide");
+        if (res.data.code != "200"){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.initPage();
+        }
+      }).catch(function (res){
+        console.log(res);
+        _this.$("#submitting").modal("hide");
+        _this.$message.error(_this.$t("systemErr"));
+      });
     },
+    // onSelectChange : function (selectedRowKeys){
+    //   console.log('selectedRowKeys changed: ', selectedRowKeys);
+    //   this.selectedRowKeys = selectedRowKeys;
+    // },
     submitData : function (type){
       var _this = this;
       var postData = {
@@ -304,7 +350,6 @@ export default {
       }
     },
     checkRowData : function (rowData){
-      // console.log(rowData);
       if (this.isNull(rowData.samplename)){
         this.$message.error(this.$t("sampleName") + this.$t("not_null"));
         return false;
@@ -450,12 +495,20 @@ export default {
         scopedSlots: { customRender: 'index' },
       });
       scorllLength +=50;
+      /**批次*/
+      clom.push({
+        title: this.$t("arrindex"),
+        dataIndex: 'arrindex',
+        width: '150px',
+        scopedSlots: { customRender: 'arrindex' },
+      });
+      scorllLength +=150;
       /**初始样本*/
       clom.push({
         title: this.$t("initSample"),
-        dataIndex: 'initSample',
+        dataIndex: 'initsample',
         width: '150px',
-        scopedSlots: { customRender: 'initSample' },
+        scopedSlots: { customRender: 'initsample' },
       });
       scorllLength +=150;
       /**样本名称*/
@@ -469,9 +522,9 @@ export default {
       /**样本编号*/
       clom.push({
         title: this.$t("sampleIndex"),
-        dataIndex: 'selfnumber',
+        dataIndex: 'sampleindex',
         width: '150px',
-        scopedSlots: { customRender: 'selfnumber' },
+        scopedSlots: { customRender: 'sampleindex' },
       });
       scorllLength +=150;
       /**物种*/
@@ -512,50 +565,50 @@ export default {
         clom.push({
           title: this.$t("tissueNumber") + "（g）",
           dataIndex: 'tissuenumber',
-          width: '100px',
+          width: '130px',
           scopedSlots: { customRender: 'tissuenumber' },
         });
-        scorllLength += 100;
+        scorllLength += 130;
       // }
       // if (type == "02"){
         /** 血液体积(ml)*/
         clom.push({
           title: this.$t("bloodVolume") + "(ml)",
           dataIndex: 'bloodvolume',
-          width: '100px',
+          width: '130px',
           scopedSlots: { customRender: 'bloodvolume' },
         });
-        scorllLength += 100;
+        scorllLength += 130;
       // }
       // if (type != "02"){
         /** 浓度(ng/ul)/（细胞个数/μl) */
         clom.push({
           title: this.concentrationName,
           dataIndex: 'concentration',
-          width: '150px',
+          width: '130px',
           scopedSlots: { customRender: 'concentration' },
         });
-        scorllLength += 150;
+        scorllLength += 130;
       // }
       // if (type != "02"){
         /** 样本体积(ul) */
         clom.push({
           title: this.$t("sampleVolume") + "(ul)",
           dataIndex: 'samplevolume',
-          width: '150px',
+          width: '130px',
           scopedSlots: { customRender: 'samplevolume' },
         });
-        scorllLength += 150;
+        scorllLength += 130;
       // }
       // if (type != "02"){
         /** 核酸/细胞总量（ug/细胞个数） */
         clom.push({
           title: this.totalNumberTitle,
           dataIndex: 'totalnumber',
-          width: '150px',
+          width: '130px',
           scopedSlots: { customRender: 'totalnumber' },
         });
-        scorllLength += 150;
+        scorllLength += 130;
       // }
       // if (type == "03"){
         /** 细胞活性 */
@@ -621,7 +674,7 @@ export default {
     },
     showText : function (clo,text,ind,record){
       if (clo == "samplemsg"){
-        for (var index in this.sampletypes(record.initSample)){
+        for (var index in this.sampletypes(record.initsample)){
           var item = this.sampletypes[index];
           if (item.key == text){
             return item.val;
@@ -630,7 +683,7 @@ export default {
       }
 
       if (clo == "samplestatu"){
-        for (var statuIndex in this.sampleStatu(record.initSample)){
+        for (var statuIndex in this.sampleStatu(record.initsample)){
           var statu = this.sampleStatu[statuIndex];
           if (statu.key == text){
             return statu.val;
@@ -648,7 +701,7 @@ export default {
       }
 
       if (clo == "databasetype"){
-        for (var databaseTypeIndex in this.databaseTypes(record.initSample)){
+        for (var databaseTypeIndex in this.databaseTypes(record.initsample)){
           var databaseType = this.databaseTypes[databaseTypeIndex];
           if (databaseType.key == text){
             return databaseType.val;
@@ -724,7 +777,22 @@ export default {
         return false;
       }
       return true;
-    }
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys, selectedRows) => {
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          this.selectedRowKeys = selectedRowKeys;
+          this.selectedRows = selectedRows;
+        },
+        getCheckboxProps: record => ({
+          props: {
+            disabled: record.currentstatu === '00', // Column configuration not to be checked
+            name: record.name,
+          },
+        }),
+      };
+    },
   },
   watch : {
     process:{
