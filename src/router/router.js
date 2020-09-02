@@ -15,6 +15,7 @@ import processDetail from "@/components/task/processHandle/processDetail";
 import about from "@/components/about/about";
 import resource from "@/components/task/resourceOrder/resource"
 import processInit from "@/components/task/processHandle/processInit";
+import partnerDetail from "@/components/task/partnerHandle/partnerDetail";
 
 /*配置路由*/
 const routes=[
@@ -29,6 +30,7 @@ const routes=[
     {path: '/about',component: about,meta: {index: 0}},
     {path: '/task/process',component: createProcess,meta: {index: 0}},
     {path: '/task/askDetail',name:"askDetail",component: askDetail,meta: {index: 0}},
+    {path: '/task/partnerDetail',name:"partnerDetail",component: partnerDetail,meta: {index: 0}},
     {path: '/task/processDetail',name:"processDetail",component: processDetail,meta: {index: 0}},
     {path: '/task/processInit',name:"processInit",component: processInit,meta: {index: 0}},
     {path: '/task/userAllow',name:"userAllow",component: userallow,meta: {index: 0}},

@@ -110,7 +110,7 @@ export default {
             _this.canClick = 2;
           }else {
             _this.current = 2;
-            _this.canClick = 2;
+            _this.canClick = 3;
           }
         }
       }).catch(function (res) {

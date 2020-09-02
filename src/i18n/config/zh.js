@@ -195,7 +195,7 @@ const zh={
     derivativeindex : "样本衍生编号",
     initSample:"初始样本",
     arrindex : "批次",
-
+    accept : "接受",
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",

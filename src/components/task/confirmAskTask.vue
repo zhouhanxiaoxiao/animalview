@@ -107,6 +107,14 @@
             return true;
           }
         }
+      },
+      watch : {
+        isNeedMore(newVal){
+          if (newVal == "N"){
+            this.startDate = "";
+            this.endDate = "";
+          }
+        }
       }
     }
 </script>

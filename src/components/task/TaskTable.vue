@@ -100,6 +100,8 @@ export default {
         ret = "使用申请";
       } else if (task.tasktype == "03"){
         ret = "流程管理";
+      }else if (task.tasktype == "04"){
+        ret = "协助申请";
       }
       return ret;
     },
@@ -160,6 +162,15 @@ export default {
         else {
           return 100;
         }
+      }else if (task.task.tasktype == "04"){
+        var partner = task.partner;
+        if (partner.taskstatu == "00"){
+          return 50;
+        }else if (partner.taskstatu == "01"){
+          return 100;
+        }else {
+          return 100;
+        }
       }
     },
     taskstatu : function(task){
@@ -189,6 +200,8 @@ export default {
       }else if (task.task.tasktype == "03"){
         // this.$router.push({name:"processDetail",query:{taskId:task.task.id}});
         this.$router.push({name:"processInit",query:{taskId:task.task.id}});
+      }else if (task.task.tasktype == "04"){
+        this.$router.push({name:"partnerDetail",query:{taskId:task.task.id}});
       }
     },
   },

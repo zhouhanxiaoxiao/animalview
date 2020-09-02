@@ -43,7 +43,7 @@ export default {
         if (res.data.code != 200){
           _this.$message.error(_this.$t(res.data.code));
         }else {
-          _this.initPage();
+          window.location.reload();
         }
       }).catch(function (res){
         _this.$("#submitting").modal("hide");

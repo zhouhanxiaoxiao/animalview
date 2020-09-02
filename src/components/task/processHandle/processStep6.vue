@@ -15,9 +15,10 @@
 
 <script>
 import {Icon} from 'ant-design-vue';
+import util from "@/components/publib/util";
 
 const IconFont = Icon.createFromIconfontCN({
-  scriptUrl: '//at.alicdn.com/t/font_2031063_ynnrauyza3.js',
+  scriptUrl: util.alicdnIcon,
 });
 export default {
   name: "processStep6",

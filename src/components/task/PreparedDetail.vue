@@ -46,7 +46,7 @@
             <textarea class="form-control" id="remarks" rows="2" disabled :value="row.confirm.remarks"></textarea>
           </div>
         </div>
-        <div class="modal-footer" v-if="row.prepare.prestatu == '02' || this.$store.getters.isCurrentUser(this.task.createuser)">
+        <div class="modal-footer" v-if="canOperat">
           <button type="button" class="btn btn-primary"  @click="handleState('confirm')">{{$t("confirm")}}</button>
         </div>
       </div>
@@ -105,7 +105,15 @@ export default {
         return "btn-danger";
       }
     },
-
+    canOperat : function (){
+      if (this.row.prepare.prestatu != '02'){
+        return false;
+      }
+      if (!this.$store.getters.isCurrentUser(this.task.createuser)){
+        return false;
+      }
+      return true;
+    }
   }
 }
 </script>

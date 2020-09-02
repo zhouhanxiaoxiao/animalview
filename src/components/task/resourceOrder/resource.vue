@@ -4,7 +4,7 @@
     <div class="resource-container">
       <a-radio-group v-model="resource" @change="onChange" button-style="solid">
         <a-radio-button v-for="met in meters" :key="met.id" :value="met.id">
-          {{ met.name }}
+          {{ showName(met) }}
         </a-radio-button>
       </a-radio-group>
       <a-calendar :disabledDate="disabledDate"
@@ -43,6 +43,13 @@ export default {
     this.initPage();
   },
   methods: {
+    showName : function (met){
+      if (met.email == undefined){
+        return met.name;
+      }else {
+        return met.name + "协助";
+      }
+    },
     onChange : function (){
 
     },
