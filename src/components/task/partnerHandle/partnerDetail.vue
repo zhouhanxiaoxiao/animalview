@@ -42,7 +42,8 @@ name: "partnerDetail",
       taskId : "",
       creater : {},
       records :[],
-      partner :{}
+      partner :{},
+      fail : {}
     }
   },
   beforeMount() {
@@ -71,6 +72,7 @@ name: "partnerDetail",
           _this.creater = res.data.retMap.creater;
           _this.records = res.data.retMap.records;
           _this.partner = res.data.retMap.partner;
+          _this.fail = res.data.retMap.fail;
         }
       }).catch(function (res){
         console.log(res);
@@ -88,10 +90,10 @@ name: "partnerDetail",
         remarks : remarks
       }
       var _this = this;
-      this.$("refuseAlert").modal("hide");
-      this.$("submitting").modal("show");
+      this.$("#refuseAlert").modal("hide");
+      this.$("#submitting").modal("show");
       this.$axios.post("/task/partner/refuse",postData).then(function (res){
-        _this.$("submitting").modal("hide");
+        _this.$("#submitting").modal("hide");
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
         }else {
@@ -99,7 +101,7 @@ name: "partnerDetail",
           _this.initPage();
         }
       }).catch(function (res){
-        _this.$("submitting").modal("hide");
+        _this.$("#submitting").modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
@@ -118,7 +120,7 @@ name: "partnerDetail",
           _this.$message.success(_this.$t("commitSucc"));
           _this.initPage();
         }
-      }).then(function (res){
+      }).catch(function (res){
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       })
@@ -148,6 +150,9 @@ name: "partnerDetail",
         }
       }else {
         sub += this.partner.remark;
+        if (this.partner.taskstatu == "02"){
+          sub += " " + this.$t("reason") + ":" + this.fail.reason;
+        }
       }
       return sub;
     }

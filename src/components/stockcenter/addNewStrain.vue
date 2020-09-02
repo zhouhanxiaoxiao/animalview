@@ -11,7 +11,7 @@
         <div class="modal-body" style="text-align: left">
           <form class="was-validated">
             <a-divider orientation="left">
-              基本信息
+              {{$t("baseInfo")}}
             </a-divider>
           <br>
           <div class="form-row">

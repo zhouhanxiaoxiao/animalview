@@ -1,6 +1,6 @@
 import i18n from "@/i18n";
 var util = {
-    alicdnIcon : "//at.alicdn.com/t/font_2031063_dbbulh256aj.js",
+    alicdnIcon : "//at.alicdn.com/t/font_2031063_ve0xmujj5i.js",
     isNull: function (obj) {
         if (obj == null) {
             return true;

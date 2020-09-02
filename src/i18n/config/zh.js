@@ -69,9 +69,7 @@ const zh={
     no : "否",
     keep : "保种",
     resourceOrder : "预约",
-
     fileNameErr : "文件命名错误！",
-
     isHybridizationNecessary : "是否需要杂交",
     hybridStrain:"对应的杂交品系",
     specialFeeding : "特殊饲养条件",
@@ -157,7 +155,6 @@ const zh={
     cellSort : "细胞分选法",
     databaseType : "建库类型",
     SequencingPlatform :"测序平台",
-
     sampleIndex : "样本编号",
     testDate :"检测日期",
     extractMethod : "提取方法",
@@ -168,7 +165,6 @@ const zh={
     remaining : "剩余量",
     selectOrderTime : "选择预约时间",
     start : "开始",
-
     tmpSave : "暂存",
     createdbtime : "建库时间",
     useNumber : "样本使用量(ug)/细胞使用量（细胞个数）",
@@ -196,6 +192,8 @@ const zh={
     initSample:"初始样本",
     arrindex : "批次",
     accept : "接受",
+    baseInfo : "基本信息",
+
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",
