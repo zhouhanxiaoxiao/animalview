@@ -3,6 +3,7 @@
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('samplePreparation')"
+        :sub-title="subTask.name"
     >
       <template slot="extra">
 
@@ -239,6 +240,7 @@ export default {
       allUsers: [],
       stopId : "",
       detailId : "",
+      subTask : {}
     }
   },
   beforeMount() {
@@ -395,6 +397,7 @@ export default {
           }
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;
+          _this.subTask = res.data.retMap.subtask;
         }
       }).catch(function (res) {
         console.log(res);
@@ -601,11 +604,11 @@ export default {
       clom.push({
         title: this.$t("operation"),
         dataIndex: 'operation',
-        width: '100px',
+        width: '150px',
         fixed: 'right',
         scopedSlots: {customRender: 'operation'},
       });
-      scorllLength += 100;
+      scorllLength += 150;
 
       this.scroll.x = scorllLength;
       this.columns = clom;
