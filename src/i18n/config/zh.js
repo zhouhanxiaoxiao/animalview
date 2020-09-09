@@ -193,7 +193,16 @@ const zh={
     arrindex : "批次",
     accept : "接受",
     baseInfo : "基本信息",
-
+    accountInfo : "帐号信息",
+    messageInfo : "通知设置",
+    userHead : "头像",
+    subProcessName : "子流程名称",
+    stop : "停止",
+    outPut : "导出",
+    importOrder : "导入申请任务",
+    showReason : "查看原因",
+    downLoadTip : "单击下载文件",
+    fileList : "文件列表",
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",

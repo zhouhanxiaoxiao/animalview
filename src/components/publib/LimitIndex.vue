@@ -22,7 +22,6 @@
             currentPage : Number,
             pageSize : Number,
             total : Number,
-            updateTableDate : Function
         },
         methods : {
             updateTable : function (pageNumber) {

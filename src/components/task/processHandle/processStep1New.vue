@@ -5,19 +5,22 @@
         :title="$t('sampleInput')"
     >
       <template slot="extra">
-        <a-button @click="startProcess" :disabled="selectedRows.length == 0" type="primary">
+        <a-button @click="subTaskInfo" :disabled="selectedRows.length == 0" type="primary">
           {{$t("start")}}
         </a-button>
         <a-button @click="submitData('tmp')" color="orange">
           {{$t("tmpSave")}}
         </a-button>
-        <a-button @click="submitData('real')">
-          {{$t("submit")}}
-        </a-button>
+<!--        <a-button @click="submitData('real')">-->
+<!--          {{$t("submit")}}-->
+<!--        </a-button>-->
         <a-button class="editable-add-btn"
                   @click="handleAdd"
         >
           {{ $t("add") }}
+        </a-button>
+        <a-button icon="download" @click="downLoad">
+          {{ $t("outPut") }}
         </a-button>
         <a-upload
             name="file"
@@ -34,26 +37,8 @@
         </a-upload>
       </template>
       <a-row type="flex">
-        <a-tag color="pink">
-          pink
-        </a-tag>
-        <a-tag color="red">
-          red
-        </a-tag>
-        <a-tag color="orange">
-          orange
-        </a-tag>
-        <a-tag color="green">
-          green
-        </a-tag>
-        <a-tag color="cyan">
-          cyan
-        </a-tag>
-        <a-tag color="blue">
-          blue
-        </a-tag>
-        <a-tag color="purple">
-          purple
+        <a-tag color="pink" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+          {{ sub.name }}
         </a-tag>
       </a-row>
     </a-page-header>
@@ -62,13 +47,43 @@
              :scroll="scroll"
              :row-selection="rowSelection"
              size="middle">
+      <div
+          slot="filterDropdown"
+          slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+          style="padding: 8px"
+      >
+        <a-input
+            v-ant-ref="c => (searchInput = c)"
+            :value="selectedKeys[0]"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+            @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          Search
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+          Reset
+        </a-button>
+      </div>
+      <a-icon
+          slot="filterIcon"
+          slot-scope="filtered"
+          type="search"
+          :style="{ color: filtered ? '#108ee9' : undefined }"
+      />
       <template
           v-for="col in this.columnNames"
           :slot="col"
           slot-scope="text, record,index"
       >
         <div :key="col">
-<!--          <template v-if="record.editable">-->
             <!-- 样本类型 -->
             <a-select  style="width: 100%" v-if="col == 'samplemsg'"
                        v-model="record.samplemsg"
@@ -163,10 +178,6 @@
             <template v-else>
               {{ showText(col,text,index,record) }}
             </template>
-<!--          </template>-->
-<!--          <template v-else>-->
-<!--            {{ showText(col,text,index,record) }}-->
-<!--          </template>-->
         </div>
       </template>
       <template slot="operation" slot-scope="text, record">
@@ -190,12 +201,7 @@
         </div>
       </template>
     </a-table>
-<!--    <div class="modal-footer" v-if="canOperating">-->
-<!--      <button type="button" class="btn btn-warning"-->
-<!--              :disabled="editingKey !== ''" @click="submitData('tmp')">{{$t("tmpSave")}}</button>-->
-<!--      <button type="button" class="btn btn-primary"-->
-<!--              :disabled="editingKey !== ''" @click="submitData('real')">{{$t("submit")}}</button>-->
-<!--    </div>-->
+    <sub-task-info @subTaskInfo="startProcess"></sub-task-info>
     <submitting :title="$t('submitting')"></submitting>
   </div>
 </template>
@@ -203,9 +209,10 @@
 <script>
 import util from "@/components/publib/util";
 import Submitting from "@/components/publib/submitting";
+import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
 export default {
   name: "processStep1New",
-  components: {Submitting},
+  components: {SubTaskInfo, Submitting},
   props : {
     process : Object
   },
@@ -215,17 +222,59 @@ export default {
       tableLoad:false,
       data : [],
       columns : [],
+      searchInput: null,
+      searchedColumn: '',
       columnNames : [],
       selectedRowKeys : [],
       selectedRows : [],
       scroll :{x:1500},
       editingKey: '',
+      subs : []
     };
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
+    downLoad : function (){
+      var postData = {
+        processId : this.process.id
+      }
+      var _this = this;
+      this.$axios({
+        url : "/task/process/downloadSampleInput",
+        method : 'post',
+        data : postData,
+        responseType : 'blob'
+      }).then(function (res){
+        let data = res.data;
+        if (!data) {
+          return
+        }
+        let url = window.URL.createObjectURL(new Blob([data]))
+        let a = document.createElement('a')
+        a.style.display = 'none'
+        a.href = url
+        a.setAttribute('download','excel.xls')
+        document.body.appendChild(a)
+        a.click() //执行下载
+        window.URL.revokeObjectURL(a.href)
+        document.body.removeChild(a)
+      }).catch(function (res){
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
+    handleSearch(selectedKeys, confirm, dataIndex) {
+      confirm();
+      this.searchText = selectedKeys[0];
+      this.searchedColumn = dataIndex;
+    },
+
+    handleReset(clearFilters) {
+      clearFilters();
+      this.searchText = '';
+    },
     colIsDisabed : function (sampleType,col){
       if (
           (
@@ -254,15 +303,23 @@ export default {
       }
       return false;
     },
-    startProcess : function (){
+    subTaskInfo : function (){
+      this.$("#subTaskInfo").modal("show");
+    },
+    showSubTask : function (subId){
+      this.$router.push({name:"processDetail",query:{subId : subId}});
+    },
+    startProcess : function (subProcessName,remarks){
       var postData = {
         datas : JSON.stringify(this.selectedRows),
         processId : this.process.id,
-        type : "sub"
+        type : "sub",
+        subProcessName : subProcessName,
+        remarks : remarks
       }
       var _this = this;
       this.$("#submitting").modal("show");
-      this.$axios.post("/task/process/commitDatas",postData).then(function (res){
+      this.$axios.post("/task/process/startSubTask",postData).then(function (res){
         _this.$("#submitting").modal("hide");
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
@@ -276,10 +333,6 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    // onSelectChange : function (selectedRowKeys){
-    //   console.log('selectedRowKeys changed: ', selectedRowKeys);
-    //   this.selectedRowKeys = selectedRowKeys;
-    // },
     submitData : function (type){
       var _this = this;
       var postData = {
@@ -328,15 +381,6 @@ export default {
         this.initPage();
       }
     },
-    // handleChange(value, key, column) {
-    //   console.log(value, key, column);
-    //   const newData = [...this.data];
-    //   const target = newData.filter(item => key === item.key)[0];
-    //   if (target) {
-    //     target[column] = value;
-    //     this.data = newData;
-    //   }
-    // },
     onDelete(key) {
       const data = [...this.data];
       this.data = data.filter(item => item.key !== key);
@@ -478,6 +522,7 @@ export default {
               _this.data.push(d);
             }
             _this.cacheData = _this.data.map(item => ({ ...item }));
+            _this.subs = res.data.retMap.subs;
             console.log(_this.data);
           }
         }
@@ -535,7 +580,23 @@ export default {
         title: this.$t("arrindex"),
         dataIndex: 'arrindex',
         width: '150px',
-        scopedSlots: { customRender: 'arrindex' },
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'arrindex'
+        },
+        onFilter: (value, record) =>
+            record.arrindex
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength +=150;
       /**初始样本*/
@@ -551,7 +612,23 @@ export default {
         title: this.$t("sampleName"),
         dataIndex: 'samplename',
         width: '150px',
-        scopedSlots: { customRender: 'samplename' },
+        scopedSlots: {
+          customRender: 'samplename',
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+        },
+        onFilter: (value, record) =>
+            record.samplename
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength +=150;
       /**样本编号*/
@@ -559,7 +636,23 @@ export default {
         title: this.$t("sampleIndex"),
         dataIndex: 'sampleindex',
         width: '150px',
-        scopedSlots: { customRender: 'sampleindex' },
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'sampleindex'
+        },
+        onFilter: (value, record) =>
+            record.sampleindex
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength +=150;
       /**物种*/

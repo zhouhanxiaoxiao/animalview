@@ -251,7 +251,7 @@ export default {
       }
     },
     submitData : function (type){
-      console.log(type);
+      // console.log(type);
       var postData = {
         processId : this.process.id,
         datas : JSON.stringify(this.data),

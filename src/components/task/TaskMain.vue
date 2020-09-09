@@ -2,7 +2,7 @@
     <div>
         <top-nav></top-nav>
         <div class="task-main">
-            <task-table></task-table>
+            <task-table :page-location="'mytask'"></task-table>
         </div>
     </div>
 </template>

@@ -1,5 +1,6 @@
 <template>
   <div class="task-container">
+
     <table class="table table-striped table-hover">
       <thead class="task-head">
       <tr>
@@ -14,17 +15,10 @@
       </thead>
       <tbody class="task-body">
       <tr v-for="(task,index) in taskList" :key="task.id">
-        <th scope="row">{{ index + 1 + currentPage * pageSize }}</th>
+        <th scope="row">{{ index + 1 + (currentPage - 1) * pageSize }}</th>
         <td>{{ taskType(task.task) }}</td>
         <td>
           <div>
-<!--            <div class="progress-bar"-->
-<!--                 :class="taskstatu(task.task)"-->
-<!--                 role="progressbar"-->
-<!--                 :style="taskPro(task)"-->
-<!--                 aria-valuenow="25" aria-valuemin="0"-->
-<!--                 aria-valuemax="100">{{ tastStatu(task.task) }}-->
-<!--            </div>-->
             <a-progress :percent="taskPro(task)" size="small" :status="taskstatu(task.task)" />
           </div>
         </td>
@@ -40,25 +34,34 @@
       </tbody>
     </table>
     <div class="page-div">
-      <limit-index v-if="total > 0" :total="total" :page-size="pageSize" :current-page="currentPage"
-                   :update-table-date="updateTable"></limit-index>
+<!--      <limit-index v-if="total > 0" :total="total" :page-size="pageSize" :current-page="currentPage"-->
+<!--                   @updateTableDate="updateTable"></limit-index>-->
+      <a-pagination
+          v-model="currentPage"
+          show-size-changer
+          :page-size.sync="pageSize"
+          :total="total"
+      />
     </div>
     <submitting :title="$t('submitting')"></submitting>
   </div>
 </template>
 
 <script>
-import LimitIndex from "@/components/publib/LimitIndex";
+// import LimitIndex from "@/components/publib/LimitIndex";
 import {formatDate} from "@/components/publib/date";
 import Submitting from "@/components/publib/submitting";
 
 export default {
   name: "TaskTable",
-  components: {Submitting, LimitIndex},
+  components: {Submitting},
+  props : {
+    pageLocation : String
+  },
   data: function () {
     return {
-      currentPage: 0,
-      pageSize: 20,
+      currentPage: 1,
+      pageSize: 10,
       total: 0,
       taskList: [],
       taskId: "",
@@ -71,8 +74,9 @@ export default {
     initPage: function () {
       var _this = this;
       var postData = {
-        currentPage: _this.currentPage,
+        currentPage: _this.currentPage - 1,
         pageSize: _this.pageSize,
+        pageLocation : this.pageLocation
       }
       _this.$axios.post("/task/gatAllTask", postData).then(function (res) {
         console.log(res);
@@ -177,7 +181,7 @@ export default {
       if (task.taskstatu == "01") {
         return "active";
       } else if (task.taskstatu == "02") {
-        return "";
+        return "success";
       } else if (task.taskstatu == "03") {
         return "exception";
       }
@@ -212,10 +216,16 @@ export default {
   },
   watch : {
     userName(){
-      this.currentPage = 0;
-      this.pageSize = 20;
+      this.currentPage = 1;
+      this.pageSize = 10;
       this.initPage();
-    }
+    },
+    pageSize(){
+      this.initPage();
+    },
+    currentPage(){
+      this.initPage();
+    },
   }
 }
 </script>
@@ -249,5 +259,6 @@ export default {
 .page-div {
   width: 100%;
   text-align: center;
+  padding-bottom: 20px;
 }
 </style>

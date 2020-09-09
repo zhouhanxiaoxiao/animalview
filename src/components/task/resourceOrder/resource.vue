@@ -113,6 +113,7 @@ export default {
           _this.$message.success(_this.$t("commitSucc"));
           window.location.reload();
           // _this.initPage();
+          // _this.render();
         }
       }).catch(function (res){
         _this.$("#submitting").modal('hide');

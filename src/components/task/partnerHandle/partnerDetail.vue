@@ -9,7 +9,7 @@
           <icon-font type="icon-chenggong" v-if="partner.taskstatu == '01'"/>
           <icon-font type="icon-jujue" v-if="partner.taskstatu == '02'"/>
         </template>
-        <template #extra v-if="partner.taskstatu == '00'">
+        <template #extra v-if="canOperate">
           <a-button type="primary" @click="acceptPartner">
             {{$t("accept")}}
           </a-button>
@@ -43,7 +43,8 @@ name: "partnerDetail",
       creater : {},
       records :[],
       partner :{},
-      fail : {}
+      fail : {},
+      task : {}
     }
   },
   beforeMount() {
@@ -73,6 +74,7 @@ name: "partnerDetail",
           _this.records = res.data.retMap.records;
           _this.partner = res.data.retMap.partner;
           _this.fail = res.data.retMap.fail;
+          _this.task = res.data.retMap.task;
         }
       }).catch(function (res){
         console.log(res);
@@ -155,6 +157,16 @@ name: "partnerDetail",
         }
       }
       return sub;
+    },
+    canOperate : function (){
+      if (this.partner.taskstatu != '00'){
+        return false;
+      }
+      if (!this.$store.getters.isCurrentUser(this.task.currentuser)
+      ){
+        return false;
+      }
+      return true;
     }
   },
 

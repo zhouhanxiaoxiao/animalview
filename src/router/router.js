@@ -4,7 +4,6 @@ Vue.use(VueRouter)
 import login from "@/components/login";
 import register from "@/components/register";
 import home from "@/components/home/home";
-import EnterAnimalStock from "@/components/personal/EnterAnimalStock";
 import AnimalStock from "@/components/personal/AnimalStock";
 import TaskMain from "@/components/task/TaskMain";
 import CurrentStrain from "@/components/stockcenter/CurrentStrain";
@@ -17,6 +16,7 @@ import resource from "@/components/task/resourceOrder/resource"
 import processInit from "@/components/task/processHandle/processInit";
 import partnerDetail from "@/components/task/partnerHandle/partnerDetail";
 import editStock from "@/components/stockcenter/editStock";
+import personalMain from "@/components/personal/personalMain";
 
 /*配置路由*/
 const routes=[
@@ -24,13 +24,12 @@ const routes=[
     {path:'/login',component: login,meta:{index:0}},
     {path: '/register',component: register,meta:{index:0}},
     {path: '/home',component: home,meta:{index:0}},
-    {path: '/personal',component: EnterAnimalStock,meta: {index: 0}},
-    {path: '/personal/enterAnimalStock',component: EnterAnimalStock,meta: {index: 0}},
     {path: '/personal/animalStock',component: AnimalStock,meta: {index: 0}},
     {path: '/task',component: TaskMain,meta: {index: 0}},
     {path: '/about',component: about,meta: {index: 0}},
     {path: '/task/process',component: createProcess,meta: {index: 0}},
     {path: '/stock/edit',name:"stockEdit",component: editStock,meta: {index: 0}},
+    {path: '/personal/main',name:"personalMain",component: personalMain,meta: {index: 0}},
     {path: '/task/askDetail',name:"askDetail",component: askDetail,meta: {index: 0}},
     {path: '/task/partnerDetail',name:"partnerDetail",component: partnerDetail,meta: {index: 0}},
     {path: '/task/processDetail',name:"processDetail",component: processDetail,meta: {index: 0}},

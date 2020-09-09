@@ -21,6 +21,7 @@ export default {
   },
   beforeMount() {
     this.taskId = this.$route.query.taskId;
+    console.log(this.taskId)
     this.initPage();
   },
   methods : {

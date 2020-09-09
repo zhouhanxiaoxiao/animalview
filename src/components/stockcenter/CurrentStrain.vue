@@ -21,7 +21,7 @@
                   <a-upload
                       name="file"
                       :multiple="false"
-                      :action="this.$axios.defaults.baseURL + '/file/import/initDrop'"
+                      :action="this.$axios.defaults.baseURL + 'file/import/initDrop'"
                       :headers="{token:this.$cookies.get('token')}"
                   >
                     <a-button> <a-icon type="upload" />{{$t("input")}}</a-button>
@@ -33,6 +33,7 @@
                     <thead class="table-head">
                     <tr>
                         <th scope="col">#</th>
+                        <th scope="col">编号</th>
                         <th scope="col">stock id</th>
                         <th scope="col">genotype</th>
                         <th scope="col">resource</th>
@@ -41,6 +42,7 @@
                     <tbody class="table-body">
                     <tr v-for="(item,index) in strains" v-bind:key="item.id">
                         <th scope="row">{{index + 1 + currentPage*pageSize}}</th>
+                        <td>{{item.selfindex}}</td>
                         <td>{{item.stockId}}</td>
                         <td>{{item.genotype}}</td>
                         <td>{{item.resource}}</td>

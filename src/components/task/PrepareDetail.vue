@@ -71,6 +71,7 @@
 
 <script>
 import {formatDate} from "@/components/publib/date";
+import util from "@/components/publib/util";
 export default {
   name: "PrepareDetail",
   props:{
@@ -86,6 +87,9 @@ export default {
   },
   methods : {
     longToStr : function (date) {
+      if (util.isNull(date)){
+        return "";
+      }
       var d = new Date(date)
       return formatDate(d,"yyyy-MM-dd");
     },

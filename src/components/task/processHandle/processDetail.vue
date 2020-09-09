@@ -4,57 +4,57 @@
     <div class="process-container">
       <div class="detail-all">
         <a-steps v-model="current" type="navigation" size="small" :style="stepStyle">
+<!--          <a-step-->
+<!--              :title="$t('sampleInput')"-->
+<!--              :status="setpStatu(0)"-->
+<!--              :disabled="isDisabled(0)"-->
+<!--          >-->
+<!--            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '10'"/>-->
+<!--          </a-step>-->
           <a-step
-              :title="$t('sampleInput')"
+              :title="$t('samplePreparation')"
               :status="setpStatu(0)"
               :disabled="isDisabled(0)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '10'"/>
-          </a-step>
-          <a-step
-              :title="$t('samplePreparation')"
-              :status="setpStatu(1)"
-              :disabled="isDisabled(1)"
-          >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '20'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '20'"/>
           </a-step>
           <a-step
               :title="$t('libraryPreparation')"
-              :status="setpStatu(2)"
-              :disabled="isDisabled(2)"
+              :status="setpStatu(1)"
+              :disabled="isDisabled(1)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '30'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '30'"/>
           </a-step>
           <a-step
               :title="$t('dismountData')"
-              :status="setpStatu(3)"
-              :disabled="isDisabled(3)"
+              :status="setpStatu(2)"
+              :disabled="isDisabled(2)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '40'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '40'"/>
           </a-step>
           <a-step
               :title="$t('bioinformaticsAnalysis')"
-              :status="setpStatu(4)"
-              :disabled="isDisabled(4)"
+              :status="setpStatu(3)"
+              :disabled="isDisabled(3)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '50'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '50'"/>
           </a-step>
           <a-step
               :title="$t('complete')"
-              :status="setpStatu(5)"
-              :disabled="isDisabled(5)"
+              :status="setpStatu(4)"
+              :disabled="isDisabled(4)"
           >
-            <a-icon slot="icon" type="loading" v-if="process.taskstatu == '60'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '60'"/>
           </a-step>
         </a-steps>
         <div class="steps-content">
 <!--          <process-step1 :process="process" :task-id="taskId" v-if="current == 1"></process-step1>-->
-          <process-step1-new :process="process" v-if="current == 0" ></process-step1-new>
-          <process-step2 :process="process" :task-id="taskId" v-if="current == 1"></process-step2>
-          <process-step3 :process="process" v-if="current == 2"></process-step3>
-          <process-step4 :process="process" v-if="current == 3"></process-step4>
-          <process-step5 :process="process" v-if="current == 4"></process-step5>
-          <process-step6 :process="process" v-if="current == 5"></process-step6>
+<!--          <process-step1-new :process="process" v-if="current == 0" ></process-step1-new>-->
+          <process-step2 :process="process" :sub-id="subId" :task-id="subId" v-if="current == 0"></process-step2>
+          <process-step3 :process="process" v-if="current == 1"></process-step3>
+          <process-step4 :process="process" v-if="current == 2"></process-step4>
+          <process-step5 :process="process" v-if="current == 3"></process-step5>
+          <process-step6 :process="process" v-if="current == 4"></process-step6>
         </div>
       </div>
     </div>
@@ -63,65 +63,67 @@
 
 <script>
 import TopNav from "@/components/publib/TopNav";
-import ProcessStep1New from "@/components/task/processHandle/processStep1New";
+// import ProcessStep1New from "@/components/task/processHandle/processStep1New";
 import ProcessStep2 from "@/components/task/processHandle/processStep2";
 import ProcessStep3 from "@/components/task/processHandle/processStep3";
 import ProcessStep4 from "@/components/task/processHandle/processStep4";
 import ProcessStep5 from "@/components/task/processHandle/processStep5";
 import ProcessStep6 from "@/components/task/processHandle/processStep6";
+import util from "@/components/publib/util";
 export default {
   name: "processDetail",
-  components: {ProcessStep6, ProcessStep5, ProcessStep4, ProcessStep3, ProcessStep2, ProcessStep1New, TopNav},
+  components: {ProcessStep6, ProcessStep5, ProcessStep4, ProcessStep3, ProcessStep2,  TopNav},
   data : function (){
     return{
       current:0,
       canClick : 0,
       process : {},
-      taskId:"",
+      subTask : {},
+      subId:"",
       stepStyle: {
-        marginBottom: '60px',
         boxShadow: '0px -1px 0 0 #e8e8e8 inset',
       },
     }
   },
   beforeMount() {
-    this.taskId = this.$route.query.taskId;
+    console.log(this.$route.query.subId)
+    this.subId = this.$route.query.subId;
     this.initPage();
   },
   methods : {
     initPage : function (){
       var _this = this;
       var postData={
-        taskId : this.taskId
+        subId : this.subId
       }
-      if (this.taskId == "" || this.taskId == undefined || this.taskId == null){
+      if (util.isNull(this.subId)){
         return;
       }
-      this.$axios.post("/task/process/init",postData).then(function (res){
+      this.$axios.post("/task/process/subinit",postData).then(function (res){
         // console.log(res);
         if (res.data.code != 200){
           _this.$message.error(_this.$t(res.data.code));
         }else {
           _this.process = res.data.retMap.process;
-          console.log(_this.process);
-          if (_this.process.taskstatu == "10"){
+          _this.subTask = res.data.retMap.subTask;
+          if (_this.subTask.taskstatu == "10"){
             _this.current = 0;
             _this.canClick = 0;
-          }else if (_this.process.taskstatu == "20"){
+          }else if (_this.subTask.taskstatu == "20"){
+            _this.current = 0;
+            _this.canClick = 0;
+          }else if (_this.subTask.taskstatu == "30"){
             _this.current = 1;
             _this.canClick = 1;
-          }else if (_this.process.taskstatu == "30"){
+          }else if (_this.subTask.taskstatu == "40"){
             _this.current = 2;
             _this.canClick = 2;
-          }else if (_this.process.taskstatu == "40"){
+          }else if (_this.subTask.taskstatu == "50"){
             _this.current = 3;
             _this.canClick = 3;
-          }else if (_this.process.taskstatu == "50"){
+          }else if (_this.subTask.taskstatu == "60"){
             _this.current = 4;
             _this.canClick = 4;
-          }else if (_this.process.taskstatu == "60"){
-            _this.current = 5;
-            _this.canClick = 5;
           }else {
             _this.current = 0;
             _this.canClick = 0;
@@ -146,15 +148,16 @@ export default {
     },
   },
   watch : {
-    getTaskId(newVal){
+    getsubId(newVal){
       console.log(newVal);
-      this.taskId = newVal;
+      this.subId = newVal;
       this.initPage();
     }
   },
   computed : {
-    getTaskId : function (){
-      return this.$route.query.taskId;
+    getsubId : function (){
+      console.log(this.$route.query.subId)
+      return this.$route.query.subId;
     },
   },
 }

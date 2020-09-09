@@ -3,9 +3,19 @@
     <top-nav></top-nav>
     <div class="stock-table">
       <div class="batch-edit">
-        <button class="btn btn-primary btn-sm" :disabled="selectallDisable" type="button" @click="batchOrder">
-          {{ $t("batchEdit") }}
-        </button>
+        <a-button type="primary" :disabled="selectallDisable" @click="batchOrder">{{ $t("batchEdit") }}</a-button>
+        &nbsp;
+        <a-upload
+            v-if="this.$store.getters.isResearcher"
+            name="file"
+            :multiple="true"
+            :action="importOrderUrl"
+            :headers="{token : this.$cookies.get('token')}"
+            :show-upload-list="false"
+            @change="handleChange"
+        >
+          <a-button><a-icon type="upload"/>{{$t("importOrder")}}</a-button>
+        </a-upload>
       </div>
       <table class="table table-striped table-hover">
         <thead class="stock-table-head">
@@ -27,12 +37,15 @@
             {{ row.index }}
           </td>
           <td style="width: 5%">
+            {{ row.selfIndex }}
+          </td>
+          <td style="width: 5%">
             {{ row.stockID }}
           </td>
-          <td style="width: 10%">
+          <td style="width: 15%">
             {{ row.genotype }}
           </td>
-          <td style="width: 20%">
+          <td style="width: 10%">
             {{ row.resource }}
           </td>
           <td style="width: 10%">
@@ -111,6 +124,19 @@ export default {
     this.initStockTable();
   },
   methods: {
+    handleChange : function (ret){
+      console.log(ret);
+      if (ret.file.status == "uploading"){
+        this.$("#submitting").modal("show");
+      }else {
+        this.$("#submitting").modal("hide");
+        if (ret.file.status == "error"){
+          this.$message.error(this.$t("systemErr"));
+        }else if (ret.file.status == "done"){
+          this.$message.success(this.$t("commitSucc"));
+        }
+      }
+    },
     initStockTable: function () {
       var _this = this;
       var postData = {
@@ -128,6 +154,7 @@ export default {
           _this.total = res.data.retMap.totalnumber;
           _this.titles = new Array();
           _this.titles.push("#");
+          _this.titles.push("编号");
           _this.titles.push("stock ID");
           _this.titles.push("genotype");
           _this.titles.push("resource");
@@ -143,6 +170,7 @@ export default {
               var row = {
                 "id": stockTmp.stock.id,
                 "index": i + _this.currentPage * _this.pageSize + 1,
+                "selfIndex" : stockTmp.animal.selfindex,
                 "stockID": stockTmp.animal.stockId,
                 "genotype": stockTmp.animal.genotype,
                 "resource": stockTmp.animal.resource,
@@ -275,8 +303,12 @@ export default {
         }
       }
       return false;
+    },
+    importOrderUrl : function (){
+      return this.$axios.defaults.baseURL + 'task/import/orderTask';
     }
-  }
+  },
+
 }
 </script>
 

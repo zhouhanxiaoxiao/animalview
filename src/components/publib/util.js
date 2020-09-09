@@ -1,6 +1,7 @@
 import i18n from "@/i18n";
+import $axios from "axios";
 var util = {
-    alicdnIcon : "//at.alicdn.com/t/font_2031063_ve0xmujj5i.js",
+    alicdnIcon : "//at.alicdn.com/t/font_2031063_0ccu40odtb3t.js",
     isNull: function (obj) {
         if (obj == null) {
             return true;
@@ -141,6 +142,28 @@ var util = {
         array.push({key:"02",val:i18n.t("tissue") + i18n.t("sample")});
         array.push({key:"03",val:i18n.t("cell") + i18n.t("sample")});
         return array;
+    },
+    downLoad : function (postData,url,fileName){
+        $axios({
+            url : url,
+            data : postData,
+            method : 'post',
+            responseType : 'blob'
+        }).then(function (res){
+            let data = res.data;
+            if (!data) {
+                return
+            }
+            let url = window.URL.createObjectURL(new Blob([data]))
+            let a = document.createElement('a')
+            a.style.display = 'none'
+            a.href = url
+            a.setAttribute('download', fileName);
+            document.body.appendChild(a)
+            a.click() //执行下载
+            window.URL.revokeObjectURL(a.href)
+            document.body.removeChild(a)
+        })
     }
 }
 
