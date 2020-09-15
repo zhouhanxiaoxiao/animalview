@@ -42,7 +42,6 @@ axios.interceptors.request.use(config => {
   var token = VueCookies.get("token");
   if (token){
     config.headers['token'] = token;
-
     // config.headers['Access-Control-Allow-Origin'] = "*";
   }
   return config;
@@ -59,7 +58,6 @@ axios.interceptors.response.use(response =>{
     switch (error.response.status) {
       case 401:
         VueCookies.remove("token");
-        $("body").css("background-image","./assets/login-back.jpg");
         router.replace({
           path : "/login",
           query : {redirect : router.currentRoute.fullPath}

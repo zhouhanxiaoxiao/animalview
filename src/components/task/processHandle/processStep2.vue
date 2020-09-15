@@ -3,14 +3,12 @@
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('samplePreparation')"
-        :sub-title="subTask.name"
     >
       <template slot="extra">
-
         <a-button @click="submitData('tmp')">
           {{ $t("tmpSave") }}
         </a-button>
-        <a-button type="primary" @click="submitData('real')">
+        <a-button type="primary" @click="subTaskInfo" :disabled="this.selectedRows.length == 0">
           {{ $t("submit") }}
         </a-button>
         <a-button icon="download" @click="downLoad">
@@ -19,17 +17,33 @@
         <a-upload
             name="file"
             accept=".xls,.xlsx"
-            :headers="{token:this.$cookies.get('token'),processId : process.id}"
+            :show-upload-list="false"
+            :headers="{token:this.$cookies.get('token'), subId : subId}"
             @change="handUploadChange"
             :action="this.$axios.defaults.baseURL + '/file/import/makeInput'"
         >
           <a-button><a-icon type="upload" />{{ $t("input") }}</a-button>
         </a-upload>
       </template>
+      <a-row type="flex">
+        <a-tag color="pink" @click="showSubTask('01')">
+          {{ $t("showAll") }}
+        </a-tag>
+        <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+          {{ sub.name }}
+        </a-tag>
+        <a-tag color="#108ee9" @click="showSubTask('00')">
+          {{ $t("reset") }}
+        </a-tag>
+      </a-row>
     </a-page-header>
-    <a-table :columns="columns" :data-source="data" bordered
+    <a-table :columns="columns"
+             :data-source="data" bordered
              :loading="tableLoad"
-             :scroll="scroll" :pagination="{ pageSize: 20 }" size="middle">
+             :scroll="scroll"
+             :row-selection="rowSelection"
+             :pagination="{ pageSize: 20 }"
+             size="middle">
       <template
           v-for="col in this.columnNames"
           :slot="col"
@@ -53,6 +67,16 @@
                      disabled
           >
             <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
+              {{item.val}}
+            </a-select-option>
+          </a-select>
+          <!-- 转化样本 -->
+          <a-select  style="width: 100%" v-else-if="col == 'transform'"
+                     v-model="record.transform"
+                     :disabled="isStop(record) || !isTissu(record)"
+
+          >
+            <a-select-option v-for="item in transformSamples" :key="item.key" :value="item.key">
               {{item.val}}
             </a-select-option>
           </a-select>
@@ -207,9 +231,10 @@
 <!--              :disabled="editingKey !== ''" @click="submitData('real')">{{ $t("submit") }}-->
 <!--      </button>-->
 <!--    </div>-->
-    <submitting :title="$t('submitting')"></submitting>
-    <refuse-alert :modal-title="$t('reason')" @confirmFun="stopProcess"></refuse-alert>
-    <show-filelist :detail-id="detailId"></show-filelist>
+    <sub-task-info @subTaskInfo="startProcess" ref="thisSubTaskInfo"></sub-task-info>
+    <submitting :title="$t('submitting')" ref="submitting"></submitting>
+    <refuse-alert :modal-title="$t('reason')" @confirmFun="stopProcess" ref="refuseAlert"></refuse-alert>
+    <show-filelist :detail-id="detailId" ref="showFilelist"></show-filelist>
   </div>
 </template>
 
@@ -219,14 +244,14 @@ import {formatDate} from "@/components/publib/date";
 import Submitting from "@/components/publib/submitting";
 import RefuseAlert from "@/components/publib/refuseAlert";
 import ShowFilelist from "@/components/publib/showFilelist";
+import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
 
 export default {
   name: "processStep2",
-  components: {ShowFilelist, RefuseAlert, Submitting},
+  components: {SubTaskInfo, ShowFilelist, RefuseAlert, Submitting},
   props: {
     taskId: String,
     process: Object,
-    subId: String
   },
   data: function () {
     this.cacheData = [];
@@ -238,21 +263,51 @@ export default {
       scroll: {x: 1500},
       editingKey: '',
       allUsers: [],
+      subs : [],
+      selectedRowKeys : [],
+      selectedRows : [],
       stopId : "",
       detailId : "",
-      subTask : {}
+      subTask : {},
+      curFlag : "01",
+      subProcessName : "",
+      remarks : "",
+      subId : "00"
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
+    startProcess : function (subProcessName,remarks){
+      this.$(this.$refs.thisSubTaskInfo.$el).modal("hide");
+      this.subProcessName = subProcessName;
+      this.remarks = remarks;
+      this.submitData("real");
+    },
+    subTaskInfo : function (){
+      this.$(this.$refs.thisSubTaskInfo.$el).modal("show");
+    },
+    showSubTask : function (subId){
+      // this.$router.push({name:"processDetail",query:{subId : subId}});
+      this.subId = subId;
+      this.initPage();
+    },
+    backToTotal : function (){
+      this.$router.push({name:"processInit",query:{taskId:this.process.taskid}});
+    },
+    isTissu : function (record){
+      if (record.initsample == "02"){
+        return true;
+      }
+      return false;
+    },
     handUploadChange : function (ret){
       console.log(ret);
       if (ret.file.status == "uploading"){
-        this.$("#submitting").modal("show");
+        this.$(this.$refs.thisSubTaskInfo.$el).modal("show");
       }else {
-        this.$("#submitting").modal("hide");
+        this.$(this.$refs.thisSubTaskInfo.$el).modal("hide");
         if (ret.file.status == "error"){
           this.$message.error(this.$t("systemErr"));
         }else if (ret.file.status == "done"){
@@ -269,7 +324,7 @@ export default {
     showFileList : function (detailId){
       console.log(detailId);
       this.detailId = detailId;
-      this.$("#showFileList").modal("show");
+      this.$(this.$refs.showFilelist.$el).modal("show");
     },
     showReason : function (makeId){
       var _this = this;
@@ -289,7 +344,7 @@ export default {
     },
     showStopAlert : function (makeId){
       this.stopId = makeId;
-      this.$("#refuseAlert").modal("show");
+      this.$(this.$refs.refuseAlert.$el).modal("show");
     },
     stopProcess : function (reason,remark){
       this.$("#refuseAlert").modal("hide");
@@ -299,9 +354,11 @@ export default {
         remark : remark
       }
       var _this = this;
-      this.$("#submitting").modal("show");
+      // this.$("#submitting").modal("show");
+      this.$(this.$refs.submitting.$el).modal("show");
       this.$axios.post("/task/process/stopMake",postData).then(function (res){
-        _this.$("#submitting").modal("hide");
+        // _this.$("#submitting").modal("hide");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
@@ -309,7 +366,8 @@ export default {
           _this.initPage();
         }
       }).catch(function (res){
-        _this.$("#submitting").modal("hide");
+        // _this.$("#submitting").modal("hide");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       })
@@ -346,27 +404,39 @@ export default {
       }
       return false;
     },
+
     submitData: function (flag) {
       var postData = {
+        subId : this.subId,
         processId: this.process.id,
         data: JSON.stringify(this.data),
-        flag: flag
+        flag: flag,
+        subProcessName : this.subProcessName,
+        remarks : this.remarks
+      }
+      if (flag === "real"){
+        postData.data = JSON.stringify(this.selectedRows);
       }
       var _this = this;
-      this.$("#submitting").modal("show");
+      // this.$("#submitting").modal("show");
+      this.$(this.$refs.submitting.$el).modal("show");
       this.$axios.post("/task/process/submitMakes", postData).then(function (res) {
         console.log(res);
-        _this.$("#submitting").modal("hide");
+        // _this.$("#submitting").modal("hide");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.$message.success(_this.$t("commitSucc"));
           _this.value = "";
+          _this.selectedRowKeys = [];
+          _this.selectedRows = [];
           _this.initPage();
-          window.location.reload();
+          // window.location.reload();
         }
       }).catch(function (res) {
-        _this.$("#submitting").modal("hide");
+        // _this.$("#submitting").modal("hide");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       })
@@ -374,16 +444,19 @@ export default {
     initPage: function () {
       this.initColumns(this.process.sampletype);
       var _this = this;
-      if (util.isNull(this.process.id) || util.isNull(this.subId)) {
+      if (util.isNull(this.process.id)) {
         return;
       }
       _this.data = new Array();
       var postData = {
         processId: this.process.id,
-        subId: this.subId
+        subId: this.subId,
+        curFlag : this.curFlag
       }
+      this.tableLoad = true;
       this.$axios.post("/task/process/makeInit", postData).then(function (res) {
         console.log(res);
+        _this.tableLoad = false;
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
@@ -397,9 +470,11 @@ export default {
           }
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;
-          _this.subTask = res.data.retMap.subtask;
+          // _this.subTask = res.data.retMap.subtask;
+          _this.subs = res.data.retMap.subs;
         }
       }).catch(function (res) {
+        _this.tableLoad = false;
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       })
@@ -423,6 +498,14 @@ export default {
         dataIndex: 'initsample',
         width: '150px',
         scopedSlots: { customRender: 'initsample' },
+      });
+      scorllLength +=150;
+      /**转化样本*/
+      clom.push({
+        title: this.$t("transformSample"),
+        dataIndex: 'transform',
+        width: '150px',
+        scopedSlots: { customRender: 'transform' },
       });
       scorllLength +=150;
       /**样本名称*/
@@ -831,8 +914,27 @@ export default {
     uploadHeader : function (record){
       return {token:this.$cookies.get('token'),make:record.id}
     },
+
   },
   computed: {
+    rowSelection() {
+      const { selectedRowKeys,selectedRows } = this;
+      return {
+        selectedRowKeys : selectedRowKeys,
+        selectedRows : selectedRows,
+        onChange: (selectedRowKeys, selectedRows) => {
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          this.selectedRowKeys = selectedRowKeys;
+          this.selectedRows = selectedRows;
+        },
+        getCheckboxProps: record => ({
+          props: {
+            // Column configuration not to be checked
+            disabled: record.currentstatu === '02' || record.currentstatu == "09",
+          },
+        }),
+      };
+    },
     concentrationName: function () {
       if (this.process.sampletype == "01") {
         return this.$t("concentration") + "(ng/ul)";
@@ -850,7 +952,6 @@ export default {
     cellSortMethods: function () {
       return util.cellSortMethods();
     },
-
     seqPlants: function () {
       return util.seqPlants();
     },
@@ -862,6 +963,15 @@ export default {
     },
     sampleInits : function (){
       return util.sampleInits();
+    },
+    transformSamples : function (){
+      var arr = new Array();
+      for (var i=0;i<this.sampleInits.length;i++){
+        if (this.sampleInits[i].key != "02"){
+          arr.push(this.sampleInits[i]);
+        }
+      }
+      return arr;
     },
     canOperating: function () {
       if (this.process.taskstatu != "20") {
@@ -884,7 +994,7 @@ export default {
 
     uploadUrl : function (){
       return this.$axios.defaults.baseURL + '/file/import/makeUpload';
-    }
+    },
   },
   watch: {
     process: {

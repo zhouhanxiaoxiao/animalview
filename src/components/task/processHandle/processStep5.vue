@@ -1,5 +1,36 @@
 <template>
   <div>
+    <a-page-header
+        style="border: 1px solid rgb(235, 237, 240)"
+        :title="$t('bioinformaticsAnalysis')"
+        :sub-title="subtask.name"
+        @back="backToTotal"
+    >
+      <template slot="extra">
+        <a-button @click="submitData('tmp')">
+          {{ $t("tmpSave") }}
+        </a-button>
+        <a-button type="primary" @click="submitData('real')">
+          {{ $t("submit") }}
+        </a-button>
+        <a-button icon="download" @click="downLoad">
+          {{ $t("outPut") }}
+        </a-button>
+        <a-upload
+            name="file"
+            accept=".xls,.xlsx"
+            :show-upload-list="false"
+            :headers="{token:this.$cookies.get('token'), subId : subId}"
+            @change="handleUploadChange"
+            :action="this.$axios.defaults.baseURL + '/file/import/analysisImport'"
+        >
+          <a-button>
+            <a-icon type="upload"/>
+            {{ $t("input") }}
+          </a-button>
+        </a-upload>
+      </template>
+    </a-page-header>
     <a-table :columns="columns"
              :data-source="data" bordered
              :loading="tableLoad"
@@ -10,66 +41,79 @@
           slot-scope="text, record, index"
       >
         <div :key="col">
-          <template v-if="record.editable">
-            <!-- 序号 -->
-            <a-input
-                v-if="col != 'index'"
-                style="margin: -5px 0"
-                :value="text"
-                @change="e => handleChange(e.target.value, record.key, col)"
-            />
-            <template v-else>
-              {{ showText(col, text, index) }}
-            </template>
-          </template>
+          <!--          <template v-if="record.editable">-->
+          <!-- 序号 -->
+          <!-- 审核人 -->
+          <a-select style="width: 100%" v-if="col == 'analyst'"
+                    v-model="record.analyst"
+                    @change="e => handleChange(e.target.value, record.key, col)"
+          >
+            <a-select-option v-for="item in allUsers" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
+          <a-input
+              v-else-if="col != 'index'"
+              style="margin: -5px 0"
+              v-model="record[col]"
+              :value="text"
+              :disabled="isDisabled(col)"
+              @change="e => handleChange(e.target.value, record.key, col)"
+          />
           <template v-else>
             {{ showText(col, text, index) }}
           </template>
+          <!--          </template>-->
+          <!--          <template v-else>-->
+          <!--            {{ showText(col, text, index) }}-->
+          <!--          </template>-->
         </div>
       </template>
-      <template slot="operation" slot-scope="text, record">
-        <div class="editable-row-operations">
-        <span v-if="record.editable">
-          <a @click="() => save(record.key)">{{ $t("save") }}</a>
-           &nbsp;
-          <a-popconfirm title="Sure to cancel?" @confirm="() => cancel(record.key)">
-            <a>{{ $t("cancel") }}</a>
-          </a-popconfirm>
-        </span>
-          <span v-else>
-          <a :disabled="editingKey !== ''" @click="() => edit(record.key)">{{ $t("edit") }}</a>
-          &nbsp;
-            <a-popconfirm
-                v-if="data.length>1"
-                title="Sure to delete?"
-                @confirm="() => onDelete(record.key)"
-            >
-          <a :disabled="editingKey !== ''">{{ $t("delete") }}</a>
-        </a-popconfirm>
-        </span>
-        </div>
-      </template>
+      <!--      <template slot="operation" slot-scope="text, record">-->
+      <!--        <div class="editable-row-operations">-->
+      <!--        <span v-if="record.editable">-->
+      <!--          <a @click="() => save(record.key)">{{ $t("save") }}</a>-->
+      <!--           &nbsp;-->
+      <!--          <a-popconfirm title="Sure to cancel?" @confirm="() => cancel(record.key)">-->
+      <!--            <a>{{ $t("cancel") }}</a>-->
+      <!--          </a-popconfirm>-->
+      <!--        </span>-->
+      <!--          <span v-else>-->
+      <!--          <a :disabled="editingKey !== ''" @click="() => edit(record.key)">{{ $t("edit") }}</a>-->
+      <!--          &nbsp;-->
+      <!--            <a-popconfirm-->
+      <!--                v-if="data.length>1"-->
+      <!--                title="Sure to delete?"-->
+      <!--                @confirm="() => onDelete(record.key)"-->
+      <!--            >-->
+      <!--          <a :disabled="editingKey !== ''">{{ $t("delete") }}</a>-->
+      <!--        </a-popconfirm>-->
+      <!--        </span>-->
+      <!--        </div>-->
+      <!--      </template>-->
     </a-table>
-    <div class="modal-footer" v-if="this.canOperating">
-      <button type="button" class="btn btn-warning"
-              :disabled="editingKey !== ''" @click="submitData('tmp')">{{ $t("tmpSave") }}
-      </button>
-      <button type="button" class="btn btn-primary"
-              :disabled="editingKey !== ''" @click="submitData('real')">{{ $t("submit") }}
-      </button>
-    </div>
+    <!--    <div class="modal-footer" v-if="this.canOperating">-->
+    <!--      <button type="button" class="btn btn-warning"-->
+    <!--              :disabled="editingKey !== ''" @click="submitData('tmp')">{{ $t("tmpSave") }}-->
+    <!--      </button>-->
+    <!--      <button type="button" class="btn btn-primary"-->
+    <!--              :disabled="editingKey !== ''" @click="submitData('real')">{{ $t("submit") }}-->
+    <!--      </button>-->
+    <!--    </div>-->
     <submitting :title="$t('submitting')"></submitting>
   </div>
 </template>
 
 <script>
 import Submitting from "@/components/publib/submitting";
+import util from "@/components/publib/util";
 
 export default {
   name: "processStep5",
   components: {Submitting},
   props: {
-    process: Object
+    process: Object,
+    subId: String
   },
   data: function () {
     this.cacheData = [];
@@ -80,17 +124,41 @@ export default {
       columnNames: [],
       scroll: {x: 1500},
       editingKey: '',
-      allUsers: []
+      allUsers: [],
+      subtask: {}
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
+    backToTotal : function (){
+      this.$router.push({name:"processInit",query:{taskId:this.process.taskid}});
+    },
+    handleUploadChange: function (ret) {
+      util.commonHandleUploadChange(ret);
+
+    },
+    downLoad: function () {
+      var postData = {
+        subId: this.subId
+      }
+      util.downLoad(postData, "/task/process/downloadAnalysis", this.subtask.name + "-生信分析.xls");
+    },
+    isDisabled: function (col) {
+      if (col == "sampleindex" || col == "samplename") {
+        return true;
+      }
+      return false;
+    },
     initPage: function () {
       this.initCols();
       var _this = this;
-      this.$axios.post("/task/process/analyseInit", {processId: this.process.id}).then(function (res) {
+      var postData = {
+        processId: this.process.id,
+        subId: this.subId
+      }
+      this.$axios.post("/task/process/analyseInit", postData).then(function (res) {
         if (res.data.code != 200) {
           _this.$message.error(_this.$t(res.data.code));
         } else {
@@ -104,6 +172,7 @@ export default {
           }
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;
+          _this.subtask = res.data.retMap.subtask;
         }
       }).catch(function (res) {
         console.log(res);
@@ -125,9 +194,9 @@ export default {
       /**样本编号*/
       clom.push({
         title: this.$t("sampleIndex"),
-        dataIndex: 'selfnumber',
+        dataIndex: 'sampleindex',
         width: '150px',
-        scopedSlots: {customRender: 'selfnumber'},
+        scopedSlots: {customRender: 'sampleindex'},
       });
       scorllLength += 150;
       /**样本名称*/
@@ -178,17 +247,17 @@ export default {
         scopedSlots: {customRender: 'remarks'},
       });
       scorllLength += 200;
-      if (this.canOperating) {
-        /**操作*/
-        clom.push({
-          title: this.$t("operation"),
-          dataIndex: 'operation',
-          width: '100px',
-          fixed: 'right',
-          scopedSlots: {customRender: 'operation'},
-        });
-        scorllLength += 100;
-      }
+      // if (this.canOperating) {
+      //   /**操作*/
+      //   clom.push({
+      //     title: this.$t("operation"),
+      //     dataIndex: 'operation',
+      //     width: '100px',
+      //     fixed: 'right',
+      //     scopedSlots: {customRender: 'operation'},
+      //   });
+      //   scorllLength += 100;
+      // }
 
       this.scroll.x = scorllLength;
       this.columns = clom;
@@ -262,6 +331,7 @@ export default {
       var _this = this;
       var post = {
         processId: this.process.id,
+        subId : this.subId,
         datas: JSON.stringify(this.data),
         type: type
       }
@@ -302,6 +372,9 @@ export default {
       },
       deep: true
     }
+  },
+  subId() {
+    this.initPage();
   }
 }
 </script>

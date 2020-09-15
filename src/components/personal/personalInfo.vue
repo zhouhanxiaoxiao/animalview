@@ -20,6 +20,7 @@
           </a-tooltip>
         </div>
       </a-form-item>
+
       <a-form-item :label="$t('userName')">
         <a-input id="userName" v-model="user.name" disabled/>
       </a-form-item>
@@ -33,6 +34,11 @@
       </a-form-item>
       <a-form-item :label="$t('userEmail')">
         <a-input id="userEmail" v-model="user.email" disabled/>
+      </a-form-item>
+      <a-form-item :label="$t('role')">
+        <a-tag v-for="role in roles" :key="role.id" color="#87d068">
+          {{role.rolename}}
+        </a-tag>
       </a-form-item>
     </a-form>
     <submitting :title="$t('submitting')"></submitting>
@@ -135,6 +141,9 @@ export default {
     }
   },
   computed : {
+    roles : function (){
+      return this.$store.getters.getUser.roles;
+    },
     userId : function (){
       return this.$store.getters.getUser.id;
     },

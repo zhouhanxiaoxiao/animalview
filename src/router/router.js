@@ -17,6 +17,7 @@ import processInit from "@/components/task/processHandle/processInit";
 import partnerDetail from "@/components/task/partnerHandle/partnerDetail";
 import editStock from "@/components/stockcenter/editStock";
 import personalMain from "@/components/personal/personalMain";
+import processDetailNew from "@/components/task/processHandle/processDetailNew";
 
 /*配置路由*/
 const routes=[
@@ -34,6 +35,7 @@ const routes=[
     {path: '/task/partnerDetail',name:"partnerDetail",component: partnerDetail,meta: {index: 0}},
     {path: '/task/processDetail',name:"processDetail",component: processDetail,meta: {index: 0}},
     {path: '/task/processInit',name:"processInit",component: processInit,meta: {index: 0}},
+    {path: '/task/processDetailNew',name:"processDetailNew",component: processDetailNew,meta: {index: 0}},
     {path: '/task/userAllow',name:"userAllow",component: userallow,meta: {index: 0}},
     {path: '/stock/currentStrain',component: CurrentStrain,meta: {index: 0}},
     {path: '/task/resourceOrder',name:"resource",component: resource,meta: {index: 0}},

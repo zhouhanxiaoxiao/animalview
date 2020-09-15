@@ -8,14 +8,27 @@
           <icon-font type="icon-xiezhu" v-if="partner.taskstatu == '00'"/>
           <icon-font type="icon-chenggong" v-if="partner.taskstatu == '01'"/>
           <icon-font type="icon-jujue" v-if="partner.taskstatu == '02'"/>
+          <icon-font type="icon-quxiao" v-if="partner.taskstatu == '03'"/>
+          <icon-font type="icon-yiguoqi" v-if="partner.taskstatu == '04'"/>
         </template>
-        <template #extra v-if="canOperate">
-          <a-button type="primary" @click="acceptPartner">
-            {{$t("accept")}}
-          </a-button>
-          <a-button type="danger" @click="showRefuse">
-            {{$t("refuse")}}
-          </a-button>
+        <template #extra >
+          <div v-if="canOperate">
+            <a-button type="primary" @click="acceptPartner">
+              {{$t("accept")}}
+            </a-button>
+            &nbsp;
+            <a-button type="danger" @click="showRefuse">
+              {{$t("refuse")}}
+            </a-button>
+          </div>
+          <div v-else-if="canCreateOperate">
+            <a-popconfirm placement="top" :ok-text="$t('yes')" :cancel-text="$t('no')" @confirm="cancelTask">
+              <template slot="title">
+                <p>{{ $t("confirmCancel") }}</p>
+              </template>
+              <a-button>{{$t("cancel")}}</a-button>
+            </a-popconfirm>
+          </div>
         </template>
       </a-result>
     </div>
@@ -80,6 +93,25 @@ name: "partnerDetail",
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
+    },
+    cancelTask : function (){
+      var postData = {
+        partnerId : this.partner.id
+      };
+      var _this = this;
+      this.$("#submitting").modal("show");
+      this.$axios.post("/task/partner/cancel",postData).then(function (res){
+        _this.$("#submitting").modal("hide");
+        if (res.data.code != "200"){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.initPage();
+        }
+      }).catch(function (res){
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      })
     },
     showRefuse : function (){
       this.$("#refuseAlert").modal("show");
@@ -163,6 +195,19 @@ name: "partnerDetail",
         return false;
       }
       if (!this.$store.getters.isCurrentUser(this.task.currentuser)
+      ){
+        return false;
+      }
+      return true;
+    },
+    canCreateOperate : function (){
+      if (this.partner.taskstatu == "02"
+          || this.partner.taskstatu == "03"
+          || this.partner.taskstatu == "04"
+      ){
+        return false;
+      }
+      if (!this.$store.getters.isCurrentUser(this.task.createuser)
       ){
         return false;
       }

@@ -1,9 +1,9 @@
 <template>
-  <div class="modal fade" id="subTaskInfo" tabindex="-1" role="dialog" aria-labelledby="subTaskInfolLabel" aria-hidden="true">
+  <div class="modal fade" id="subTaskInfo" tabindex="-1" role="dialog" ref="subTaskInfo">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="subTaskInfoLabel">Modal title</h5>
+          <h5 class="modal-title" id="subTaskInfoLabel">{{ $t("subTask") }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>

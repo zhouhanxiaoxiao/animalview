@@ -6,7 +6,7 @@
     >
       <template slot="extra">
         <a-button @click="subTaskInfo" :disabled="selectedRows.length == 0" type="primary">
-          {{$t("start")}}
+          {{$t("submit")}}
         </a-button>
         <a-button @click="submitData('tmp')" color="orange">
           {{$t("tmpSave")}}
@@ -28,7 +28,7 @@
             :headers="{token:this.$cookies.get('token'),processId : process.id}"
             @change="handUploadChange"
             @reject="handUnaccept"
-            :beforeUpload="handBeforeUpload"
+            :show-upload-list="false"
             :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
         >
           <a-tooltip placement="topLeft" :title="$t('overText')">
@@ -37,12 +37,19 @@
         </a-upload>
       </template>
       <a-row type="flex">
-        <a-tag color="pink" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+        <a-tag color="pink" @click="showSubTask('01')">
+          {{ $t("showAll") }}
+        </a-tag>
+        <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
           {{ sub.name }}
+        </a-tag>
+        <a-tag color="#108ee9" @click="showSubTask('00')">
+          {{ $t("reset") }}
         </a-tag>
       </a-row>
     </a-page-header>
-    <a-table :columns="columns" :data-source="data" bordered
+    <a-table :columns="columns"
+             :data-source="data" bordered
              :loading="tableLoad"
              :scroll="scroll"
              :row-selection="rowSelection"
@@ -201,8 +208,8 @@
         </div>
       </template>
     </a-table>
-    <sub-task-info @subTaskInfo="startProcess"></sub-task-info>
-    <submitting :title="$t('submitting')"></submitting>
+    <sub-task-info @subTaskInfo="startProcess" ref="subTask"></sub-task-info>
+    <submitting :title="$t('submitting')" ref="submitting"></submitting>
   </div>
 </template>
 
@@ -229,7 +236,9 @@ export default {
       selectedRows : [],
       scroll :{x:1500},
       editingKey: '',
-      subs : []
+      subs : [],
+      curFlag : "01",
+      subId : "00",
     };
   },
   beforeMount() {
@@ -304,12 +313,16 @@ export default {
       return false;
     },
     subTaskInfo : function (){
-      this.$("#subTaskInfo").modal("show");
+      this.$(this.$refs.subTask.$el).modal("show");
+      // this.$("#subTaskInfo").modal("show");
     },
     showSubTask : function (subId){
-      this.$router.push({name:"processDetail",query:{subId : subId}});
+      // this.$router.push({name:"processDetail",query:{subId : subId}});
+      this.subId = subId;
+      this.initPage();
     },
     startProcess : function (subProcessName,remarks){
+      this.$(this.$refs.subTask.$el).modal("hide");
       var postData = {
         datas : JSON.stringify(this.selectedRows),
         processId : this.process.id,
@@ -318,9 +331,11 @@ export default {
         remarks : remarks
       }
       var _this = this;
-      this.$("#submitting").modal("show");
+      this.$(this.$refs.submitting.$el).modal("show");
+      // this.$("#submitting").modal("show");
       this.$axios.post("/task/process/startSubTask",postData).then(function (res){
-        _this.$("#submitting").modal("hide");
+        // _this.$("#submitting").modal("hide");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
         }else {
@@ -329,7 +344,8 @@ export default {
         }
       }).catch(function (res){
         console.log(res);
-        _this.$("#submitting").modal("hide");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        // _this.$("#submitting").modal("hide");
         _this.$message.error(_this.$t("systemErr"));
       });
     },
@@ -347,7 +363,9 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         }else {
           _this.$message.success(_this.$t("commitSucc"));
-          window.location.reload();
+          _this.selectedRowKeys = [];
+          _this.selectedRows = [];
+          _this.initPage();
         }
       }).catch(function (res){
         console.log(res);
@@ -499,7 +517,9 @@ export default {
         return ;
       }
       var postData = {
-        processId : this.process.id
+        processId : this.process.id,
+        curFlag : this.curFlag,
+        subId : this.subId
       }
       var _this = this;
       this.tableLoad = true;
@@ -513,7 +533,7 @@ export default {
           if (res.data.retMap.sampleInputs == undefined
               ||res.data.retMap.sampleInputs == null
               ||res.data.retMap.sampleInputs.length == 0){
-            _this.handleAdd();
+            // _this.handleAdd();
           }else {
             _this.editingKey = "";
             for (var i=0;i<res.data.retMap.sampleInputs.length;i++){
@@ -522,9 +542,9 @@ export default {
               _this.data.push(d);
             }
             _this.cacheData = _this.data.map(item => ({ ...item }));
-            _this.subs = res.data.retMap.subs;
             console.log(_this.data);
           }
+          _this.subs = res.data.retMap.subs;
         }
       }).catch(function (res){
         console.log(res);
@@ -907,7 +927,10 @@ export default {
       return true;
     },
     rowSelection() {
+      const { selectedRowKeys,selectedRows } = this;
       return {
+        selectedRowKeys : selectedRowKeys,
+        selectedRows : selectedRows,
         onChange: (selectedRowKeys, selectedRows) => {
           console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
           this.selectedRowKeys = selectedRowKeys;
@@ -915,8 +938,8 @@ export default {
         },
         getCheckboxProps: record => ({
           props: {
-            disabled: record.currentstatu === '00', // Column configuration not to be checked
-            name: record.name,
+            // Column configuration not to be checked
+            disabled: record.currentstatu === '00' || record.currentstatu === '02' ,
           },
         }),
       };

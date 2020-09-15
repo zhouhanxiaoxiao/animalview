@@ -16,44 +16,44 @@
               :status="setpStatu(0)"
               :disabled="isDisabled(0)"
           >
-            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '20'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currentstatu == '20'"/>
           </a-step>
           <a-step
               :title="$t('libraryPreparation')"
               :status="setpStatu(1)"
               :disabled="isDisabled(1)"
           >
-            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '30'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currentstatu == '30'"/>
           </a-step>
           <a-step
               :title="$t('dismountData')"
               :status="setpStatu(2)"
               :disabled="isDisabled(2)"
           >
-            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '40'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currentstatu == '40'"/>
           </a-step>
           <a-step
               :title="$t('bioinformaticsAnalysis')"
               :status="setpStatu(3)"
               :disabled="isDisabled(3)"
           >
-            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '50'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currentstatu == '50'"/>
           </a-step>
           <a-step
               :title="$t('complete')"
               :status="setpStatu(4)"
               :disabled="isDisabled(4)"
           >
-            <a-icon slot="icon" type="loading" v-if="subTask.currenttatu == '60'"/>
+            <a-icon slot="icon" type="loading" v-if="subTask.currentstatu == '60'"/>
           </a-step>
         </a-steps>
         <div class="steps-content">
 <!--          <process-step1 :process="process" :task-id="taskId" v-if="current == 1"></process-step1>-->
 <!--          <process-step1-new :process="process" v-if="current == 0" ></process-step1-new>-->
           <process-step2 :process="process" :sub-id="subId" :task-id="subId" v-if="current == 0"></process-step2>
-          <process-step3 :process="process" v-if="current == 1"></process-step3>
-          <process-step4 :process="process" v-if="current == 2"></process-step4>
-          <process-step5 :process="process" v-if="current == 3"></process-step5>
+          <process-step3 :process="process" :sub-id="subId" v-if="current == 1"></process-step3>
+          <process-step4 :process="process" :sub-id="subId" v-if="current == 2"></process-step4>
+          <process-step5 :process="process" :sub-id="subId" v-if="current == 3"></process-step5>
           <process-step6 :process="process" v-if="current == 4"></process-step6>
         </div>
       </div>
@@ -106,22 +106,22 @@ export default {
         }else {
           _this.process = res.data.retMap.process;
           _this.subTask = res.data.retMap.subTask;
-          if (_this.subTask.taskstatu == "10"){
+          if (_this.subTask.currentstatu == "10"){
             _this.current = 0;
             _this.canClick = 0;
-          }else if (_this.subTask.taskstatu == "20"){
+          }else if (_this.subTask.currentstatu == "20"){
             _this.current = 0;
             _this.canClick = 0;
-          }else if (_this.subTask.taskstatu == "30"){
+          }else if (_this.subTask.currentstatu == "30"){
             _this.current = 1;
             _this.canClick = 1;
-          }else if (_this.subTask.taskstatu == "40"){
+          }else if (_this.subTask.currentstatu == "40"){
             _this.current = 2;
             _this.canClick = 2;
-          }else if (_this.subTask.taskstatu == "50"){
+          }else if (_this.subTask.currentstatu == "50"){
             _this.current = 3;
             _this.canClick = 3;
-          }else if (_this.subTask.taskstatu == "60"){
+          }else if (_this.subTask.currentstatu == "60"){
             _this.current = 4;
             _this.canClick = 4;
           }else {

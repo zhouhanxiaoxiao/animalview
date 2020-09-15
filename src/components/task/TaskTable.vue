@@ -203,7 +203,8 @@ export default {
         this.$router.push({name:"userAllow",query:{taskId:task.task.id}});
       }else if (task.task.tasktype == "03"){
         // this.$router.push({name:"processDetail",query:{taskId:task.task.id}});
-        this.$router.push({name:"processInit",query:{taskId:task.task.id}});
+        // this.$router.push({name:"processInit",query:{taskId:task.task.id}});
+        this.$router.push({name:"processDetailNew",query:{taskId:task.task.id}});
       }else if (task.task.tasktype == "04"){
         this.$router.push({name:"partnerDetail",query:{taskId:task.task.id}});
       }

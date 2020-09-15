@@ -1,7 +1,10 @@
 import i18n from "@/i18n";
 import $axios from "axios";
+import $ from "jquery";
+import {message as $message} from "ant-design-vue";
+
 var util = {
-    alicdnIcon : "//at.alicdn.com/t/font_2031063_0ccu40odtb3t.js",
+    alicdnIcon : "//at.alicdn.com/t/font_2031063_1mutltdz0v2.js",
     isNull: function (obj) {
         if (obj == null) {
             return true;
@@ -142,6 +145,21 @@ var util = {
         array.push({key:"02",val:i18n.t("tissue") + i18n.t("sample")});
         array.push({key:"03",val:i18n.t("cell") + i18n.t("sample")});
         return array;
+    },
+    commonUploadUrl : function (){
+        return $axios.defaults.baseURL + '/file/import/uploadFile';
+    },
+    commonHandleUploadChange : function (ret){
+        if (ret.file.status == "uploading"){
+            $("#submitting").modal("show");
+        }else {
+            $("#submitting").modal("hide");
+            if (ret.file.status == "error"){
+                $message.error(i18n.t("systemErr"));
+            }else if (ret.file.status == "done"){
+                window.location.reload();
+            }
+        }
     },
     downLoad : function (postData,url,fileName){
         $axios({
