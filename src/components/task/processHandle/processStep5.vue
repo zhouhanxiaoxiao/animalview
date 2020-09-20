@@ -3,14 +3,12 @@
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('bioinformaticsAnalysis')"
-        :sub-title="subtask.name"
-        @back="backToTotal"
     >
       <template slot="extra">
         <a-button @click="submitData('tmp')">
           {{ $t("tmpSave") }}
         </a-button>
-        <a-button type="primary" @click="submitData('real')">
+        <a-button type="primary" @click="subTaskInfo" :disabled="this.selectedRows.length == 0">
           {{ $t("submit") }}
         </a-button>
         <a-button icon="download" @click="downLoad">
@@ -20,7 +18,7 @@
             name="file"
             accept=".xls,.xlsx"
             :show-upload-list="false"
-            :headers="{token:this.$cookies.get('token'), subId : subId}"
+            :headers="{token:this.$cookies.get('token'), processId : this.process.id}"
             @change="handleUploadChange"
             :action="this.$axios.defaults.baseURL + '/file/import/analysisImport'"
         >
@@ -30,11 +28,56 @@
           </a-button>
         </a-upload>
       </template>
+      <a-row type="flex">
+        <a-tag color="pink" @click="showSubTask('01')">
+          {{ $t("showAll") }}
+        </a-tag>
+        <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+          {{ sub.name }}
+        </a-tag>
+        <a-tag color="#108ee9" @click="showSubTask('00')">
+          {{ $t("reset") }}
+        </a-tag>
+      </a-row>
     </a-page-header>
     <a-table :columns="columns"
              :data-source="data" bordered
              :loading="tableLoad"
-             :scroll="scroll" :pagination="{ pageSize: 20 }" size="middle">
+             :pagination="false"
+             :row-selection="rowSelection"
+             :scroll="scroll"
+             size="middle">
+      <div
+          slot="filterDropdown"
+          slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+          style="padding: 8px"
+      >
+        <a-input
+            v-ant-ref="c => (searchInput = c)"
+            :value="selectedKeys[0]"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+            @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          {{ $t("search") }}
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+          {{ $t("reset") }}
+        </a-button>
+      </div>
+      <a-icon
+          slot="filterIcon"
+          slot-scope="filtered"
+          type="search"
+          :style="{ color: filtered ? '#108ee9' : undefined }"
+      />
       <template
           v-for="col in this.columnNames"
           :slot="col"
@@ -46,6 +89,7 @@
           <!-- 审核人 -->
           <a-select style="width: 100%" v-if="col == 'analyst'"
                     v-model="record.analyst"
+                    :disabled="isDisabled(col,record)"
                     @change="e => handleChange(e.target.value, record.key, col)"
           >
             <a-select-option v-for="item in allUsers" :key="item.id" :value="item.id">
@@ -57,7 +101,7 @@
               style="margin: -5px 0"
               v-model="record[col]"
               :value="text"
-              :disabled="isDisabled(col)"
+              :disabled="isDisabled(col,record)"
               @change="e => handleChange(e.target.value, record.key, col)"
           />
           <template v-else>
@@ -100,20 +144,21 @@
     <!--              :disabled="editingKey !== ''" @click="submitData('real')">{{ $t("submit") }}-->
     <!--      </button>-->
     <!--    </div>-->
-    <submitting :title="$t('submitting')"></submitting>
+    <submitting :title="$t('submitting')" ref="submitting"></submitting>
+    <sub-task-info @subTaskInfo="startProcess" ref="subTask"></sub-task-info>
   </div>
 </template>
 
 <script>
 import Submitting from "@/components/publib/submitting";
 import util from "@/components/publib/util";
+import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
 
 export default {
   name: "processStep5",
-  components: {Submitting},
+  components: {SubTaskInfo, Submitting},
   props: {
     process: Object,
-    subId: String
   },
   data: function () {
     this.cacheData = [];
@@ -121,17 +166,46 @@ export default {
       tableLoad: false,
       data: [],
       columns: [],
+      selectedRowKeys : [],
+      selectedRows : [],
       columnNames: [],
       scroll: {x: 1500},
       editingKey: '',
       allUsers: [],
-      subtask: {}
+      subtask: {},
+      subProcessName : "",
+      remarks : "",
+      subId : "00",
+      subs : []
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
+    handleReset(clearFilters) {
+      clearFilters();
+      this.searchText = '';
+    },
+    handleSearch(selectedKeys, confirm, dataIndex) {
+      confirm();
+      this.searchText = selectedKeys[0];
+      this.searchedColumn = dataIndex;
+    },
+    showSubTask: function (subId) {
+      // this.$router.push({name:"processDetail",query:{subId : subId}});
+      this.subId = subId;
+      this.initPage();
+    },
+    startProcess : function (subProcessName,remarks){
+      this.$(this.$refs.subTask.$el).modal("hide");
+      this.subProcessName = subProcessName;
+      this.remarks = remarks;
+      this.submitData("real");
+    },
+    subTaskInfo : function (){
+      this.$(this.$refs.subTask.$el).modal("show");
+    },
     backToTotal : function (){
       this.$router.push({name:"processInit",query:{taskId:this.process.taskid}});
     },
@@ -141,12 +215,15 @@ export default {
     },
     downLoad: function () {
       var postData = {
-        subId: this.subId
+        processId: this.process.id
       }
-      util.downLoad(postData, "/task/process/downloadAnalysis", this.subtask.name + "-生信分析.xls");
+      util.downLoad(postData, "/task/process/downloadAnalysis", "生信分析.xls");
     },
-    isDisabled: function (col) {
+    isDisabled: function (col,record) {
       if (col == "sampleindex" || col == "samplename") {
+        return true;
+      }
+      if (record.currentstatu == "02"){
         return true;
       }
       return false;
@@ -159,6 +236,7 @@ export default {
         subId: this.subId
       }
       this.$axios.post("/task/process/analyseInit", postData).then(function (res) {
+        _this.data = new Array();
         if (res.data.code != 200) {
           _this.$message.error(_this.$t(res.data.code));
         } else {
@@ -172,7 +250,8 @@ export default {
           }
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;
-          _this.subtask = res.data.retMap.subtask;
+          // _this.subtask = res.data.retMap.subtask;
+          _this.subs = res.data.retMap.subs
         }
       }).catch(function (res) {
         console.log(res);
@@ -196,7 +275,27 @@ export default {
         title: this.$t("sampleIndex"),
         dataIndex: 'sampleindex',
         width: '150px',
-        scopedSlots: {customRender: 'sampleindex'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'sampleindex'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.sampleindex)){
+            return false;
+          }
+          return record.sampleindex
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**样本名称*/
@@ -204,7 +303,27 @@ export default {
         title: this.$t("sampleName"),
         dataIndex: 'samplename',
         width: '150px',
-        scopedSlots: {customRender: 'samplename'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'samplename'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.samplename)){
+            return false;
+          }
+          return record.samplename
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**结果主路径*/
@@ -212,7 +331,27 @@ export default {
         title: this.$t("resultpath"),
         dataIndex: 'resultpath',
         width: '300px',
-        scopedSlots: {customRender: 'resultpath'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'resultpath'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.resultpath)){
+            return false;
+          }
+          return record.resultpath
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 300;
       /**报告地址*/
@@ -220,17 +359,57 @@ export default {
         title: this.$t("reportpath"),
         dataIndex: 'reportpath',
         width: '300px',
-        scopedSlots: {customRender: 'reportpath'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'reportpath'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.reportpath)){
+            return false;
+          }
+          return record.reportpath
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 300;
       /**分析流程/参数*/
       clom.push({
         title: this.$t("args"),
         dataIndex: 'args',
-        width: '200px',
-        scopedSlots: {customRender: 'args'},
+        width: '300px',
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'args'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.args)){
+            return false;
+          }
+          return record.args
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
-      scorllLength += 200;
+      scorllLength += 300;
       /**分析人*/
       clom.push({
         title: this.$t("analyst"),
@@ -244,7 +423,27 @@ export default {
         title: this.$t("remarks"),
         dataIndex: 'remarks',
         width: '200px',
-        scopedSlots: {customRender: 'remarks'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'remarks'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.remarks)){
+            return false;
+          }
+          return record.remarks
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 200;
       // if (this.canOperating) {
@@ -333,19 +532,26 @@ export default {
         processId: this.process.id,
         subId : this.subId,
         datas: JSON.stringify(this.data),
-        type: type
+        type: type,
+        subProcessName : this.subProcessName,
+        remarks : this.remarks,
       }
-      _this.$("#submitting").modal("show");
+      if (type == "real"){
+        post.datas = JSON.stringify(this.selectedRows);
+      }
+      // _this.$("#submitting").modal("show");
+      this.$(this.$refs.submitting.$el).modal("show");
       this.$axios.post("/task/process/saveAnalyse", post).then(function (res) {
-        _this.$("#submitting").modal("hide");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != 200) {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.$message.success(_this.$t("commitSucc"));
-          window.location.reload();
+          _this.initPage();
         }
       }).catch(function (res) {
-        _this.$("#submitting").modal("hide");
+        // _this.$("#submitting").modal("hide");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
@@ -362,7 +568,25 @@ export default {
         return false;
       }
       return true;
-    }
+    },
+    rowSelection() {
+      const {selectedRowKeys, selectedRows} = this;
+      return {
+        selectedRowKeys: selectedRowKeys,
+        selectedRows: selectedRows,
+        onChange: (selectedRowKeys, selectedRows) => {
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          this.selectedRowKeys = selectedRowKeys;
+          this.selectedRows = selectedRows;
+        },
+        getCheckboxProps: record => ({
+          props: {
+            // Column configuration not to be checked
+            disabled: record.currentstatu === '02' || record.currentstatu == "09",
+          },
+        }),
+      };
+    },
   },
   watch: {
     process: {
@@ -373,9 +597,6 @@ export default {
       deep: true
     }
   },
-  subId() {
-    this.initPage();
-  }
 }
 </script>
 

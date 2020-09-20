@@ -5,11 +5,16 @@
         :title="$t('libraryPreparation')"
     >
       <template slot="extra">
+        <a-button type="primary" @click="submitData('complete')"
+                  :disabled="canComplete">
+          {{ $t("complete") }}
+        </a-button>
+        <a-button type="primary" @click="subTaskInfo"
+                  :disabled="cansubmit">
+          {{ $t("submit") }}
+        </a-button>
         <a-button @click="submitData('tmp')">
           {{ $t("tmpSave") }}
-        </a-button>
-        <a-button type="primary" @click="subTaskInfo" :disabled="selectedRowKeys.length == 0">
-          {{ $t("submit") }}
         </a-button>
         <a-button icon="download" @click="downLoad">
           {{ $t("outPut") }}
@@ -18,9 +23,9 @@
             name="file"
             accept=".xls,.xlsx"
             :show-upload-list="false"
-            :headers="{token:this.$cookies.get('token'), subId : subId}"
+            :headers="{token:this.$cookies.get('token'), processId : this.process.id}"
             @change="handleUploadChange"
-            :action="this.$axios.defaults.baseURL + '/file/import/makeInput'"
+            :action="this.$axios.defaults.baseURL + '/file/import/libImport'"
         >
           <a-button>
             <a-icon type="upload"/>
@@ -30,14 +35,17 @@
       </template>
       <a-row type="flex">
         <a-row type="flex">
-          <a-tag color="pink" @click="showSubTask('01')">
-            {{ $t("showAll") }}
+<!--          <a-tag color="pink" @click="showSubTask('01')">-->
+<!--            {{ $t("showAll") }}-->
+<!--          </a-tag>-->
+          <a-tag color="pink" @click="showSubTask('02')">
+            {{ $t("allcomplete") }}
           </a-tag>
           <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
             {{ sub.name }}
           </a-tag>
           <a-tag color="#108ee9" @click="showSubTask('00')">
-            {{ $t("reset") }}
+            {{ $t("init") }}
           </a-tag>
         </a-row>
       </a-row>
@@ -47,8 +55,39 @@
              :loading="tableLoad"
              :scroll="scroll"
              :row-selection="rowSelection"
-             :pagination="{ pageSize: 20 }"
+             :pagination="false"
              size="middle">
+      <div
+          slot="filterDropdown"
+          slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+          style="padding: 8px"
+      >
+        <a-input
+            v-ant-ref="c => (searchInput = c)"
+            :value="selectedKeys[0]"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+            @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          {{ $t("search") }}
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+          {{ $t("reset") }}
+        </a-button>
+      </div>
+      <a-icon
+          slot="filterIcon"
+          slot-scope="filtered"
+          type="search"
+          :style="{ color: filtered ? '#108ee9' : undefined }"
+      />
       <template
           v-for="col in this.columnNames"
           :slot="col"
@@ -59,14 +98,14 @@
           <!-- 建库时间 -->
           <a-date-picker v-if="col == 'createdbtime'"
                          format="YYYY-MM-DD"
-                         :disabled="isStop(record)"
+                         :disabled="isStop(record) || isDisabled(record)"
                          @change="e => handleChange(e.target.value, record.key, col)"
                          v-model="record.createdbtime"/>
           <!-- 浓度(ng/ul)/（细胞个数/μl) -->
           <a-input-number
               v-else-if="col == 'concentration'"
               style="margin: -5px 0"
-              :disabled="isStop(record)"
+              :disabled="isStop(record)|| isDisabled(record)"
               v-model="record.concentration"
               :min="0"
               @change="e => handleChange(e.target.value, record.key, col)"
@@ -74,7 +113,7 @@
           <!-- 核酸/细胞总量（ug/细胞个数） -->
           <a-input-number
               v-else-if="col == 'totalnumber'"
-              :disabled="isStop(record)"
+              :disabled="isStop(record)|| isDisabled(record)"
               style="margin: -5px 0"
               v-model="record.totalnumber"
               :min="0"
@@ -83,7 +122,7 @@
           <!-- 样本使用量(ug)/细胞使用量（细胞个数） -->
           <a-input-number
               v-else-if="col == 'usenumber'"
-              :disabled="isStop(record)"
+              :disabled="isStop(record)|| isDisabled(record)"
               style="margin: -5px 0"
               v-model="record.usenumber"
               :min="0"
@@ -92,7 +131,7 @@
           <!-- 片段大小（bp） -->
           <a-input-number
               v-else-if="col == 'partsize'"
-              :disabled="isStop(record)"
+              :disabled="isStop(record)|| isDisabled(record)"
               style="margin: -5px 0"
               v-model="record.partsize"
               :min="0"
@@ -101,7 +140,7 @@
           <!-- 常规PCR循环数 -->
           <a-input-number
               v-else-if="col == 'cyclenumber'"
-              :disabled="isStop(record)"
+              :disabled="isStop(record)|| isDisabled(record)"
               style="margin: -5px 0"
               v-model="record.cyclenumber"
               :min="0"
@@ -110,7 +149,7 @@
           <!-- 上机数据量 -->
           <a-input-number
               v-else-if="col == 'uploadsize'"
-              :disabled="isStop(record)"
+              :disabled="isStop(record) || isDisabled(record)"
               style="margin: -5px 0"
               v-model="record.uploadsize"
               :min="0"
@@ -119,7 +158,7 @@
           <!-- 文库体积（ul） -->
           <a-input-number
               v-else-if="col == 'libsize'"
-              :disabled="isStop(record)"
+              :disabled="isStop(record)|| isDisabled(record)"
               style="margin: -5px 0"
               v-model="record.libsize"
               :min="0"
@@ -127,7 +166,7 @@
           />
           <!-- 建库人 -->
           <a-select style="width: 100%" v-else-if="col == 'createdbuser'"
-                    :disabled="isStop(record)"
+                    :disabled="isStop(record)|| isDisabled(record)"
                     v-model="record.createdbuser"
                     @change="e => handleChange(e.target.value, record.key, col)"
           >
@@ -137,7 +176,7 @@
           </a-select>
           <!-- 审核人 -->
           <a-select style="width: 100%" v-else-if="col == 'reviewer'"
-                    :disabled="isStop(record)"
+                    :disabled="isStop(record)|| isDisabled(record)"
                     v-model="record.reviewer"
                     @change="e => handleChange(e.target.value, record.key, col)"
           >
@@ -151,7 +190,7 @@
 
                 name="file"
                 :multiple="true"
-                :disabled="isStop(record)"
+                :disabled="isStop(record)|| isDisabled(record)"
                 :headers="uploadHeader(record)"
                 :action="uploadUrl"
                 :showUploadList="false"
@@ -165,7 +204,7 @@
           </div>
           <!-- 建库类型 -->
           <a-select style="width: 100%" v-else-if="col == 'databasetype'"
-                    :disabled="isStop(record)"
+                    :disabled="isStop(record)|| isDisabled(record)"
                     v-model="record.databasetype"
                     @change="e => handleChange(e.target.value, record.key, col)"
           >
@@ -178,7 +217,7 @@
               v-else-if="col != 'index'"
               style="margin: -5px 0"
               :value="text"
-              :disabled="isStop(record)"
+              :disabled="isStop(record) || isDisabled(record)"
               v-model="record[col]"
               @change="e => handleChange(e.target.value, record.key, col)"
           />
@@ -194,7 +233,7 @@
       <template slot="operation" slot-scope="text, record">
         <div class="editable-row-operations">
           <a @click="() => showReason(record.id)" v-if="isStop(record)">{{ $t("showReason") }}</a>
-          <a @click="() => showStopAlert(record.id)" v-if="!isStop(record)">{{ $t("stop") }}</a>
+          <a @click="() => showStopAlert(record.id)" v-if="!isStop(record) && !isDisabled(record)">{{ $t("stop") }}</a>
           &nbsp;<a @click="() => showFileList(record.id)">{{ "查看附件" }}</a>
           <!--        <span v-if="record.editable">-->
           <!--          <a @click="() => save(record.key)">{{$t("save")}}</a>-->
@@ -271,6 +310,21 @@ export default {
     this.initPage();
   },
   methods: {
+    isDisabled : function (record){
+      if (record.currentstatu == "02"){
+        return true;
+      }
+      return false;
+    },
+    handleReset(clearFilters) {
+      clearFilters();
+      this.searchText = '';
+    },
+    handleSearch(selectedKeys, confirm, dataIndex) {
+      confirm();
+      this.searchText = selectedKeys[0];
+      this.searchedColumn = dataIndex;
+    },
     startProcess : function (subProcessName,remarks){
       this.$(this.$refs.subTask.$el).modal("hide");
       this.subProcessName = subProcessName;
@@ -299,9 +353,9 @@ export default {
     },
     downLoad: function () {
       var postData = {
-        subId: this.subId
+        processId: this.process.id
       }
-      util.downLoad(postData, "/task/process/downloadLibs", this.subtask.name + "-文库制备.xls");
+      util.downLoad(postData, "/task/process/downloadLibs", "文库制备.xls");
     },
     isStop: function (record) {
       if (record.currentstatu == "09") {
@@ -411,8 +465,8 @@ export default {
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
+          _this.data = new Array();
           if (res.data.retMap.libs.length != 0) {
-            _this.data = new Array();
             for (var ind in res.data.retMap.libs) {
               var lib = res.data.retMap.libs[ind];
               if (!util.isNull(lib.createdbtime)) {
@@ -452,7 +506,27 @@ export default {
         title: this.$t("createdbtime"),
         dataIndex: 'createdbtime',
         width: '150px',
-        scopedSlots: {customRender: 'createdbtime'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'createdbtime'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.createdbtime)){
+            return false;
+          }
+          return record.createdbtime
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**样本编号*/
@@ -460,7 +534,27 @@ export default {
         title: this.$t("sampleIndex"),
         dataIndex: 'selfnumber',
         width: '150px',
-        scopedSlots: {customRender: 'selfnumber'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'selfnumber'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.selfnumber)){
+            return false;
+          }
+          return record.selfnumber
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**中间产物编号*/
@@ -468,7 +562,27 @@ export default {
         title: this.$t("middleIndex"),
         dataIndex: 'middleindex',
         width: '150px',
-        scopedSlots: {customRender: 'middleindex'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'middleindex'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.middleindex)){
+            return false;
+          }
+          return record.middleindex
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**样本名称*/
@@ -476,7 +590,27 @@ export default {
         title: this.$t("sampleName"),
         dataIndex: 'samplename',
         width: '150px',
-        scopedSlots: {customRender: 'samplename'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'samplename'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.samplename)){
+            return false;
+          }
+          return record.samplename
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**物种*/
@@ -484,7 +618,27 @@ export default {
         title: this.$t("species"),
         dataIndex: 'species',
         width: '150px',
-        scopedSlots: {customRender: 'species'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'species'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.species)){
+            return false;
+          }
+          return record.species
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /** 浓度(ng/ul)/（细胞个数/μl) */
@@ -508,7 +662,27 @@ export default {
         title: this.$t("cellLife"),
         dataIndex: 'celllife',
         width: '100px',
-        scopedSlots: {customRender: 'celllife'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'celllife'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.celllife)){
+            return false;
+          }
+          return record.celllife
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 100;
       /** 样本使用量(ug)/细胞使用量（细胞个数） */
@@ -525,6 +699,7 @@ export default {
         dataIndex: 'partsize',
         width: '100px',
         scopedSlots: {customRender: 'partsize'},
+
       });
       scorllLength += 100;
       /** index */
@@ -564,7 +739,27 @@ export default {
         title: this.$t("databaseindex"),
         dataIndex: 'databaseindex',
         width: '100px',
-        scopedSlots: {customRender: 'databaseindex'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'databaseindex'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.databaseindex)){
+            return false;
+          }
+          return record.databaseindex
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 100;
       /** 建库人 */
@@ -851,6 +1046,28 @@ export default {
       }
       return true;
     },
+    cansubmit(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (this.selectedRows[item].currentstatu != '02'){
+          return true;
+        }
+      }
+      return false;
+    },
+    canComplete(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (this.selectedRows[item].currentstatu == '02'){
+          return true;
+        }
+      }
+      return false;
+    },
     rowSelection() {
       const {selectedRowKeys, selectedRows} = this;
       return {
@@ -864,7 +1081,7 @@ export default {
         getCheckboxProps: record => ({
           props: {
             // Column configuration not to be checked
-            disabled: record.currentstatu === '02' || record.currentstatu == "09",
+            disabled: record.currentstatu == "09",
           },
         }),
       };

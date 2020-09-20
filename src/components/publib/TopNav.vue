@@ -36,7 +36,8 @@
             <div class="dropdown-menu" aria-labelledby="personal">
               <router-link to="/stock/currentStrain"><a class="dropdown-item">{{ $t("current_strain") }}</a>
               </router-link>
-              <router-link to="/personal/animalStock"><a class="dropdown-item">{{ $t("current_stock") }}</a>
+<!--              <router-link to="/personal/animalStock"><a class="dropdown-item">{{ $t("current_stock") }}</a>-->
+              <router-link to="/stock/currentStock"><a class="dropdown-item">{{ $t("current_stock") }}</a>
               </router-link>
             </div>
           </li>

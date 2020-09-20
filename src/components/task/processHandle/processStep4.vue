@@ -3,14 +3,18 @@
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('dismountData')"
-        @back="backToTotal"
     >
       <template slot="extra">
+        <a-button type="primary" @click="submitData('complete')"
+                  :disabled="canComplete">
+          {{ $t("complete") }}
+        </a-button>
+        <a-button type="primary" @click="SubTaskInfo"
+                  :disabled="cansubmit">
+          {{ $t("submit") }}
+        </a-button>
         <a-button @click="submitData('tmp')">
           {{ $t("tmpSave") }}
-        </a-button>
-        <a-button type="primary" @click="SubTaskInfo" :disabled="this.selectedRows.length == 0">
-          {{ $t("submit") }}
         </a-button>
         <a-button icon="download" @click="downLoad">
           {{ $t("outPut") }}
@@ -19,7 +23,7 @@
             name="file"
             accept=".xls,.xlsx"
             :show-upload-list="false"
-            :headers="{token:this.$cookies.get('token'), subId : subId}"
+            :headers="{token:this.$cookies.get('token'), processId : this.process.id}"
             @change="handleUploadChange"
             :action="this.$axios.defaults.baseURL + '/file/import/dismountImport'"
         >
@@ -30,14 +34,17 @@
         </a-upload>
       </template>
       <a-row type="flex">
-        <a-tag color="pink" @click="showSubTask('01')">
-          {{ $t("showAll") }}
+<!--        <a-tag color="pink" @click="showSubTask('01')">-->
+<!--          {{ $t("showAll") }}-->
+<!--        </a-tag>-->
+        <a-tag color="pink" @click="showSubTask('02')">
+          {{ $t("allcomplete") }}
         </a-tag>
         <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
           {{ sub.name }}
         </a-tag>
         <a-tag color="#108ee9" @click="showSubTask('00')">
-          {{ $t("reset") }}
+          {{ $t("init") }}
         </a-tag>
       </a-row>
     </a-page-header>
@@ -46,8 +53,39 @@
              :loading="tableLoad"
              :row-selection="rowSelection"
              :scroll="scroll"
-             :pagination="{ pageSize: 20 }"
+             :pagination="false"
              size="middle">
+      <div
+          slot="filterDropdown"
+          slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+          style="padding: 8px"
+      >
+        <a-input
+            v-ant-ref="c => (searchInput = c)"
+            :value="selectedKeys[0]"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+            @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          {{ $t("search") }}
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+          {{ $t("reset") }}
+        </a-button>
+      </div>
+      <a-icon
+          slot="filterIcon"
+          slot-scope="filtered"
+          type="search"
+          :style="{ color: filtered ? '#108ee9' : undefined }"
+      />
       <template
           v-for="col in this.columnNames"
           :slot="col"
@@ -57,6 +95,7 @@
           <!-- 测序平台 -->
           <a-select style="width: 100%" v-if="col == 'sequencingplatform'"
                     v-model="record.sequencingplatform"
+                    :disabled="isDisabled(col,record)"
                     @change="e => handleChange(e.target.value, record.key, col)"
           >
             <a-select-option v-for="item in seqPlants" :key="item.key" :value="item.key">
@@ -69,7 +108,7 @@
               v-else-if="col != 'index'"
               style="margin: -5px 0"
               v-model="record[col]"
-              :disabled="isDisabled(col)"
+              :disabled="isDisabled(col,record)"
               :value="text"
               @change="e => handleChange(e.target.value, record.key, col)"
           />
@@ -145,13 +184,22 @@ export default {
       showAll : false,
       subProcessName : "",
       remarks : "",
-      subId : ""
+      subId : "00"
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
+    handleReset(clearFilters) {
+      clearFilters();
+      this.searchText = '';
+    },
+    handleSearch(selectedKeys, confirm, dataIndex) {
+      confirm();
+      this.searchText = selectedKeys[0];
+      this.searchedColumn = dataIndex;
+    },
     showSubTask: function (subId) {
       // this.$router.push({name:"processDetail",query:{subId : subId}});
       this.subId = subId;
@@ -175,24 +223,27 @@ export default {
     handleUploadChange: function (ret) {
       util.commonHandleUploadChange(ret);
     },
-    isDisabled: function (col) {
+    isDisabled: function (col,record) {
       if (col == "sampleindex" || col == "samplename") {
+        return true;
+      }
+      if (record.currentstatu == "02"){
         return true;
       }
       return false;
     },
     downLoad: function () {
       var postData = {
-        subId: this.subId
+        processId: this.process.id
       }
-      util.downLoad(postData, "/task/process/downloadDismount", this.subtask.name + "-测序分析.xls");
+      util.downLoad(postData, "/task/process/downloadDismount", "测序分析.xls");
     },
     initPage: function () {
       this.initCols();
       var _this = this;
       var postData = {
         processId: this.process.id,
-        showAll : this.showAll
+        subId : this.subId
       }
       this.tableLoad = true;
       this.$axios.post("/task/process/dismountInit", postData).then(function (res) {
@@ -200,8 +251,8 @@ export default {
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
+          _this.data = new Array();
           if (res.data.retMap.datas.length != 0) {
-            _this.data = new Array();
             for (var ind in res.data.retMap.datas) {
               var d = res.data.retMap.datas[ind];
               d.key = d.id;
@@ -210,7 +261,10 @@ export default {
           }
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;
-          _this.subtask = res.data.retMap.subtask;
+          // _this.subtask = res.data.retMap.subtask;
+          _this.subs = res.data.retMap.subs;
+          _this.selectedRowKeys = [];
+          _this.selectedRows = [];
         }
       }).catch(function (res) {
         _this.tableLoad = false;
@@ -235,7 +289,27 @@ export default {
         title: this.$t("sampleIndex"),
         dataIndex: 'sampleindex',
         width: '150px',
-        scopedSlots: {customRender: 'sampleindex'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'sampleindex'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.sampleindex)){
+            return false;
+          }
+          return record.sampleindex
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**样本名称*/
@@ -243,7 +317,27 @@ export default {
         title: this.$t("sampleName"),
         dataIndex: 'samplename',
         width: '150px',
-        scopedSlots: {customRender: 'samplename'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'samplename'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.samplename)){
+            return false;
+          }
+          return record.samplename
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**数据账号*/
@@ -251,7 +345,27 @@ export default {
         title: this.$t("dateaccount"),
         dataIndex: 'dateaccount',
         width: '150px',
-        scopedSlots: {customRender: 'dateaccount'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'dateaccount'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.dateaccount)){
+            return false;
+          }
+          return record.dateaccount
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**数据密码*/
@@ -267,7 +381,27 @@ export default {
         title: this.$t("datepath"),
         dataIndex: 'datepath',
         width: '300px',
-        scopedSlots: {customRender: 'datepath'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'datepath'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.datepath)){
+            return false;
+          }
+          return record.datepath
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 300;
       /**测序平台*/
@@ -382,7 +516,7 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.$message.success(_this.$t("commitSucc"));
-          window.location.reload();
+          _this.initPage();
         }
       }).catch(function (res) {
         // _this.$("#submitting").modal('hide');
@@ -414,6 +548,28 @@ export default {
     seqPlants: function () {
       return util.seqPlants();
     },
+    cansubmit(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (this.selectedRows[item].currentstatu != '02'){
+          return true;
+        }
+      }
+      return false;
+    },
+    canComplete(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (this.selectedRows[item].currentstatu == '02'){
+          return true;
+        }
+      }
+      return false;
+    },
     rowSelection() {
       const {selectedRowKeys, selectedRows} = this;
       return {
@@ -427,7 +583,7 @@ export default {
         getCheckboxProps: record => ({
           props: {
             // Column configuration not to be checked
-            disabled: record.currentstatu === '02' || record.currentstatu == "09",
+            disabled: record.currentstatu == "09",
           },
         }),
       };

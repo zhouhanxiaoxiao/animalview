@@ -18,6 +18,8 @@ import partnerDetail from "@/components/task/partnerHandle/partnerDetail";
 import editStock from "@/components/stockcenter/editStock";
 import personalMain from "@/components/personal/personalMain";
 import processDetailNew from "@/components/task/processHandle/processDetailNew";
+import errorPage from "@/components/publib/errorPage";
+import currentStock from "@/components/stockcenter/currentStock";
 
 /*配置路由*/
 const routes=[
@@ -30,8 +32,10 @@ const routes=[
     {path: '/about',component: about,meta: {index: 0}},
     {path: '/task/process',component: createProcess,meta: {index: 0}},
     {path: '/stock/edit',name:"stockEdit",component: editStock,meta: {index: 0}},
+    {path: '/stock/currentStock',name:"currentStock",component: currentStock,meta: {index: 0}},
     {path: '/personal/main',name:"personalMain",component: personalMain,meta: {index: 0}},
     {path: '/task/askDetail',name:"askDetail",component: askDetail,meta: {index: 0}},
+    {path: '/error',name:"error",component: errorPage,meta: {index: 0}},
     {path: '/task/partnerDetail',name:"partnerDetail",component: partnerDetail,meta: {index: 0}},
     {path: '/task/processDetail',name:"processDetail",component: processDetail,meta: {index: 0}},
     {path: '/task/processInit',name:"processInit",component: processInit,meta: {index: 0}},

@@ -36,8 +36,9 @@ Vue.prototype.$cookies = VueCookies;
 /*
 * axios 全局设置
 * */
-axios.defaults.baseURL = 'http://localhost:8081/';
-// axios.defaults.baseURL = 'http://119.90.33.35:3566/';
+axios.defaults.baseURL = 'http://localhost:8081/'; //本机测试
+// axios.defaults.baseURL = 'http://119.90.33.35:3566/'; //果蝇管理系统
+// axios.defaults.baseURL = 'http://119.90.33.35:3568/'; // 流程管理系统
 axios.interceptors.request.use(config => {
   var token = VueCookies.get("token");
   if (token){
@@ -62,9 +63,15 @@ axios.interceptors.response.use(response =>{
           path : "/login",
           query : {redirect : router.currentRoute.fullPath}
         });
+        return Promise.reject("转到登录啦！");
+      default:
+        break;
     }
   }
-  return Promise.reject("转到登录啦！");
+  router.replace({
+    path : "/error",
+    query : {redirect : router.currentRoute.fullPath}
+  });
 });
 
 /*路由监听*/

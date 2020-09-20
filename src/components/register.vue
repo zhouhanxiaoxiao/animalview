@@ -13,7 +13,15 @@
 
       <InputwhitName ref="registerPwd2" :inp-data="registerPwd2Data" @updateData="updateRegister"></InputwhitName>
 
-      <div class="input-group mb-3" style="margin-top: 10px">
+      <div class="form-row ">
+        <a-select style="width: 95%" :placeholder='$t("selectGroup")' v-model="usergroup">
+          <a-select-option  v-for="group in groups" :key="group.id" :value="group.id">
+            {{ group.groupname }}
+          </a-select-option>
+        </a-select>
+      </div>
+
+      <div class="form-row input-group mb-3" style="margin-top: 20px">
         <input type="text" class="form-control" :placeholder="$t('verification')" aria-label="输入验证码"
                aria-describedby="get-verification-code" v-model="verificationCode">
         <div class="input-group-append">
@@ -84,10 +92,28 @@ export default {
       registerName: '',
       registerEmail: '',
       registerPwd: '',
-      registerPwd2: ''
+      registerPwd2: '',
+      usergroup : "",
+      groups : []
     }
   },
+  beforeMount() {
+    this.initPage();
+  },
   methods: {
+    initPage : function (){
+      var _this = this;
+      this.$axios.post("/register/getGroups").then(function (res){
+        if (res.data.code != "200") {
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.groups = res.data.retMap.groups;
+        }
+      }).catch(function (res){
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      })
+    },
     userLogin: function () {
       this.$router.push("/login");
     },
@@ -160,6 +186,10 @@ export default {
         this.codeShowClass = "invalid-feedback";
         this.codeStatu = this.$t("verificationStatuErr");
       }
+      if (this.usergroup == ""){
+        this.$message.error(this.$t("selectGroup"));
+        return ;
+      }
       var _this = this;
       this.$("#submitting").modal("show");
       this.$axios({
@@ -169,7 +199,8 @@ export default {
           "registerName": this.registerName,
           "registerEmail": this.registerEmail,
           "registerPwd": this.$md5(this.registerPwd),
-          "verificationCode": this.verificationCode
+          "verificationCode": this.verificationCode,
+          "usergroup" : this.usergroup
         }
       }).then(function (res) {
         _this.$("#submitting").modal("hide");

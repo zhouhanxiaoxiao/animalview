@@ -87,6 +87,7 @@
       </div>
       <div class="modal-footer" style="margin-top: 10px" >
         <button type="button" class="btn btn-primary" @click="handleState">{{$t("confirm")}}</button>
+        <button type="button" class="btn btn-danger" @click="deleteSotck">{{$t("delete")}}</button>
       </div>
     </div>
     <submitting :title="$t('submitting')"></submitting>
@@ -117,6 +118,37 @@ export default {
     this.initPage();
   },
   methods : {
+    deleteSotck : function (){
+      var _this = this;
+      this.$confirm({
+        title: this.$t("areyousureDelete"),
+        okText: this.$t("yes"),
+        okType: 'danger',
+        cancelText: this.$t("no"),
+        onOk() {
+          _this.deleteThisStock();
+        },
+      });
+    },
+    deleteThisStock : function (){
+      var psotData = {
+        stockId : this.stockId
+      };
+      var _this = this;
+      this.$("#submitting").modal("show");
+      this.$axios.post("/stock/edit/delete",psotData).then(function (res){
+        _this.$("#submitting").modal("hide");
+        if (res.data.code != "200"){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          _this.$router.push("/stock/currentStrain");
+        }
+      }).catch(function (res){
+        _this.$("#submitting").modal("hide");
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
     initPage : function (){
       if (util.isNull(this.stockId)){
         return ;

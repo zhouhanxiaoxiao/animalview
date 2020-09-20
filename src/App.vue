@@ -57,7 +57,7 @@ export default {
     background-color: white;
     text-align: center;
     width: 350px;
-    height: 500px;
+    min-height: 500px;
     padding: 20px 20px;
     border-radius: 2px;
     display: inline-block;

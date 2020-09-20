@@ -41,6 +41,7 @@ const zh={
     animal_stock_environment : "保存环境",
     save_success : "保存成功！",
     reset : "重置",
+    init : "初始化",
     submit : "提交",
     choose : "请选择",
     selectedAll : "全选",
@@ -189,6 +190,7 @@ const zh={
     reportpath : "报告地址",
     analyst : "分析人",
     complete : "完成",
+    allcomplete : "已完成",
     derivativeindex : "样本衍生编号",
     initSample:"初始样本",
     arrindex : "批次",
@@ -209,6 +211,10 @@ const zh={
     confirmCancel : "请确认是否取消?",
     showAll : "展示全部",
     subTask : "子任务",
+    search: "搜索",
+    selectGroup : "请选择实验室",
+    areyousureDelete : "您确定要删除吗？",
+
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",

@@ -5,7 +5,24 @@
         :title="$t('sampleInput')"
     >
       <template slot="extra">
-        <a-button @click="subTaskInfo" :disabled="selectedRows.length == 0" type="primary">
+        <a-popconfirm placement="topLeft"
+                      :ok-text="$t('yes')"
+                      :disabled="selectedRows.length == 0"
+                      :cancel-text="$t('no')"
+                      @confirm="deleteInputs">
+          <template slot="title">
+            <p>{{ $t("areyousureDelete") }}</p>
+          </template>
+          <a-button :disabled="canDelete" type="danger">
+            {{$t("delete")}}
+          </a-button>
+        </a-popconfirm>
+        <a-button @click="submitData('complete')"
+                  :disabled="canDelete" type="primary">
+          {{$t("complete")}}
+        </a-button>
+        <a-button @click="subTaskInfo"
+                  :disabled="cansubmit" type="primary">
           {{$t("submit")}}
         </a-button>
         <a-button @click="submitData('tmp')" color="orange">
@@ -37,22 +54,27 @@
         </a-upload>
       </template>
       <a-row type="flex">
-        <a-tag color="pink" @click="showSubTask('01')">
-          {{ $t("showAll") }}
+<!--        <a-tag color="pink" @click="showSubTask('01')">-->
+<!--          {{ $t("showAll") }}-->
+<!--        </a-tag>-->
+        <a-tag color="pink" @click="showSubTask('02')">
+          {{ $t("allcomplete") }}
         </a-tag>
         <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
           {{ sub.name }}
         </a-tag>
         <a-tag color="#108ee9" @click="showSubTask('00')">
-          {{ $t("reset") }}
+          {{ $t("init") }}
         </a-tag>
       </a-row>
     </a-page-header>
     <a-table :columns="columns"
-             :data-source="data" bordered
+             :data-source="data"
+             bordered
              :loading="tableLoad"
              :scroll="scroll"
              :row-selection="rowSelection"
+             :pagination="false"
              size="middle">
       <div
           slot="filterDropdown"
@@ -73,10 +95,10 @@
             style="width: 90px; margin-right: 8px"
             @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
         >
-          Search
+          {{ $t("search") }}
         </a-button>
         <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
-          Reset
+          {{ $t("reset") }}
         </a-button>
       </div>
       <a-icon
@@ -94,6 +116,7 @@
             <!-- 样本类型 -->
             <a-select  style="width: 100%" v-if="col == 'samplemsg'"
                        v-model="record.samplemsg"
+                       :disabled="isDisabled(record)"
             >
               <a-select-option v-for="item in sampletypes(record.initsample)" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -102,6 +125,7 @@
             <!-- 样本状态 -->
             <a-select  style="width: 100%" v-else-if="col == 'samplestatu'"
                        v-model="record.samplestatu"
+                       :disabled="isDisabled(record)"
             >
               <a-select-option v-for="item in sampleStatu(record.initsample)" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -110,7 +134,7 @@
             <!-- 细胞分选法 -->
             <a-select  style="width: 100%" v-else-if="col == 'cellsort'"
                        v-model="record.cellsort"
-                       :disabled="colIsDisabed(record.initsample,'cellsort')"
+                       :disabled="colIsDisabed(record.initsample,'cellsort') || isDisabled(record)"
             >
               <a-select-option v-for="item in cellSortMethods" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -120,6 +144,7 @@
             <!-- 建库类型 -->
             <a-select  style="width: 100%" v-else-if="col == 'databasetype'"
                        v-model="record.databasetype"
+                       :disabled="isDisabled(record)"
             >
               <a-select-option v-for="item in databaseTypes(record.initsample)" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -128,6 +153,7 @@
             <!-- initSample -->
             <a-select  style="width: 100%" v-else-if="col == 'initsample'"
                        v-model="record.initsample"
+                       :disabled="isDisabled(record)"
             >
               <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -136,6 +162,7 @@
             <!-- 测序平台 -->
             <a-select  style="width: 100%" v-else-if="col == 'sequencingplatform'"
                        v-model="record.sequencingplatform"
+                       :disabled="isDisabled(record)"
             >
               <a-select-option v-for="item in seqPlants" :key="item.key" :value="item.key">
                 {{item.val}}
@@ -146,41 +173,41 @@
                 style="margin: -5px 0"
                 v-model="record.samplevolume"
                 :min="0"
-                :disabled="colIsDisabed(record.initsample,'samplevolume')"
+                :disabled="colIsDisabed(record.initsample,'samplevolume') || isDisabled(record)"
             />
             <a-input-number
                 v-else-if="col == 'tissuenumber'"
                 style="margin: -5px 0"
                 v-model="record.tissuenumber"
                 :min="0"
-                :disabled="colIsDisabed(record.initsample,'tissuenumber')"
+                :disabled="colIsDisabed(record.initsample,'tissuenumber') || isDisabled(record)"
             />
             <a-input-number
                 v-else-if="col == 'bloodvolume'"
                 style="margin: -5px 0"
                 v-model="record.bloodvolume"
                 :min="0"
-                :disabled="colIsDisabed(record.initsample,'bloodvolume')"
+                :disabled="colIsDisabed(record.initsample,'bloodvolume') || isDisabled(record)"
             />
             <a-input-number
                 v-else-if="col == 'concentration'"
                 style="margin: -5px 0"
                 v-model="record.concentration"
                 :min="0"
-                :disabled="colIsDisabed(record.initsample,'concentration')"
+                :disabled="colIsDisabed(record.initsample,'concentration') || isDisabled(record)"
             />
             <a-input-number
                 v-else-if="col == 'totalnumber'"
                 style="margin: -5px 0"
                 v-model="record.totalnumber"
                 :min="0"
-                :disabled="colIsDisabed(record.initsample,'totalnumber')"
+                :disabled="colIsDisabed(record.initsample,'totalnumber') || isDisabled(record)"
             />
             <a-input
                 v-else-if="col != 'index'"
                 style="margin: -5px 0"
                 v-model="record[col]"
-                :disabled="colIsDisabed(record.initsample,col)"
+                :disabled="colIsDisabed(record.initsample,col) || isDisabled(record)"
             />
             <template v-else>
               {{ showText(col,text,index,record) }}
@@ -245,6 +272,33 @@ export default {
     this.initPage();
   },
   methods: {
+    deleteInputs : function (){
+      var _this = this;
+      _this.$(_this.$refs.submitting.$el).modal("show");
+      var postData = {
+        inputIds : this.selectedRowKeys
+      }
+      this.$axios.post("/task/process/deleteInput",postData).then(function (res){
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        if (res.data.code != "200"){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.initPage();
+        }
+      }).catch(function (res){
+        console.log(res);
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        // _this.$("#submitting").modal("hide");
+        _this.$message.error(_this.$t("systemErr"));
+      })
+    },
+    isDisabled : function (record){
+      if (record.currentstatu == "02"){
+        return true;
+      }
+      return false;
+    },
     downLoad : function (){
       var postData = {
         processId : this.process.id
@@ -264,7 +318,7 @@ export default {
         let a = document.createElement('a')
         a.style.display = 'none'
         a.href = url
-        a.setAttribute('download','excel.xls')
+        a.setAttribute('download','样品录入.xls')
         document.body.appendChild(a)
         a.click() //执行下载
         window.URL.revokeObjectURL(a.href)
@@ -545,6 +599,8 @@ export default {
             console.log(_this.data);
           }
           _this.subs = res.data.retMap.subs;
+          _this.selectedRows = [];
+          _this.selectedRowKeys = [];
         }
       }).catch(function (res){
         console.log(res);
@@ -688,7 +744,23 @@ export default {
         title: this.$t("tissue") + this.$t("animal_stock_resource"),
         dataIndex: 'tissue',
         width: '150px',
-        scopedSlots: { customRender: 'tissue' },
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'tissue'
+        },
+        onFilter: (value, record) =>
+            record.tissue
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
       });
       scorllLength += 150;
       /**样本类型*/
@@ -764,7 +836,27 @@ export default {
           title: this.$t("cellLife"),
           dataIndex: 'celllife',
           width: '100px',
-          scopedSlots: { customRender: 'celllife' },
+          scopedSlots: {
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'search',
+            customRender: 'celllife'
+          },
+          onFilter: (value, record) =>{
+            if (util.isNull(record.celllife)){
+              return false;
+            }
+            return record.celllife
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase());
+          },
+          onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+              setTimeout(() => {
+                this.searchInput.focus();
+              }, 0);
+            }
+          },
         });
         scorllLength += 100;
       // }
@@ -939,11 +1031,33 @@ export default {
         getCheckboxProps: record => ({
           props: {
             // Column configuration not to be checked
-            disabled: record.currentstatu === '00' || record.currentstatu === '02' ,
+            disabled: record.currentstatu == '00' ,
           },
         }),
       };
     },
+    cansubmit(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (this.selectedRows[item].currentstatu != '02'){
+          return true;
+        }
+      }
+      return false;
+    },
+    canDelete(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (this.selectedRows[item].currentstatu == '02'){
+          return true;
+        }
+      }
+      return false;
+    }
   },
   watch : {
     process:{
