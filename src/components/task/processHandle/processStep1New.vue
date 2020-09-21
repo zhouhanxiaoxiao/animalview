@@ -18,11 +18,11 @@
             {{$t("delete")}}
           </a-button>
         </a-popconfirm>
-        <a-button @click="submitData('complete')"
+        <a-button @click="subTaskInfo"
                   :disabled="canDelete" type="primary">
           {{$t("complete")}}
         </a-button>
-        <a-button @click="subTaskInfo"
+        <a-button @click="submitData('real')"
                   :disabled="cansubmit" type="primary">
           {{$t("submit")}}
         </a-button>
@@ -411,7 +411,7 @@ export default {
         datas : JSON.stringify(this.data),
         type : type
       }
-      if (type == "complete"){
+      if (type != "tmp"){
         postData.datas = JSON.stringify(_this.selectedRows)
       }
       this.$("#submitting").modal("show");

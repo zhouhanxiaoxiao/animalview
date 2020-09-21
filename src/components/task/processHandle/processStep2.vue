@@ -17,11 +17,11 @@
             {{$t("delete")}}
           </a-button>
         </a-popconfirm>
-        <a-button type="primary" @click="submitData('complete')"
+        <a-button type="primary" @click="subTaskInfo"
                   :disabled="canComplete">
           {{ $t("complete") }}
         </a-button>
-        <a-button type="primary" @click="subTaskInfo"
+        <a-button type="primary" @click="submitData('real')"
                   :disabled="cansubmit">
           {{ $t("submit") }}
         </a-button>
@@ -339,14 +339,15 @@ export default {
       };
       this.$(this.$refs.submitting.$el).modal("show");
       this.$axios.post("/task/process/deleteByIds",postData).then(function (res){
-        this.$(this.$refs.submitting.$el).modal("show");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.$message.success(_this.$t("commitSucc"));
           _this.initPage();
         }
-      }).then(function (res){
+      }).catch(function (res){
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
@@ -370,7 +371,7 @@ export default {
       this.$(this.$refs.thisSubTaskInfo.$el).modal("hide");
       this.subProcessName = subProcessName;
       this.remarks = remarks;
-      this.submitData("real");
+      this.submitData("complete");
     },
     subTaskInfo : function (){
       this.$(this.$refs.thisSubTaskInfo.$el).modal("show");
@@ -554,7 +555,7 @@ export default {
             for (var ind in res.data.retMap.makes) {
               var make = res.data.retMap.makes[ind];
               make.testdate = formatDate(new Date(make.testdate),"yyyy-MM-dd");
-              make.key = make.inputid;
+              make.key = make.id;
               _this.data.push(make);
             }
           }

@@ -5,11 +5,23 @@
         :title="$t('dismountData')"
     >
       <template slot="extra">
-        <a-button type="primary" @click="submitData('complete')"
+        <a-popconfirm placement="topLeft"
+                      :ok-text="$t('yes')"
+                      :disabled="selectedRows.length == 0"
+                      :cancel-text="$t('no')"
+                      @confirm="deleteByIds">
+          <template slot="title">
+            <p>{{ $t("areyousureDelete") }}</p>
+          </template>
+          <a-button :disabled="canComplete" type="danger">
+            {{$t("delete")}}
+          </a-button>
+        </a-popconfirm>
+        <a-button type="primary" @click="SubTaskInfo"
                   :disabled="canComplete">
           {{ $t("complete") }}
         </a-button>
-        <a-button type="primary" @click="SubTaskInfo"
+        <a-button type="primary" @click="submitData('real')"
                   :disabled="cansubmit">
           {{ $t("submit") }}
         </a-button>
@@ -191,6 +203,27 @@ export default {
     this.initPage();
   },
   methods: {
+    deleteByIds : function (){
+      var _this = this;
+      var postData = {
+        ids : this.selectedRowKeys,
+        type : "04"
+      };
+      this.$(this.$refs.submitting.$el).modal("show");
+      this.$axios.post("/task/process/deleteByIds",postData).then(function (res){
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        if (res.data.code != "200") {
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.initPage();
+        }
+      }).catch(function (res){
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
     handleReset(clearFilters) {
       clearFilters();
       this.searchText = '';
@@ -212,7 +245,7 @@ export default {
       this.$(this.$refs.subTask.$el).modal("hide");
       this.subProcessName = subProcessName;
       this.remarks = remarks;
-      this.submitData("real");
+      this.submitData("complete");
     },
     showAllChange : function (){
       this.initPage();
