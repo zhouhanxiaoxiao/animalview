@@ -502,7 +502,7 @@ export default {
         subProcessName : this.subProcessName,
         remarks : this.remarks,
       }
-      if (type === "real"){
+      if (type != "tmp"){
         postData.datas = JSON.stringify(this.selectedRows)
       }
       var _this = this;

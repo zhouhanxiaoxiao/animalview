@@ -3,6 +3,7 @@
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('sampleInput')"
+        :sub-title="process.projectname"
     >
       <template slot="extra">
         <a-popconfirm placement="topLeft"
@@ -409,6 +410,9 @@ export default {
         processId : this.process.id,
         datas : JSON.stringify(this.data),
         type : type
+      }
+      if (type == "complete"){
+        postData.datas = JSON.stringify(_this.selectedRows)
       }
       this.$("#submitting").modal("show");
       this.$axios.post("/task/process/commitDatas",postData).then(function (res){

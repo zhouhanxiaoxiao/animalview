@@ -5,6 +5,18 @@
         :title="$t('samplePreparation')"
     >
       <template slot="extra">
+        <a-popconfirm placement="topLeft"
+                      :ok-text="$t('yes')"
+                      :disabled="selectedRows.length == 0"
+                      :cancel-text="$t('no')"
+                      @confirm="deleteByIds">
+          <template slot="title">
+            <p>{{ $t("areyousureDelete") }}</p>
+          </template>
+          <a-button :disabled="canComplete" type="danger">
+            {{$t("delete")}}
+          </a-button>
+        </a-popconfirm>
         <a-button type="primary" @click="submitData('complete')"
                   :disabled="canComplete">
           {{ $t("complete") }}
@@ -319,6 +331,26 @@ export default {
     this.initPage();
   },
   methods: {
+    deleteByIds : function (){
+      var _this = this;
+      var postData = {
+        ids : this.selectedRowKeys,
+        type : "02"
+      };
+      this.$(this.$refs.submitting.$el).modal("show");
+      this.$axios.post("/task/process/deleteByIds",postData).then(function (res){
+        this.$(this.$refs.submitting.$el).modal("show");
+        if (res.data.code != "200") {
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.initPage();
+        }
+      }).then(function (res){
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
     isDisabled : function (record){
       if (record.currentstatu == "02"){
         return true;
@@ -472,7 +504,7 @@ export default {
         subProcessName : this.subProcessName,
         remarks : this.remarks
       }
-      if (flag == "real"){
+      if (flag != "tmp"){
         postData.data = JSON.stringify(this.selectedRows);
       }
       var _this = this;

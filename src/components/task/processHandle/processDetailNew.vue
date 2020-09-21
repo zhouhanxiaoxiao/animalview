@@ -18,6 +18,9 @@
         <a-tab-pane key="5" :tab="$t('bioinformaticsAnalysis')">
           <process-step5 :process="process"></process-step5>
         </a-tab-pane>
+<!--        <a-tag color="purple" slot="tabBarExtraContent">-->
+<!--          {{process.projectname}}-->
+<!--        </a-tag>-->
       </a-tabs>
     </div>
   </div>

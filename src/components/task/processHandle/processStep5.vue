@@ -536,7 +536,7 @@ export default {
         subProcessName : this.subProcessName,
         remarks : this.remarks,
       }
-      if (type == "real"){
+      if (type != "tmp"){
         post.datas = JSON.stringify(this.selectedRows);
       }
       // _this.$("#submitting").modal("show");

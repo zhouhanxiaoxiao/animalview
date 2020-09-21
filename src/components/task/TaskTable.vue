@@ -16,7 +16,10 @@
       <tbody class="task-body">
       <tr v-for="(task,index) in taskList" :key="task.id">
         <th scope="row">{{ index + 1 + (currentPage - 1) * pageSize }}</th>
-        <td>{{ taskType(task.task) }}</td>
+        <td>
+          {{ taskType(task.task) }}
+
+        </td>
         <td>
           <div>
             <a-progress :percent="taskPro(task)" size="small" :status="taskstatu(task.task)" />
@@ -24,7 +27,12 @@
         </td>
         <td>{{ task.creater.name }}</td>
         <td>{{ format(task.task.createtime) }}</td>
-        <td>{{ task.task.taskdesc }}</td>
+        <td>
+          <a-tag color="green" v-if="task.task.tasktype == '03'">
+            {{task.process.projectname}}
+          </a-tag>
+          {{ task.task.taskdesc }}
+        </td>
         <td>
           <button type="button" style="font-size: 12px" class="btn btn-primary btn-sm stock-action"
                   @click="showDetail(task)">{{ $t("detail") }}
@@ -103,7 +111,7 @@ export default {
       } else if (task.tasktype == "02") {
         ret = "使用申请";
       } else if (task.tasktype == "03"){
-        ret = "流程管理";
+        ret = "流程管理" + "";
       }else if (task.tasktype == "04"){
         ret = "协助申请";
       }
