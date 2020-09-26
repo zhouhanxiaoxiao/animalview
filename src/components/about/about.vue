@@ -5,8 +5,8 @@
       <a-comment>
         <a-avatar
             slot="avatar"
-            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-            alt="Han Solo"
+            :src="userHeadSrc"
+            :alt="userName"
         />
         <div slot="content">
           <a-form-item>
@@ -29,9 +29,14 @@
           <a-comment
               :author="item.user.name"
               :content="item.comments"
-              avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
               :datetime="longToStr(item.createtime)"
-          />
+          >
+            <a-avatar
+                slot="avatar"
+                :src="getUserHeadSrc(item.user.id)"
+                :alt="item.user.name"
+            />
+          </a-comment>
         </a-list-item>
       </a-list>
     </div>
@@ -103,6 +108,20 @@ export default {
     handleChange(e) {
       this.value = e.target.value;
     },
+    getUserHeadSrc(userId){
+      return this.$axios.defaults.baseURL + 'user/userHead/' + userId + '.png';
+    }
+  },
+  computed:{
+    userId : function (){
+      return this.$store.getters.getUser.id;
+    },
+    userHeadSrc : function (){
+      return this.$axios.defaults.baseURL + 'user/userHead/' + this.userId + '.png';
+    },
+    userName : function (){
+      return this.$store.getters.getUser.name
+    }
   }
 }
 </script>

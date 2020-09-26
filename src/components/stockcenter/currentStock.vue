@@ -1,8 +1,39 @@
 <template>
   <div>
     <top-nav></top-nav>
-    <div class="main-container">
-      <a-table :data-source="data" :columns="columns" >
+    <div class="main-container current-stock">
+      <a-page-header
+          style="border: 1px solid rgb(235, 237, 240)"
+          :title="$t('current_stock')"
+      >
+        <template slot="extra">
+          <a-button type="primary" @click="batchOrder" v-if="canOrder" :disabled="this.selectedRowKeys.length == 0">
+            {{ $t("batchEdit") }}
+          </a-button>
+          <a-button type="primary" @click="addNewStock" v-if="canEdit">
+            {{ $t("add") }}
+          </a-button>
+          <a-upload
+              name="file"
+              :multiple="false"
+              :action="this.$axios.defaults.baseURL + '/file/import/stockImport'"
+              :headers="{token:this.$cookies.get('token')}"
+              @change="handleUploadChange"
+              :show-upload-list="false"
+              v-if="canEdit"
+          >
+            <a-button>
+              <a-icon type="upload"/>
+              {{ $t("input") }}
+            </a-button>
+          </a-upload>
+        </template>
+      </a-page-header>
+      <a-table :data-source="data"
+               :row-selection="rowSelection"
+               :pagination="pagina"
+               :loading="tableLoad"
+               :columns="columns" >
         <div
             slot="filterDropdown"
             slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -10,7 +41,6 @@
         >
           <a-input
               v-ant-ref="c => (searchInput = c)"
-              :placeholder="`Search ${column.dataIndex}`"
               :value="selectedKeys[0]"
               style="width: 188px; margin-bottom: 8px; display: block;"
               @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
@@ -58,19 +88,24 @@
               </button>
             </div>
             <template v-else>
+              <a-tooltip placement="topLeft" :title="showText(text,col,record)">
               {{ showText(text,col,record) }}
+              </a-tooltip>
             </template>
           </div>
         </template>
         <template slot="customRender" slot-scope="text,column,record">
           <template>
-            {{ showText(text,column,record) }}
+            <a-tooltip placement="topLeft" :title="showText(text,column,record)">
+              {{ showText(text,column,record) }}
+            </a-tooltip>
           </template>
         </template>
       </a-table>
     </div>
     <AppointmentDialog @submitData="submitAllData" :stock-ids="orderIds"></AppointmentDialog>
     <submitting :title="$t('submitting')"></submitting>
+    <add-new-stock ref="addNewStock" @currentInit="initStockTable"></add-new-stock>
   </div>
 </template>
 
@@ -78,9 +113,12 @@
 import TopNav from "@/components/publib/TopNav";
 import AppointmentDialog from "@/components/stockcenter/AppointmentDialog";
 import Submitting from "@/components/publib/submitting";
+import AddNewStock from "@/components/stockcenter/addNewStock";
+import {formatDate} from "@/components/publib/date";
+import util from "@/components/publib/util";
 export default {
   name: "currentStock",
-  components: {Submitting, AppointmentDialog, TopNav},
+  components: {AddNewStock, Submitting, AppointmentDialog, TopNav},
   data: function () {
     return {
       data : [],
@@ -93,13 +131,29 @@ export default {
       selectedLine: [],
       currentPage: 0,
       pageSize: 10,
-      total: 0
+      total: 0,
+      selectedRowKeys : [],
+      selectedRows : [],
+      tableLoad : false
     }
   },
   beforeMount: function () {
     this.initStockTable();
   },
   methods : {
+    handleUploadChange: function (ret) {
+      util.commonHandleUploadChange(ret);
+    },
+    addNewStock : function (){
+      this.$(this.$refs.addNewStock.$el).modal("show");
+    },
+    batchOrder: function () {
+      this.orderIds = new Array();
+      for (var i = 0; i < this.selectedRowKeys.length; i++) {
+        this.orderIds.push(this.selectedRowKeys[i]);
+      }
+      this.$("#exampleModal").modal();
+    },
     editStock : function (stockId){
       this.$router.push({name:"stockEdit",query:{stockId:stockId}});
     },
@@ -145,8 +199,10 @@ export default {
         currentPage: this.currentPage,
         pageSize: this.pageSize
       }
+      this.tableLoad = true;
       this.$axios.post("/stock/currentStock", postData).then(function (res) {
         console.log(res);
+        _this.tableLoad = false;
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
@@ -161,6 +217,7 @@ export default {
           }
         }
       }).catch(function (res) {
+        _this.tableLoad = false;
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
@@ -174,6 +231,9 @@ export default {
           return "库存";
         }
       }
+      if(column == "createtime"){
+        return  formatDate(new Date(record.createtime),"yyyy-MM-dd");
+      }
       return text;
     },
     initColumns : function (){
@@ -181,6 +241,7 @@ export default {
       cols.push({
         title: "编号",
         dataIndex: 'animal.selfindex',
+        ellipsis: true,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -202,6 +263,7 @@ export default {
       cols.push({
         title: "stock ID",
         dataIndex: 'animal.stockId',
+        ellipsis: true,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -223,6 +285,7 @@ export default {
       cols.push({
         title: "genotype",
         dataIndex: 'animal.genotype',
+        ellipsis: true,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -273,6 +336,7 @@ export default {
       cols.push({
         title: "数量",
         dataIndex: 'contanernmuber',
+        ellipsis: true,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -291,17 +355,45 @@ export default {
           }
         },
       });
-
       cols.push({
         title: "用途",
         dataIndex: 'usagetype',
+        ellipsis: true,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
           customRender: 'usagetype',
         },
+        onFilter: (value, record) =>{
+          var usage = "库存";
+          if (record.usagetype == "keep"){
+            usage = "保种";
+          }
+          return usage
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
+      });
+
+      cols.push({
+        title: "保存环境",
+        dataIndex: 'env.displayname',
+        ellipsis: true,
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'env.displayname',
+        },
         onFilter: (value, record) =>
-            record.usagetype
+            record.env.displayname
                 .toString()
                 .toLowerCase()
                 .includes(value.toLowerCase()),
@@ -314,18 +406,21 @@ export default {
         },
       });
       cols.push({
-        title: "保存环境",
-        dataIndex: 'env.displayname',
+        title: "建管日期",
+        dataIndex: 'createtime',
+        ellipsis: true,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
-          customRender: 'env.displayname',
+          customRender: 'createtime',
         },
-        onFilter: (value, record) =>
-            record.env.displayname
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
+        onFilter: (value, record) =>{
+          var createT = formatDate(new Date(record.createtime),"yyyy-MM-dd");
+          return createT
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
         onFilterDropdownVisibleChange: visible => {
           if (visible) {
             setTimeout(() => {
@@ -366,10 +461,37 @@ export default {
       }
       return false;
     },
+    pagina(){
+      return{
+        showSizeChanger : true,
+        showQuickJumper : true,
+        pageSizeOptions:['10','20','50','100']
+      }
+    },
+    rowSelection() {
+      const { selectedRowKeys,selectedRows } = this;
+      return {
+        selectedRowKeys : selectedRowKeys,
+        selectedRows : selectedRows,
+        onChange: (selectedRowKeys, selectedRows) => {
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          this.selectedRowKeys = selectedRowKeys;
+          this.selectedRows = selectedRows;
+        },
+        getCheckboxProps: record => ({
+          props: {
+            // Column configuration not to be checked
+            disabled: record.currentstatu == "09",
+          },
+        }),
+      };
+    },
   }
 }
 </script>
 
 <style scoped>
-
+  .current-stock{
+    font-size: 12px !important;
+  }
 </style>

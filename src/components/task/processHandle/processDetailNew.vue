@@ -18,6 +18,23 @@
         <a-tab-pane key="5" :tab="$t('bioinformaticsAnalysis')">
           <process-step5 :process="process"></process-step5>
         </a-tab-pane>
+        <div slot="tabBarExtraContent">
+          <a-popconfirm placement="topLeft"
+                        :ok-text="$t('yes')"
+                        v-if="this.process.taskstatu != '70'"
+                        :cancel-text="$t('no')"
+                        @confirm="completeTask">
+            <template slot="title">
+              <p>{{ $t("areyousureCompleteProject") }}</p>
+            </template>
+            <a-button type="danger">
+              {{ $t("projectComplete") }}
+            </a-button>
+          </a-popconfirm>
+          <a-tag v-else color="#87d068">
+            {{ $t("allcomplete") }}
+          </a-tag>
+        </div>
 <!--        <a-tag color="purple" slot="tabBarExtraContent">-->
 <!--          {{process.projectname}}-->
 <!--        </a-tag>-->
@@ -47,6 +64,22 @@ export default {
     this.initPage();
   },
   methods : {
+    completeTask :function (){
+      var post = {
+        processId : this.process.id
+      }
+      var _this = this;
+      this.$axios.post("/task/process/completeProject",post).catch(function (res){
+        if (res.data.code != 200){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          _this.$message.success(_this.$t("save_success"));
+        }
+      }).catch(function (res){
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      })
+    },
     callback : function (key){
       console.log(key);
     },

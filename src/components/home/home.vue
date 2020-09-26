@@ -5,7 +5,7 @@
       <div class="summary-container">
         <number-and-name @click.native="myTask" num-name="待处理" :number="selfTaskNumber"></number-and-name>
         <number-and-name @click.native="myTask" num-name="流转中" :number="selfTaskNumber"></number-and-name>
-        <number-and-name @click.native="currentStrain" :num-name="$t('current_strain')" :number="allStrainNumber"></number-and-name>
+<!--        <number-and-name @click.native="currentStrain" :num-name="$t('current_strain')" :number="allStrainNumber"></number-and-name>-->
       </div>
       <task-table :page-location="'home'"></task-table>
     </div>

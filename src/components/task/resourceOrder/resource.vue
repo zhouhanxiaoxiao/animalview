@@ -96,11 +96,12 @@ export default {
       }
       return false;
     },
-    commitTimes : function (resourceId,times){
+    commitTimes : function (resourceId,times,remarks){
       console.log(resourceId,times);
       var postData = {
         resourceId : resourceId,
-        times : times
+        times : times,
+        remarks : remarks
       }
       var _this = this;
       _this.$("#submitting").modal("show");

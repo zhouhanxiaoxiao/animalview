@@ -3,12 +3,14 @@
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('dismountData')"
+        :sub-title="process.projectname"
     >
       <template slot="extra">
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
                       :disabled="selectedRows.length == 0"
                       :cancel-text="$t('no')"
+                      v-if="this.isEnd"
                       @confirm="deleteByIds">
           <template slot="title">
             <p>{{ $t("areyousureDelete") }}</p>
@@ -17,21 +19,26 @@
             {{$t("delete")}}
           </a-button>
         </a-popconfirm>
-        <a-button type="primary" @click="SubTaskInfo"
+        <a-button @click="subTaskInfo" v-if="this.isEnd"
+                  :disabled="canDivide" type="primary">
+          {{$t("divide")}}
+        </a-button>
+        <a-button type="primary" @click="submitData('complete')" v-if="this.isEnd"
                   :disabled="canComplete">
           {{ $t("complete") }}
         </a-button>
-        <a-button type="primary" @click="submitData('real')"
+        <a-button type="primary" @click="submitData('real')" v-if="this.isEnd"
                   :disabled="cansubmit">
           {{ $t("submit") }}
         </a-button>
-        <a-button @click="submitData('tmp')">
+        <a-button @click="submitData('tmp')" v-if="this.isEnd">
           {{ $t("tmpSave") }}
         </a-button>
-        <a-button icon="download" @click="downLoad">
+        <a-button icon="download" @click="downLoad" :disabled="this.selectedRowKeys.length == 0">
           {{ $t("outPut") }}
         </a-button>
         <a-upload
+            v-if="this.isEnd"
             name="file"
             accept=".xls,.xlsx"
             :show-upload-list="false"
@@ -238,14 +245,14 @@ export default {
       this.subId = subId;
       this.initPage();
     },
-    SubTaskInfo : function (){
+    subTaskInfo : function (){
       this.$(this.$refs.subTask.$el).modal("show");
     },
     startProcess : function (subProcessName,remarks){
       this.$(this.$refs.subTask.$el).modal("hide");
       this.subProcessName = subProcessName;
       this.remarks = remarks;
-      this.submitData("complete");
+      this.submitData("divide");
     },
     showAllChange : function (){
       this.initPage();
@@ -257,6 +264,9 @@ export default {
       util.commonHandleUploadChange(ret);
     },
     isDisabled: function (col,record) {
+      if (!this.isEnd){
+        return true;
+      }
       if (col == "sampleindex" || col == "samplename") {
         return true;
       }
@@ -267,7 +277,8 @@ export default {
     },
     downLoad: function () {
       var postData = {
-        processId: this.process.id
+        processId: this.process.id,
+        disIds : JSON.stringify(this.selectedRowKeys)
       }
       util.downLoad(postData, "/task/process/downloadDismount", "测序分析.xls");
     },
@@ -581,6 +592,18 @@ export default {
     seqPlants: function () {
       return util.seqPlants();
     },
+    canDivide(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (!util.isNull(this.selectedRows[item].subid)
+            || this.selectedRows[item].currentstatu == "02"){
+          return true;
+        }
+      }
+      return false;
+    },
     cansubmit(){
       if (this.selectedRowKeys.length == 0){
         return true;
@@ -600,6 +623,12 @@ export default {
         if (this.selectedRows[item].currentstatu == '02'){
           return true;
         }
+      }
+      return false;
+    },
+    isEnd : function (){
+      if (this.process.taskstatu != "70"){
+        return true;
       }
       return false;
     },

@@ -137,45 +137,48 @@ export default {
     }
   },
   watch: {
-    stockIds(newValue, oldValue) {
-      var boolean = true;
-      if (newValue.length == oldValue.length) {
-        for (var i = 0; i < newValue.length; i++) {
-          for (var j = 0; j < oldValue.length; j++) {
-            if (newValue[i] != oldValue[j]) {
-              boolean = false;
+    stockIds : {
+      handler(newValue, oldValue) {
+        var boolean = true;
+        if (newValue.length == oldValue.length) {
+          for (var i = 0; i < newValue.length; i++) {
+            for (var j = 0; j < oldValue.length; j++) {
+              if (newValue[i] != oldValue[j]) {
+                boolean = false;
+              }
             }
           }
-        }
-      } else {
-        boolean = false;
-      }
-      /*如果预约的果蝇相同，则不更新页面*/
-      if (boolean) {
-        return;
-      }
-      var postData = {
-        stockIds: newValue
-      }
-      var _this = this;
-      this.$axios.post("/orderTask/init", postData).then(function (res) {
-        if (res.data.code != '200') {
-          _this.$message.error(_this.$t(res.data.code));
         } else {
-          console.log(res);
-          _this.rows = res.data.retMap.stockTable;
-          _this.studyDirectors = res.data.retMap.researchers;
-          _this.allDrosophila = res.data.retMap.allDrosophila;
-          _this.supporters = res.data.retMap.supporters;
-          _this.allMerial = res.data.retMap.allMerial;
-          for (var item in _this.detailData) {
-            _this.$delete(_this.detailData, item);
-          }
+          boolean = false;
         }
-      }).catch(function (res) {
-        console.log(res);
-        _this.$message.error(_this.$t("systemErr"));
-      });
+        /*如果预约的果蝇相同，则不更新页面*/
+        if (boolean) {
+          return;
+        }
+        var postData = {
+          stockIds: newValue
+        }
+        var _this = this;
+        this.$axios.post("/orderTask/init", postData).then(function (res) {
+          if (res.data.code != '200') {
+            _this.$message.error(_this.$t(res.data.code));
+          } else {
+            console.log(res);
+            _this.rows = res.data.retMap.stockTable;
+            _this.studyDirectors = res.data.retMap.researchers;
+            _this.allDrosophila = res.data.retMap.allDrosophila;
+            _this.supporters = res.data.retMap.supporters;
+            _this.allMerial = res.data.retMap.allMerial;
+            for (var item in _this.detailData) {
+              _this.$delete(_this.detailData, item);
+            }
+          }
+        }).catch(function (res) {
+          console.log(res);
+          _this.$message.error(_this.$t("systemErr"));
+        });
+      },
+      deep : true
     }
   },
   computed: {
@@ -213,7 +216,9 @@ export default {
 .task-item-container {
   font-size: 14px;
 }
-
+.modal-body {
+  text-align: left;
+}
 .stock-item-detail {
   margin-top: 10px;
   width: 90%;

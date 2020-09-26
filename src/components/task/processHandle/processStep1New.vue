@@ -6,42 +6,54 @@
         :sub-title="process.projectname"
     >
       <template slot="extra">
+<!--        <a-button type="primary" @click="subTaskInfo"-->
+<!--                  :disabled="canDelete">-->
+<!--          {{ $t("batchUpdate") }}-->
+<!--        </a-button>-->
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
                       :disabled="selectedRows.length == 0"
                       :cancel-text="$t('no')"
+                      v-if="process.taskstatu != '70'"
                       @confirm="deleteInputs">
           <template slot="title">
             <p>{{ $t("areyousureDelete") }}</p>
           </template>
-          <a-button :disabled="canDelete" type="danger">
+          <a-button :disabled="canDelete" type="danger" v-if="process.taskstatu != '70'">
             {{$t("delete")}}
           </a-button>
         </a-popconfirm>
+
         <a-button @click="subTaskInfo"
-                  :disabled="canDelete" type="primary">
+                  :disabled="canDivide" type="primary" v-if="process.taskstatu != '70'">
+          {{$t("divide")}}
+        </a-button>
+
+        <a-button @click="submitData('complete')"
+                  :disabled="canDelete" type="primary" v-if="process.taskstatu != '70'">
           {{$t("complete")}}
         </a-button>
         <a-button @click="submitData('real')"
-                  :disabled="cansubmit" type="primary">
+                  :disabled="cansubmit" type="primary" v-if="process.taskstatu != '70'">
           {{$t("submit")}}
         </a-button>
-        <a-button @click="submitData('tmp')" color="orange">
+        <a-button @click="submitData('tmp')" color="orange" v-if="process.taskstatu != '70'">
           {{$t("tmpSave")}}
         </a-button>
 <!--        <a-button @click="submitData('real')">-->
 <!--          {{$t("submit")}}-->
 <!--        </a-button>-->
-        <a-button class="editable-add-btn"
+        <a-button class="editable-add-btn" v-if="process.taskstatu != '70'"
                   @click="handleAdd"
         >
           {{ $t("add") }}
         </a-button>
-        <a-button icon="download" @click="downLoad">
+        <a-button icon="download" @click="downLoad" :disabled="this.selectedRowKeys.length == 0">
           {{ $t("outPut") }}
         </a-button>
         <a-upload
             name="file"
+            v-if="process.taskstatu != '70'"
             accept=".xls,.xlsx"
             :headers="{token:this.$cookies.get('token'),processId : process.id}"
             @change="handUploadChange"
@@ -295,6 +307,9 @@ export default {
       })
     },
     isDisabled : function (record){
+      if (process.taskstatu != "70"){
+        return true;
+      }
       if (record.currentstatu == "02"){
         return true;
       }
@@ -302,7 +317,8 @@ export default {
     },
     downLoad : function (){
       var postData = {
-        processId : this.process.id
+        processId : this.process.id,
+        inputIds : JSON.stringify(this.selectedRowKeys)
       }
       var _this = this;
       this.$axios({
@@ -376,15 +392,17 @@ export default {
       this.subId = subId;
       this.initPage();
     },
+
     startProcess : function (subProcessName,remarks){
       this.$(this.$refs.subTask.$el).modal("hide");
       var postData = {
         datas : JSON.stringify(this.selectedRows),
         processId : this.process.id,
-        type : "sub",
+        type : "complete",
         subProcessName : subProcessName,
         remarks : remarks
       }
+
       var _this = this;
       this.$(this.$refs.submitting.$el).modal("show");
       // this.$("#submitting").modal("show");
@@ -404,6 +422,7 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       });
     },
+
     submitData : function (type){
       var _this = this;
       var postData = {
@@ -431,6 +450,7 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       });
     },
+
     handBeforeUpload : function (file){
       if (file.name.indexOf("样本录入-") != 0){
         this.$message.error(this.$t("fileNameErr"));
@@ -1046,6 +1066,19 @@ export default {
       }
       for (var item in this.selectedRows){
         if (this.selectedRows[item].currentstatu != '02'){
+          return true;
+        }
+      }
+      return false;
+    },
+    canDivide(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (!util.isNull(this.selectedRows[item].subid)
+            || this.selectedRows[item].currentstatu == "02"
+        ){
           return true;
         }
       }

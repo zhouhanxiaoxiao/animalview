@@ -3,12 +3,14 @@
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('bioinformaticsAnalysis')"
+        :sub-title="process.projectname"
     >
       <template slot="extra">
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
                       :disabled="selectedRows.length == 0"
                       :cancel-text="$t('no')"
+                      v-if="isEnd"
                       @confirm="deleteByIds">
           <template slot="title">
             <p>{{ $t("areyousureDelete") }}</p>
@@ -17,10 +19,10 @@
             {{$t("delete")}}
           </a-button>
         </a-popconfirm>
-        <a-button @click="submitData('tmp')">
+        <a-button @click="submitData('tmp')" v-if="isEnd">
           {{ $t("tmpSave") }}
         </a-button>
-        <a-button type="primary" @click="subTaskInfo"
+        <a-button type="primary" @click="subTaskInfo" v-if="isEnd"
                   :disabled="this.selectedRows.length == 0">
           {{ $t("submit") }}
         </a-button>
@@ -29,6 +31,7 @@
         </a-button>
         <a-upload
             name="file"
+            v-if="isEnd"
             accept=".xls,.xlsx"
             :show-upload-list="false"
             :headers="{token:this.$cookies.get('token'), processId : this.process.id}"
@@ -42,14 +45,17 @@
         </a-upload>
       </template>
       <a-row type="flex">
-        <a-tag color="pink" @click="showSubTask('01')">
-          {{ $t("showAll") }}
+<!--        <a-tag color="pink" @click="showSubTask('01')">-->
+<!--          {{ $t("showAll") }}-->
+<!--        </a-tag>-->
+        <a-tag color="pink" @click="showSubTask('02')">
+          {{ $t("allcomplete") }}
         </a-tag>
         <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
           {{ sub.name }}
         </a-tag>
         <a-tag color="#108ee9" @click="showSubTask('00')">
-          {{ $t("reset") }}
+          {{ $t("init") }}
         </a-tag>
       </a-row>
     </a-page-header>
@@ -254,6 +260,9 @@ export default {
       util.downLoad(postData, "/task/process/downloadAnalysis", "生信分析.xls");
     },
     isDisabled: function (col,record) {
+      if (!this.isEnd){
+        return true;
+      }
       if (col == "sampleindex" || col == "samplename") {
         return true;
       }
@@ -602,6 +611,12 @@ export default {
         return false;
       }
       return true;
+    },
+    isEnd : function (){
+      if (this.process.taskstatu != "70"){
+        return true;
+      }
+      return false;
     },
     canComplete(){
       if (this.selectedRowKeys.length == 0){

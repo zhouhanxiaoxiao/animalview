@@ -19,6 +19,13 @@
               </a-card-grid>
             </a-card>
           </a-checkbox-group>
+          <!--  备注  -->
+          <div class="form-row">
+            <div class="form-group-sm col-md-12" style="text-align: left">
+              <label for="remarks">{{ $t("remarks") }}</label>
+              <textarea class="form-control" id="remarks" v-model="remarks" placeholder="实验" rows="2"></textarea>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary"
@@ -52,7 +59,8 @@ export default {
         {key:16,val:"16:00-17:00",stat:false}
       ],
       times:[],
-      records : []
+      records : [],
+      remarks : ""
     }
   },
   beforeMount() {
@@ -109,7 +117,7 @@ export default {
       var postStr = JSON.stringify(postArray);
       this.times = [];
       this.$("#selectTime").modal("hide");
-      this.$emit("submitData",this.resource,postStr);
+      this.$emit("submitData",this.resource,postStr,this.remarks);
     }
   },
   watch : {

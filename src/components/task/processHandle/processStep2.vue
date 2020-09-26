@@ -3,12 +3,14 @@
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('samplePreparation')"
+        :sub-title="process.projectname"
     >
       <template slot="extra">
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
                       :disabled="selectedRows.length == 0"
                       :cancel-text="$t('no')"
+                      v-if="isEnd"
                       @confirm="deleteByIds">
           <template slot="title">
             <p>{{ $t("areyousureDelete") }}</p>
@@ -17,23 +19,33 @@
             {{$t("delete")}}
           </a-button>
         </a-popconfirm>
-        <a-button type="primary" @click="subTaskInfo"
+
+        <a-button @click="subTaskInfo"
+                  :disabled="canDivide" type="primary" v-if="isEnd">
+          {{$t("divide")}}
+        </a-button>
+
+        <a-button type="primary" @click="submitData('complete')"
+                  v-if="isEnd"
                   :disabled="canComplete">
           {{ $t("complete") }}
         </a-button>
         <a-button type="primary" @click="submitData('real')"
+                  v-if="isEnd"
                   :disabled="cansubmit">
           {{ $t("submit") }}
         </a-button>
-        <a-button @click="submitData('tmp')">
+        <a-button @click="submitData('tmp')" v-if="isEnd">
           {{ $t("tmpSave") }}
         </a-button>
-        <a-button icon="download" @click="downLoad">
+        <a-button icon="download" @click="downLoad"
+                  :disabled="this.selectedRowKeys.length == 0">
           {{ $t("outPut") }}
         </a-button>
         <a-upload
             name="file"
             accept=".xls,.xlsx"
+            v-if="isEnd"
             :show-upload-list="false"
             :headers="{token:this.$cookies.get('token'), processId : this.process.id}"
             @change="handUploadChange"
@@ -223,7 +235,6 @@
           />
           <div v-else-if="col == 'upload'">
             <a-upload
-
                 name="file"
                 :multiple="true"
                 :disabled="isStop(record)|| isDisabled(record)"
@@ -232,7 +243,7 @@
                 :showUploadList="false"
                 @change="handleUploadChange"
             >
-              <a-button :disabled="isStop(record)"> <a-icon type="upload" />{{ $t("upload") }} </a-button>
+              <a-button :disabled="isStop(record) || isDisabled(record)"> <a-icon type="upload" />{{ $t("upload") }} </a-button>
             </a-upload>
           </div>
           <a-input
@@ -253,6 +264,7 @@
           <a @click="() => showReason(record.id)" v-if="isStop(record)">{{ $t("showReason") }}</a>
           &nbsp;
           <a @click="() => showStopAlert(record.id)" v-if="!isStop(record) && !isDisabled(record)">{{ $t("stop") }}</a>
+          &nbsp;
           <a @click="() => showFileList(record.id)" >{{ "查看附件" }}</a>
 
           <!--          <span v-if="record.editable">-->
@@ -353,6 +365,9 @@ export default {
       });
     },
     isDisabled : function (record){
+      if (!this.isEnd){
+        return true;
+      }
       if (record.currentstatu == "02"){
         return true;
       }
@@ -371,7 +386,7 @@ export default {
       this.$(this.$refs.thisSubTaskInfo.$el).modal("hide");
       this.subProcessName = subProcessName;
       this.remarks = remarks;
-      this.submitData("complete");
+      this.submitData("divide");
     },
     subTaskInfo : function (){
       this.$(this.$refs.thisSubTaskInfo.$el).modal("show");
@@ -406,7 +421,8 @@ export default {
     },
     downLoad : function (){
       var postData = {
-        processId : this.process.id
+        processId : this.process.id,
+        makeIds : JSON.stringify(this.selectedRowKeys)
       }
       util.downLoad(postData,"/task/process/downloadMakes","样品制备.xls");
     },
@@ -1231,6 +1247,19 @@ export default {
       }
       return false;
     },
+    canDivide(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (!util.isNull(this.selectedRows[item].subid)
+            || this.selectedRows[item].currentstatu == "02"
+        ){
+          return true;
+        }
+      }
+      return false;
+    },
     canComplete(){
       if (this.selectedRowKeys.length == 0){
         return true;
@@ -1245,6 +1274,12 @@ export default {
     uploadUrl : function (){
       return this.$axios.defaults.baseURL + '/file/import/makeUpload';
     },
+    isEnd : function (){
+      if (this.process.taskstatu != "70"){
+        return true;
+      }
+      return false;
+    }
   },
   watch: {
     process: {

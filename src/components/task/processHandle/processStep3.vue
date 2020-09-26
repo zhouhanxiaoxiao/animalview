@@ -3,12 +3,14 @@
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('libraryPreparation')"
+        :sub-title="process.projectname"
     >
       <template slot="extra">
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
                       :disabled="selectedRows.length == 0"
                       :cancel-text="$t('no')"
+                      v-if="isEnd"
                       @confirm="deleteByIds">
           <template slot="title">
             <p>{{ $t("areyousureDelete") }}</p>
@@ -17,22 +19,33 @@
             {{$t("delete")}}
           </a-button>
         </a-popconfirm>
-        <a-button type="primary" @click="subTaskInfo"
+        <a-button type="primary" @click="submitData('complete')"
+                  v-if="isEnd"
                   :disabled="canComplete">
           {{ $t("complete") }}
         </a-button>
-        <a-button type="primary" @click="submitData('real')"
+
+        <a-button @click="subTaskInfo" v-if="isEnd"
+                  :disabled="canDivide" type="primary">
+          {{$t("divide")}}
+        </a-button>
+
+        <a-button type="primary" @click="submitData('real')" v-if="isEnd"
                   :disabled="cansubmit">
           {{ $t("submit") }}
         </a-button>
-        <a-button @click="submitData('tmp')">
+
+        <a-button @click="submitData('tmp')" v-if="isEnd">
           {{ $t("tmpSave") }}
         </a-button>
-        <a-button icon="download" @click="downLoad">
+
+        <a-button icon="download" @click="downLoad" :disabled="this.selectedRowKeys.length == 0">
           {{ $t("outPut") }}
         </a-button>
+
         <a-upload
             name="file"
+            v-if="isEnd"
             accept=".xls,.xlsx"
             :show-upload-list="false"
             :headers="{token:this.$cookies.get('token'), processId : this.process.id}"
@@ -44,6 +57,7 @@
             {{ $t("input") }}
           </a-button>
         </a-upload>
+
       </template>
       <a-row type="flex">
         <a-row type="flex">
@@ -199,7 +213,6 @@
           <!-- 上传附件 -->
           <div v-else-if="col == 'upload'">
             <a-upload
-
                 name="file"
                 :multiple="true"
                 :disabled="isStop(record)|| isDisabled(record)"
@@ -208,7 +221,7 @@
                 :showUploadList="false"
                 @change="handleUploadChange"
             >
-              <a-button :disabled="isStop(record)">
+              <a-button :disabled="isStop(record)|| isDisabled(record)">
                 <a-icon type="upload"/>
                 {{ $t("upload") }}
               </a-button>
@@ -344,6 +357,9 @@ export default {
       });
     },
     isDisabled : function (record){
+      if (!this.isEnd){
+        return true;
+      }
       if (record.currentstatu == "02"){
         return true;
       }
@@ -362,7 +378,7 @@ export default {
       this.$(this.$refs.subTask.$el).modal("hide");
       this.subProcessName = subProcessName;
       this.remarks = remarks;
-      this.submitData("complete");
+      this.submitData("divide");
     },
     subTaskInfo : function (){
       this.$(this.$refs.subTask.$el).modal("show");
@@ -386,7 +402,8 @@ export default {
     },
     downLoad: function () {
       var postData = {
-        processId: this.process.id
+        processId: this.process.id,
+        libIds : JSON.stringify(this.selectedRowKeys)
       }
       util.downLoad(postData, "/task/process/downloadLibs", "文库制备.xls");
     },
@@ -1090,6 +1107,18 @@ export default {
       }
       return false;
     },
+    canDivide(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (!util.isNull(this.selectedRows[item].subid)
+            || this.selectedRows[item].currentstatu == "02"){
+          return true;
+        }
+      }
+      return false;
+    },
     canComplete(){
       if (this.selectedRowKeys.length == 0){
         return true;
@@ -1098,6 +1127,12 @@ export default {
         if (this.selectedRows[item].currentstatu == '02'){
           return true;
         }
+      }
+      return false;
+    },
+    isEnd : function (){
+      if (this.process.taskstatu != "70"){
+        return true;
       }
       return false;
     },

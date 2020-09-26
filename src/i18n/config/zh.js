@@ -214,7 +214,12 @@ const zh={
     search: "搜索",
     selectGroup : "请选择实验室",
     areyousureDelete : "您确定要删除吗？",
-
+    batchUpdate : "批量编辑",
+    addNewStock : "新增库存",
+    divide : "分组",
+    projectComplete : "项目完结",
+    areyousure : "您确认",
+    areyousureCompleteProject : "您确定本项目已完成？",
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",
