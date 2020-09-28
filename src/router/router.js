@@ -6,7 +6,7 @@ import register from "@/components/register";
 import home from "@/components/home/home";
 import AnimalStock from "@/components/personal/AnimalStock";
 import TaskMain from "@/components/task/TaskMain";
-import CurrentStrain from "@/components/stockcenter/CurrentStrain";
+// import CurrentStrain from "@/components/stockcenter/CurrentStrain";
 import askDetail from "@/components/task/askDetail";
 import userallow from "@/components/task/userallow";
 import createProcess from "@/components/task/processHandle/createProcess";
@@ -20,6 +20,7 @@ import personalMain from "@/components/personal/personalMain";
 import processDetailNew from "@/components/task/processHandle/processDetailNew";
 import errorPage from "@/components/publib/errorPage";
 import currentStock from "@/components/stockcenter/currentStock";
+import currentStrainNew from "@/components/stockcenter/currentStrainNew";
 
 /*配置路由*/
 const routes=[
@@ -41,7 +42,8 @@ const routes=[
     {path: '/task/processInit',name:"processInit",component: processInit,meta: {index: 0}},
     {path: '/task/processDetailNew',name:"processDetailNew",component: processDetailNew,meta: {index: 0}},
     {path: '/task/userAllow',name:"userAllow",component: userallow,meta: {index: 0}},
-    {path: '/stock/currentStrain',component: CurrentStrain,meta: {index: 0}},
+    // {path: '/stock/currentStrain',component: CurrentStrain,meta: {index: 0}},
+    {path: '/stock/currentStrain',component: currentStrainNew,meta: {index: 0}},
     {path: '/task/resourceOrder',name:"resource",component: resource,meta: {index: 0}},
     {path: '/*',login,meta:{index:0}}
 ]

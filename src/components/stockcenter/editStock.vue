@@ -131,8 +131,10 @@ export default {
       });
     },
     deleteThisStock : function (){
+      var stockids = new Array();
+      stockids.push(this.stockId);
       var psotData = {
-        stockId : this.stockId
+        stockIds : stockids
       };
       var _this = this;
       this.$("#submitting").modal("show");
@@ -141,7 +143,7 @@ export default {
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
         }else {
-          _this.$router.push("/stock/currentStrain");
+          _this.$router.push("/stock/currentStock");
         }
       }).catch(function (res){
         _this.$("#submitting").modal("hide");

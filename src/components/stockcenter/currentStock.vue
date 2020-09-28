@@ -13,6 +13,10 @@
           <a-button type="primary" @click="addNewStock" v-if="canEdit">
             {{ $t("add") }}
           </a-button>
+
+          <a-button type="danger" @click="batchDelete" :disabled="selectedRowKeys.length == 0" v-if="canEdit">
+            {{ $t("delete") }}
+          </a-button>
           <a-upload
               name="file"
               :multiple="false"
@@ -141,6 +145,26 @@ export default {
     this.initStockTable();
   },
   methods : {
+    batchDelete : function (){
+      var psotData = {
+        stockIds : this.selectedRowKeys
+      };
+      var _this = this;
+      this.$("#submitting").modal("show");
+      this.$axios.post("/stock/edit/delete",psotData).then(function (res){
+        _this.$("#submitting").modal("hide");
+        if (res.data.code != "200"){
+          _this.$message.error(_this.$t(res.data.code));
+        }else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.initStockTable();
+        }
+      }).catch(function (res){
+        _this.$("#submitting").modal("hide");
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
     handleUploadChange: function (ret) {
       util.commonHandleUploadChange(ret);
     },
@@ -215,6 +239,8 @@ export default {
               _this.data.push(stockTmp);
             }
           }
+          _this.selectedRows = [];
+          _this.selectedRowKeys = [];
         }
       }).catch(function (res) {
         _this.tableLoad = false;
@@ -355,6 +381,7 @@ export default {
           }
         },
       });
+
       cols.push({
         title: "用途",
         dataIndex: 'usagetype',
@@ -429,6 +456,7 @@ export default {
           }
         },
       });
+
       cols.push({
         title: "操作",
         dataIndex: 'operation',
