@@ -3,6 +3,7 @@
     <transition name="fade">
       <router-view></router-view>
     </transition>
+    <a-back-top />
   </div>
 </template>
 
@@ -88,6 +89,10 @@ export default {
   border-radius: 5px;
   padding: 10px 10px;
   text-align: left;
+  margin-bottom: 50px;
+}
+.pointer{
+  cursor: pointer !important;
 }
 </style>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

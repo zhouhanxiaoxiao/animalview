@@ -58,13 +58,13 @@
 <!--        <a-tag color="pink" @click="showSubTask('01')">-->
 <!--          {{ $t("showAll") }}-->
 <!--        </a-tag>-->
-        <a-tag color="pink" @click="showSubTask('02')">
+        <a-tag class="pointer" color="pink" @click="showSubTask('02')">
           {{ $t("allcomplete") }}
         </a-tag>
-        <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+        <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
           {{ sub.name }}
         </a-tag>
-        <a-tag color="#108ee9" @click="showSubTask('00')">
+        <a-tag class="pointer" color="#108ee9" @click="showSubTask('00')">
           {{ $t("init") }}
         </a-tag>
       </a-row>
@@ -1212,9 +1212,10 @@ export default {
     transformSamples : function (){
       var arr = new Array();
       for (var i=0;i<this.sampleInits.length;i++){
-        if (this.sampleInits[i].key != "02"){
-          arr.push(this.sampleInits[i]);
-        }
+        // if (this.sampleInits[i].key != "02"){
+        //   arr.push(this.sampleInits[i]);
+        // }
+        arr.push(this.sampleInits[i]);
       }
       return arr;
     },
@@ -1275,7 +1276,9 @@ export default {
       return this.$axios.defaults.baseURL + '/file/import/makeUpload';
     },
     isEnd : function (){
-      if (this.process.taskstatu != "70"){
+      if (this.process.taskstatu != "70"
+          && this.process.samplepreparation == this.$store.getters.getUser.id
+      ){
         return true;
       }
       return false;

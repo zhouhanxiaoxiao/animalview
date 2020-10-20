@@ -18,11 +18,10 @@
         <th scope="row">{{ index + 1 + (currentPage - 1) * pageSize }}</th>
         <td>
           {{ taskType(task.task) }}
-
         </td>
         <td>
           <div>
-            <a-progress :percent="taskPro(task)" size="small" :status="taskstatu(task.task)" />
+            <a-progress :showInfo="false" :percent="taskPro(task)" size="small" :status="taskstatu(task.task)" />
           </div>
         </td>
         <td>{{ task.creater.name }}</td>
@@ -152,28 +151,29 @@ export default {
           return 100;
         }
       }else if (task.task.tasktype == "03"){
-        var process = task.process;
-        if (process.taskstatu == "10"){
-          return 10;
-        }else
-        if (process.taskstatu == "20"){
-          return 25;
-        }else
-        if (process.taskstatu == "30"){
-          return 40;
-        }else
-        if (process.taskstatu == "40"){
-          return 55;
-        }else
-        if (process.taskstatu == "50"){
-          return 75;
-        }else
-        if (process.taskstatu == "60"){
-          return 90;
-        }
-        else {
-          return 100;
-        }
+        // var process = task.process;
+        return 100;
+        // if (process.taskstatu == "10"){
+        //   return 10;
+        // }else
+        // if (process.taskstatu == "20"){
+        //   return 25;
+        // }else
+        // if (process.taskstatu == "30"){
+        //   return 40;
+        // }else
+        // if (process.taskstatu == "40"){
+        //   return 55;
+        // }else
+        // if (process.taskstatu == "50"){
+        //   return 75;
+        // }else
+        // if (process.taskstatu == "60"){
+        //   return 90;
+        // }
+        // else {
+        //   return 100;
+        // }
       }else if (task.task.tasktype == "04"){
         var partner = task.partner;
         if (partner.taskstatu == "00"){

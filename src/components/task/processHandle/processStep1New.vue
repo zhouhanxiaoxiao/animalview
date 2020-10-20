@@ -10,40 +10,45 @@
 <!--                  :disabled="canDelete">-->
 <!--          {{ $t("batchUpdate") }}-->
 <!--        </a-button>-->
+        <a-button :disabled="canDelete" type="primary" v-if="canEdit"
+                  data-toggle="collapse" href="#batchUpdate" role="button" aria-expanded="false" aria-controls="batchUpdate">
+          {{$t("batchUpdate")}}
+        </a-button>
+
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
                       :disabled="selectedRows.length == 0"
                       :cancel-text="$t('no')"
-                      v-if="process.taskstatu != '70'"
+                      v-if="canEdit"
                       @confirm="deleteInputs">
           <template slot="title">
             <p>{{ $t("areyousureDelete") }}</p>
           </template>
-          <a-button :disabled="canDelete" type="danger" v-if="process.taskstatu != '70'">
+          <a-button :disabled="canDelete" type="danger" v-if="canEdit">
             {{$t("delete")}}
           </a-button>
         </a-popconfirm>
 
         <a-button @click="subTaskInfo"
-                  :disabled="canDivide" type="primary" v-if="process.taskstatu != '70'">
+                  :disabled="canDivide" type="primary" v-if="canEdit">
           {{$t("divide")}}
         </a-button>
 
         <a-button @click="submitData('complete')"
-                  :disabled="canDelete" type="primary" v-if="process.taskstatu != '70'">
+                  :disabled="canDelete" type="primary" v-if="canEdit">
           {{$t("complete")}}
         </a-button>
         <a-button @click="submitData('real')"
-                  :disabled="cansubmit" type="primary" v-if="process.taskstatu != '70'">
+                  :disabled="cansubmit" type="primary" v-if="canEdit">
           {{$t("submit")}}
         </a-button>
-        <a-button @click="submitData('tmp')" color="orange" v-if="process.taskstatu != '70'">
+        <a-button @click="submitData('tmp')" color="orange" v-if="canEdit">
           {{$t("tmpSave")}}
         </a-button>
 <!--        <a-button @click="submitData('real')">-->
 <!--          {{$t("submit")}}-->
 <!--        </a-button>-->
-        <a-button class="editable-add-btn" v-if="process.taskstatu != '70'"
+        <a-button class="editable-add-btn" v-if="canEdit"
                   @click="handleAdd"
         >
           {{ $t("add") }}
@@ -53,7 +58,7 @@
         </a-button>
         <a-upload
             name="file"
-            v-if="process.taskstatu != '70'"
+            v-if="canEdit"
             accept=".xls,.xlsx"
             :headers="{token:this.$cookies.get('token'),processId : process.id}"
             @change="handUploadChange"
@@ -70,17 +75,155 @@
 <!--        <a-tag color="pink" @click="showSubTask('01')">-->
 <!--          {{ $t("showAll") }}-->
 <!--        </a-tag>-->
-        <a-tag color="pink" @click="showSubTask('02')">
+        <a-tag class="pointer" color="pink" @click="showSubTask('02')">
           {{ $t("allcomplete") }}
         </a-tag>
-        <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+        <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
           {{ sub.name }}
         </a-tag>
-        <a-tag color="#108ee9" @click="showSubTask('00')">
+        <a-tag class="pointer" color="#108ee9" @click="showSubTask('00')">
           {{ $t("init") }}
         </a-tag>
       </a-row>
     </a-page-header>
+    <div class="collapse" id="batchUpdate">
+      <div class="card card-body">
+        <div class="form-row">
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="arrindex">{{$t("arrindex")}}</label>
+            <a-input id="arrindex" v-model="editObj.arrindex"/>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="initSample">{{$t("initSample")}}</label>
+            <!-- initSample -->
+            <a-select id="initSample" style="width: 100%" v-model="editObj.initsample">
+              <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
+                {{item.val}}
+              </a-select-option>
+            </a-select>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="sampleName">{{$t("sampleName")}}</label>
+            <a-input id="sampleName" v-model="editObj.samplename"/>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="species">{{$t("species")}}</label>
+            <a-input id="species" v-model="editObj.species"/>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="tissue">{{this.$t("tissue") + $t("animal_stock_resource")}}</label>
+            <a-input id="tissue" v-model="editObj.tissue"/>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="sampleMsg">{{$t("sampleMsg")}}</label>
+            <a-select id="sampleMsg" style="width: 100%" v-model="editObj.samplemsg">
+              <a-select-option v-for="item in sampletypes(editObj.initsample)" :key="item.key" :value="item.key">
+                {{item.val}}
+              </a-select-option>
+            </a-select>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="sampleStatu">{{$t("sampleStatu")}}</label>
+            <a-select id="sampleStatu" style="width: 100%" v-model="editObj.samplestatu">
+              <a-select-option v-for="item in sampletypes(editObj.initsample)" :key="item.key" :value="item.key">
+                {{item.val}}
+              </a-select-option>
+            </a-select>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="tissueNumber">{{$t("tissueNumber") + "（g）"}}</label>
+            <div id="tissueNumber">
+              <a-input-number v-model="editObj.tissuenumber" style="width: 100%"/>
+            </div>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="bloodVolume">{{$t("bloodVolume") + "(ml)"}}</label>
+            <div id="bloodVolume">
+              <a-input-number v-model="editObj.bloodvolume" style="width: 100%"/>
+            </div>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="concentration">{{concentrationName}}</label>
+            <div id="concentration">
+              <a-input-number v-model="editObj.concentration" style="width: 100%"/>
+            </div>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="samplevolume">{{$t("sampleVolume") + "(ul)" }}</label>
+            <div id="samplevolume">
+              <a-input-number v-model="editObj.samplevolume" style="width: 100%"/>
+            </div>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="totalnumber">{{totalNumberTitle}}</label>
+            <div id="totalnumber">
+              <a-input-number v-model="editObj.totalnumber" style="width: 100%"/>
+            </div>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="celllife">{{$t("cellLife")}}</label>
+            <a-input id="celllife" v-model="editObj.celllife"/>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="cellSort">{{$t("cellSort")}}</label>
+            <a-select id="cellSort" style="width: 100%" v-model="editObj.cellsort">
+              <a-select-option v-for="item in cellSortMethods" :key="item.key" :value="item.key">
+                {{item.val}}
+              </a-select-option>
+            </a-select>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="databaseType">{{$t("databaseType")}}</label>
+            <!-- 建库类型 -->
+            <a-select  style="width: 100%" id="databaseType" v-model="editObj.databasetype">
+              <a-select-option v-for="item in databaseTypes(editObj.initsample)" :key="item.key" :value="item.key">
+                {{item.val}}
+              </a-select-option>
+            </a-select>
+          </div>
+
+          <div class="form-group col-md-3 col-sm-12 col-lg-2">
+            <label for="SequencingPlatform">{{$t("SequencingPlatform")}}</label>
+            <a-select  style="width: 100%" id="SequencingPlatform"
+                       v-model="editObj.sequencingplatform">
+              <a-select-option v-for="item in seqPlants" :key="item.key" :value="item.key">
+                {{item.val}}
+              </a-select-option>
+            </a-select>
+          </div>
+        </div>
+            <div class="modal-footer" style="text-align: center">
+              <a-popconfirm placement="topLeft"
+                            :ok-text="$t('yes')"
+                            :disabled="selectedRows.length == 0"
+                            :cancel-text="$t('no')"
+                            @confirm="tmpSaveData">
+                <template slot="title">
+                  <p>{{ "数据将保存到页面上，确认无误后点击'暂存'才可以真正保存数据！" }}</p>
+                </template>
+                <a-button type="primary" :disabled="selectedRows.length == 0">
+                  {{$t("confirm")}}
+                </a-button>
+              </a-popconfirm>
+
+            </div>
+      </div>
+    </div>
     <a-table :columns="columns"
              :data-source="data"
              bordered
@@ -279,12 +422,43 @@ export default {
       subs : [],
       curFlag : "01",
       subId : "00",
+      editObj : {
+        arrindex : "",
+        initsample : "",
+        samplename : "",
+        species : "",
+        tissue : "",
+        samplemsg : "",
+        samplestatu : "",
+        tissuenumber : 0,
+        bloodvolume : 0,
+        concentration : 0,
+        samplevolume : 0,
+        totalnumber : 0,
+        celllife : "",
+        cellsort : "",
+        databasetype : "",
+      }
     };
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
+    tmpSaveData : function (){
+      var _this = this;
+      Object.keys(this.editObj).forEach(function (key){
+        // console.log(key,_this.editObj[key]);
+        for (var i = 0;i<_this.data.length;i++){
+          var selData = _this.data[i];
+          if (selData.currentstatu == "01" && _this.selectedRowKeys.indexOf(selData.key) != -1
+              && !util.isNull(_this.editObj[key])
+          ){
+            selData[key] = _this.editObj[key];
+          }
+        }
+      });
+    },
     deleteInputs : function (){
       var _this = this;
       _this.$(_this.$refs.submitting.$el).modal("show");
@@ -307,7 +481,7 @@ export default {
       })
     },
     isDisabled : function (record){
-      if (process.taskstatu != "70"){
+      if (!this.canEdit){
         return true;
       }
       if (record.currentstatu == "02"){
@@ -1092,6 +1266,14 @@ export default {
         if (this.selectedRows[item].currentstatu == '02'){
           return true;
         }
+      }
+      return false;
+    },
+    canEdit : function (){
+      if (this.process.taskstatu != '70'
+          && this.process.sampleinput == this.$store.getters.getUser.id
+      ){
+        return true
       }
       return false;
     }

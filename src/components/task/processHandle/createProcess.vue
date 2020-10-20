@@ -15,8 +15,8 @@
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="principal">{{ $t("principal") }}</label>
           <div id="principal">
-            <a-select  style="width: 100%" v-model="principal">
-              <a-select-option v-for="user in users" :key="user.id">
+            <a-select  style="width: 100%" v-model="principal" :disabled="true">
+              <a-select-option v-for="user in users" :key="user.id" :value="user.id">
                 {{ user.name }}
               </a-select-option>
             </a-select>
@@ -44,6 +44,7 @@
             </a-select>
           </div>
         </div>
+        <div style="display: none">
         <a-divider orientation="left">{{$t("staffing")}}</a-divider>
         <!--样品录入负责人-->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
@@ -106,7 +107,9 @@
           <label for="remarks">{{$t("remarks")}}</label>
           <textarea class="form-control" id="remarks" v-model="remarks" placeholder="例：我很着急" rows="3"></textarea>
         </div>
+        </div>
       </div>
+
       <div class="modal-footer" style="margin-top: 20px">
         <button type="button" class="btn btn-primary"
                 @click="submitData">{{$t("submit")}}</button>
@@ -126,7 +129,7 @@ export default {
     return{
       projectName :"",
       dataType:"",
-      principal:"",
+      principal:this.$store.getters.getUser.id,
       emails : [],
       users : [],
       remarks:"",
@@ -169,6 +172,7 @@ export default {
         libraryPreparation : this.libraryPreparation,
         dismountData : this.dismountData,
         bioinformaticsAnalysis : this.bioinformaticsAnalysis,
+        sampleInput : this.sampleInput,
         remarks : this.remarks
       }
       var _this = this;
@@ -216,22 +220,22 @@ export default {
         this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
         return false;
       }
-      if (this.samplePreparation == ""){
-        this.$message.error(this.$t("samplePreparation") + this.$t("not_null"));
-        return false;
-      }
-      if (this.libraryPreparation == ""){
-        this.$message.error(this.$t("libraryPreparation") + this.$t("not_null"));
-        return false;
-      }
-      if (this.dismountData == ""){
-        this.$message.error(this.$t("dismountData") + this.$t("not_null"));
-        return false;
-      }
-      if (this.bioinformaticsAnalysis == ""){
-        this.$message.error(this.$t("bioinformaticsAnalysis") + this.$t("not_null"));
-        return false;
-      }
+      // if (this.samplePreparation == ""){
+      //   this.$message.error(this.$t("samplePreparation") + this.$t("not_null"));
+      //   return false;
+      // }
+      // if (this.libraryPreparation == ""){
+      //   this.$message.error(this.$t("libraryPreparation") + this.$t("not_null"));
+      //   return false;
+      // }
+      // if (this.dismountData == ""){
+      //   this.$message.error(this.$t("dismountData") + this.$t("not_null"));
+      //   return false;
+      // }
+      // if (this.bioinformaticsAnalysis == ""){
+      //   this.$message.error(this.$t("bioinformaticsAnalysis") + this.$t("not_null"));
+      //   return false;
+      // }
       return true;
     }
   },

@@ -251,6 +251,29 @@ export default {
     },
     initColumns : function (){
       var cols = new Array();
+
+      cols.push({
+        title: "物种",
+        dataIndex: 'name',
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'name',
+        },
+        onFilter: (value, record) =>
+            record.name
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
+      });
+
       cols.push({
         title: "编号",
         dataIndex: 'selfindex',
@@ -379,7 +402,11 @@ export default {
       return{
         showSizeChanger : true,
         showQuickJumper : true,
-        pageSizeOptions:['10','20','50','100']
+        pageSizeOptions:['10','20','50','100'],
+        total : this.data.length,
+        showTotal : function (total){
+          return `共 ${total} 条`
+        }
       }
     },
     rowSelection() {
@@ -401,7 +428,6 @@ export default {
       };
     },
   }
-
 }
 </script>
 

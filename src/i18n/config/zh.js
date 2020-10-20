@@ -120,7 +120,7 @@ const zh={
     role : "角色",
     add : "新增",
     enterCorrectly : "输入正确",
-    animalName : "动物名称",
+    animalName : "物种",
     useType : "用途",
     supporter : "材料提供人员",
     processHandle : "流程管理",
@@ -220,6 +220,16 @@ const zh={
     projectComplete : "项目完结",
     areyousure : "您确认",
     areyousureCompleteProject : "您确定本项目已完成？",
+    createContainerTime:"建管日期",
+    projectDetail : "项目详情",
+    userManager : "用户管理",
+    department : "部门",
+    newDepartment : "新增部门",
+    departmentName : "部门名称",
+    update : "更新",
+    newRole : "新增角色",
+    roleName : "角色名称",
+    roleIndex : "角色编号",
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",
@@ -232,7 +242,10 @@ const zh={
     E505 : "邮箱不存在！",
     E511 : "密码错误！",
     E510 : "用户不存在！",
-    E520 : "基因型已存在！"
+    E520 : "基因型已存在！",
+    E550 : "部门名称已存在！",
+    E551 : "角色名称重复",
+    E552 : "角色编号重复"
 
 }
 export default zh;

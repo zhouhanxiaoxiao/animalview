@@ -70,6 +70,13 @@
                              v-model="stock.birthday" ></date-picker>
               </div>
             </div>
+            <div class="form-group col-md-4 mb-3">
+              <label for="createContainerTime">{{$t("createContainerTime")}}</label>
+              <div id="createContainerTime">
+                <date-picker value-type="format" format="YYYY-MM-DD"
+                             v-model="stock.createtime" ></date-picker>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -101,7 +108,8 @@ export default {
         usagetype : "keep",
         environment : "",
         location : "",
-        birthday : new Date()
+        birthday : new Date(),
+        createtime : new Date(),
       },
       animals : [],
       envs :[]

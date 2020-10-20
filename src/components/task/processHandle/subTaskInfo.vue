@@ -47,7 +47,7 @@ export default {
   },
   computed : {
     isCanConfirm : function (){
-      return util.isNull(this.subProcessName);
+      return util.isNull(this.subProcessName + "");
     }
   }
 }

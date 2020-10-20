@@ -9,18 +9,23 @@
               <a-menu
                   mode="inline"
                   :default-selected-keys="['1']"
+                  v-model="menuId"
                   style="height: 100%"
               >
-                  <a-menu-item key="1" @click="showContent(1)">
-                    {{ $t("accountInfo") }}
-                  </a-menu-item>
-                  <a-menu-item key="2">
-                    {{ $t("messageInfo") }}
-                  </a-menu-item>
+                <a-menu-item key="1" @click="showContent('1')">
+                  {{ $t("accountInfo") }}
+                </a-menu-item>
+<!--                <a-menu-item key="2" @click="showContent('2')">-->
+<!--                  {{ $t("messageInfo") }}-->
+<!--                </a-menu-item>-->
+                <a-menu-item key="3" @click="showContent('3')" v-if="$store.getters.isAdmin">
+                  {{ $t("userManager") }}
+                </a-menu-item>
               </a-menu>
             </a-layout-sider>
             <a-layout-content :style="{ padding: '0 24px', minHeight: '280px' }">
-              <personal-info></personal-info>
+              <personal-info v-if="this.menuId == '1'"></personal-info>
+              <user-manager v-if="this.menuId == '3'"></user-manager>
             </a-layout-content>
           </a-layout>
         </a-layout-content>
@@ -32,23 +37,23 @@
 <script>
 import TopNav from "@/components/publib/TopNav";
 import PersonalInfo from "@/components/personal/personalInfo";
+import UserManager from "@/components/personal/userManager";
+
 export default {
   name: "personalMain",
-  components: {PersonalInfo, TopNav},
+  components: {UserManager, PersonalInfo, TopNav},
   data() {
     return {
       collapsed: false,
-      type : 1
+      menuId: '1',
     };
   },
-  methods : {
-    showContent : function (type){
-      this.type = type;
+  methods: {
+    showContent: function (menuId) {
+      this.menuId = menuId;
     }
   },
-  computed : {
-
-  }
+  computed: {}
 }
 </script>
 

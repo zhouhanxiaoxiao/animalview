@@ -31,9 +31,20 @@
               {{ $t("input") }}
             </a-button>
           </a-upload>
+          <a-upload
+              v-if="this.$store.getters.isResearcher"
+              name="file"
+              :multiple="true"
+              :action="importOrderUrl"
+              :headers="{token : this.$cookies.get('token')}"
+              :show-upload-list="false"
+              @change="handleChange"
+          >
+            <a-button><a-icon type="upload"/>{{$t("importOrder")}}</a-button>
+          </a-upload>
         </template>
       </a-page-header>
-      <a-table :data-source="data"
+      <a-table :data-source="data" bordered
                :row-selection="rowSelection"
                :pagination="pagina"
                :loading="tableLoad"
@@ -145,6 +156,19 @@ export default {
     this.initStockTable();
   },
   methods : {
+    handleChange : function (ret){
+      console.log(ret);
+      if (ret.file.status == "uploading"){
+        this.$("#submitting").modal("show");
+      }else {
+        this.$("#submitting").modal("hide");
+        if (ret.file.status == "error"){
+          this.$message.error(this.$t("systemErr"));
+        }else if (ret.file.status == "done"){
+          this.$message.success(this.$t("commitSucc"));
+        }
+      }
+    },
     batchDelete : function (){
       var psotData = {
         stockIds : this.selectedRowKeys
@@ -265,7 +289,29 @@ export default {
     initColumns : function (){
       var cols = new Array();
       cols.push({
-        title: "编号",
+        title: "库存编号",
+        dataIndex: 'stockindex',
+        ellipsis: true,
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'stockindex',
+        },
+        onFilter: (value, record) =>
+            record.stockindex
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
+      });
+      cols.push({
+        title: "品系编号",
         dataIndex: 'animal.selfindex',
         ellipsis: true,
         scopedSlots: {
@@ -330,35 +376,35 @@ export default {
           }
         },
       });
-      cols.push({
-        title: "resource",
-        dataIndex: 'animal.resource',
-        scopedSlots: {
-          customRender: 'animal.resource',
-        },
-        ellipsis: true,
-      });
-      cols.push({
-        title: "容器类型",
-        dataIndex: 'contanertype',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'contanertype',
-        },
-        onFilter: (value, record) =>
-            record.contanertype
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
+      // cols.push({
+      //   title: "resource",
+      //   dataIndex: 'animal.resource',
+      //   scopedSlots: {
+      //     customRender: 'animal.resource',
+      //   },
+      //   ellipsis: true,
+      // });
+      // cols.push({
+      //   title: "容器类型",
+      //   dataIndex: 'contanertype',
+      //   scopedSlots: {
+      //     filterDropdown: 'filterDropdown',
+      //     filterIcon: 'filterIcon',
+      //     customRender: 'contanertype',
+      //   },
+      //   onFilter: (value, record) =>
+      //       record.contanertype
+      //           .toString()
+      //           .toLowerCase()
+      //           .includes(value.toLowerCase()),
+      //   onFilterDropdownVisibleChange: visible => {
+      //     if (visible) {
+      //       setTimeout(() => {
+      //         this.searchInput.focus();
+      //       }, 0);
+      //     }
+      //   },
+      // });
       cols.push({
         title: "数量",
         dataIndex: 'contanernmuber',
@@ -387,27 +433,36 @@ export default {
         dataIndex: 'usagetype',
         ellipsis: true,
         scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
           customRender: 'usagetype',
         },
-        onFilter: (value, record) =>{
-          var usage = "库存";
-          if (record.usagetype == "keep"){
-            usage = "保种";
-          }
-          return usage
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
+        filters: [
+          {
+            text: '保种',
+            value: 'keep',
+          },
+          {
+            text: '库存',
+            value: 'stock',
+          },
+        ],
+        onFilter: (value, record) => record.usagetype.indexOf(value) === 0,
+        // onFilter: (value, record) =>{
+        //   var usage = "库存";
+        //   if (record.usagetype == "keep"){
+        //     usage = "保种";
+        //   }
+        //   return usage
+        //       .toString()
+        //       .toLowerCase()
+        //       .includes(value.toLowerCase());
+        // },
+        // onFilterDropdownVisibleChange: visible => {
+        //   if (visible) {
+        //     setTimeout(() => {
+        //       this.searchInput.focus();
+        //     }, 0);
+        //   }
+        // },
       });
 
       cols.push({
@@ -514,6 +569,9 @@ export default {
         }),
       };
     },
+    importOrderUrl : function (){
+      return this.$axios.defaults.baseURL + 'task/import/orderTask';
+    }
   }
 }
 </script>

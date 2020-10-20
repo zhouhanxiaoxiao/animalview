@@ -64,13 +64,13 @@
 <!--          <a-tag color="pink" @click="showSubTask('01')">-->
 <!--            {{ $t("showAll") }}-->
 <!--          </a-tag>-->
-          <a-tag color="pink" @click="showSubTask('02')">
+          <a-tag class="pointer" color="pink" @click="showSubTask('02')">
             {{ $t("allcomplete") }}
           </a-tag>
-          <a-tag color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+          <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
             {{ sub.name }}
           </a-tag>
-          <a-tag color="#108ee9" @click="showSubTask('00')">
+          <a-tag class="pointer" color="#108ee9" @click="showSubTask('00')">
             {{ $t("init") }}
           </a-tag>
         </a-row>
@@ -130,7 +130,7 @@
           <!-- 浓度(ng/ul)/（细胞个数/μl) -->
           <a-input-number
               v-else-if="col == 'concentration'"
-              style="margin: -5px 0"
+              style="width: 100%"
               :disabled="isStop(record)|| isDisabled(record)"
               v-model="record.concentration"
               :min="0"
@@ -140,7 +140,7 @@
           <a-input-number
               v-else-if="col == 'totalnumber'"
               :disabled="isStop(record)|| isDisabled(record)"
-              style="margin: -5px 0"
+              style="width: 100%"
               v-model="record.totalnumber"
               :min="0"
               @change="e => handleChange(e.target.value, record.key, col)"
@@ -149,7 +149,7 @@
           <a-input-number
               v-else-if="col == 'usenumber'"
               :disabled="isStop(record)|| isDisabled(record)"
-              style="margin: -5px 0"
+              style="width: 100%"
               v-model="record.usenumber"
               :min="0"
               @change="e => handleChange(e.target.value, record.key, col)"
@@ -158,7 +158,7 @@
           <a-input-number
               v-else-if="col == 'partsize'"
               :disabled="isStop(record)|| isDisabled(record)"
-              style="margin: -5px 0"
+              style="width: 100%"
               v-model="record.partsize"
               :min="0"
               @change="e => handleChange(e.target.value, record.key, col)"
@@ -167,7 +167,7 @@
           <a-input-number
               v-else-if="col == 'cyclenumber'"
               :disabled="isStop(record)|| isDisabled(record)"
-              style="margin: -5px 0"
+              style="width: 100%"
               v-model="record.cyclenumber"
               :min="0"
               @change="e => handleChange(e.target.value, record.key, col)"
@@ -176,7 +176,7 @@
           <a-input-number
               v-else-if="col == 'uploadsize'"
               :disabled="isStop(record) || isDisabled(record)"
-              style="margin: -5px 0"
+              style="width: 100%"
               v-model="record.uploadsize"
               :min="0"
               @change="e => handleChange(e.target.value, record.key, col)"
@@ -185,7 +185,7 @@
           <a-input-number
               v-else-if="col == 'libsize'"
               :disabled="isStop(record)|| isDisabled(record)"
-              style="margin: -5px 0"
+              style="width: 100%"
               v-model="record.libsize"
               :min="0"
               @change="e => handleChange(e.target.value, record.key, col)"
@@ -711,7 +711,7 @@ export default {
       clom.push({
         title: this.$t("cellLife"),
         dataIndex: 'celllife',
-        width: '100px',
+        width: '150px',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -734,24 +734,24 @@ export default {
           }
         },
       });
-      scorllLength += 100;
+      scorllLength += 150;
       /** 样本使用量(ug)/细胞使用量（细胞个数） */
       clom.push({
         title: this.$t("useNumber"),
         dataIndex: 'usenumber',
-        width: '100px',
+        width: '150px',
         scopedSlots: {customRender: 'usenumber'},
       });
-      scorllLength += 100;
+      scorllLength += 150;
       /** 片段大小（bp） */
       clom.push({
         title: this.$t("partsize"),
         dataIndex: 'partsize',
-        width: '100px',
+        width: '150px',
         scopedSlots: {customRender: 'partsize'},
 
       });
-      scorllLength += 100;
+      scorllLength += 150;
       /** index */
       clom.push({
         title: "index",
@@ -780,15 +780,15 @@ export default {
       clom.push({
         title: this.$t("databasetype2"),
         dataIndex: 'databasetype',
-        width: '100px',
+        width: '200px',
         scopedSlots: {customRender: 'databasetype'},
       });
-      scorllLength += 100;
+      scorllLength += 200;
       /** 文库编号 */
       clom.push({
         title: this.$t("databaseindex"),
         dataIndex: 'databaseindex',
-        width: '100px',
+        width: '200px',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -811,15 +811,15 @@ export default {
           }
         },
       });
-      scorllLength += 100;
+      scorllLength += 200;
       /** 建库人 */
       clom.push({
         title: this.$t("createdbuser"),
         dataIndex: 'createdbuser',
-        width: '100px',
+        width: '150px',
         scopedSlots: {customRender: 'createdbuser'},
       });
-      scorllLength += 100;
+      scorllLength += 150;
       /** 审核人 */
       clom.push({
         title: this.$t("reviewer"),
@@ -1131,7 +1131,9 @@ export default {
       return false;
     },
     isEnd : function (){
-      if (this.process.taskstatu != "70"){
+      if (this.process.taskstatu != "70"
+          && this.process.librarypreparation == this.$store.getters.getUser.id
+      ){
         return true;
       }
       return false;

@@ -18,9 +18,9 @@ var util = {
         if (obj.length == 0) {
             return true;
         }
-        if (obj >= 0){
-            return true;
-        }
+        // if (obj >= 0){
+        //     return true;
+        // }
         return false;
     },
     sampletypes : function (sampletype){

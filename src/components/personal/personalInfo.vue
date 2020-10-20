@@ -40,6 +40,9 @@
           {{role.rolename}}
         </a-tag>
       </a-form-item>
+      <a-form-item :label="$t('department')">
+        <a-input id="department" v-model="user.group.groupname" disabled/>
+      </a-form-item>
     </a-form>
     <submitting :title="$t('submitting')"></submitting>
   </div>
