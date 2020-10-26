@@ -41,7 +41,8 @@ const zh={
     animal_stock_environment : "保存环境",
     save_success : "保存成功！",
     reset : "重置",
-    init : "初始化",
+    init : "未提交",
+
     submit : "提交",
     choose : "请选择",
     selectedAll : "全选",
@@ -130,10 +131,10 @@ const zh={
     principal:"负责人",
     overText : "先导出Excel,按照导出的Excel格式填写",
     unAcceptFile : "不合法文件，请上传.xls或.xlsx文件",
-    samplePreparation :"样品制备",
-    sampleInput : "样品录入",
+    samplePreparation :"样本制备",
+    sampleInput : "样本录入",
     libraryPreparation :"文库制备",
-    dismountData : "测序分析",
+    dismountData : "数据交付",
     bioinformaticsAnalysis : "生信分析",
     sampleMsg : "样本类型",
     nucleicAcid : "核酸",
@@ -191,6 +192,12 @@ const zh={
     analyst : "分析人",
     complete : "完成",
     allcomplete : "已完成",
+    allAllow : "已审核",
+    notAllow : "未审核",
+    pass : "通过",
+    unPass : "不通过",
+    submitted : "已提交",
+
     derivativeindex : "样本衍生编号",
     initSample:"初始样本",
     arrindex : "批次",
@@ -230,6 +237,17 @@ const zh={
     newRole : "新增角色",
     roleName : "角色名称",
     roleIndex : "角色编号",
+    confirmDelete : "一旦删除将不可恢复，是否确认删除？",
+    other : "其他",
+    projectDesc : "项目描述",
+
+    processSelectPre : "1.如果预期负责人不在列表中，请先注册之后再选择！\n2.标有星号（*）的条目为必填项目\n3.邮箱可以从下拉中选择或手动填写",
+    processStep1Tip :"操作说明：1.点击‘新增’增加一行数据，填写内容后，点击‘暂存’保存页面数据。" +
+        "2.也可通过选中数据导出Excel模板，按照模板内容编写数据再进行导入。3.样本编号一栏无需填写，选择‘初始样本’、‘建库类型’之后点击" +
+        "‘暂存’将自动生成‘样本编号’。4.数据填写完成之后可点击‘完成’，数据将进入‘已完成未审核’列表，待创建者审核完成之后，数据进入‘已完成已审核’列表" +
+        "5.选中'已完成已审核列'表中的数据，点击‘样本制备‘进入样本制备环节。",
+    remind : "提醒",
+    repeat : "重复",
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",

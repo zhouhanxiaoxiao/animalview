@@ -10,10 +10,13 @@
         />
         <div slot="content">
           <a-form-item>
-            <a-textarea :rows="4" :value="value" @change="handleChange" />
+            <a-textarea :rows="4" v-model="value"/>
           </a-form-item>
           <a-form-item>
-            <a-button html-type="submit" :loading="submitting" type="primary" @click="handleSubmit">
+            <a-button html-type="submit"
+                      :loading="submitting"
+                      :disabled="this.value.length == 0"
+                      type="primary" @click="handleSubmit('new')">
               Add Comment
             </a-button>
           </a-form-item>
@@ -28,14 +31,46 @@
         <a-list-item slot="renderItem" slot-scope="item">
           <a-comment
               :author="item.user.name"
-              :content="item.comments"
               :datetime="longToStr(item.createtime)"
+              style="width: 100%"
           >
+            <span slot="actions" key="comment-nested-reply-to"
+                  @click="replayId=item.id">Reply to</span>
             <a-avatar
                 slot="avatar"
                 :src="getUserHeadSrc(item.user.id)"
                 :alt="item.user.name"
             />
+            <div slot="content" style="width: 100%">
+              {{item.comments}}
+              <div v-if="replayId == item.id" style="width: 100%">
+                <a-form-item>
+                  <a-textarea :rows="4" v-model="replayText"/>
+                </a-form-item>
+                <a-form-item>
+                  <a-button html-type="submit"
+                            :loading="submitting" type="primary"
+                            :disabled="replayText.length == 0"
+                            @click="handleSubmit('old')">
+                    add reply
+                  </a-button>
+                </a-form-item>
+              </div>
+            </div>
+            <a-comment v-for="reply in item.replys" :key="reply.id"
+                       :author="reply.user.name"
+                       :datetime="longToStr(reply.createtime)"
+                       style="width: 100%"
+            >
+              <a-avatar
+                  slot="avatar"
+                  :src="getUserHeadSrc(reply.user.id)"
+                  :alt="reply.user.name"
+              />
+              <p slot="content">
+                {{reply.comments}}
+              </p>
+            </a-comment>
           </a-comment>
         </a-list-item>
       </a-list>
@@ -55,6 +90,8 @@ export default {
       submitting: false,
       value: '',
       moment,
+      replayId : "",
+      replayText : "",
     }
   },
   beforeMount() {
@@ -79,13 +116,18 @@ export default {
       var d = new Date(date)
       return formatDate(d,"yyyy-MM-dd hh:mm:ss");
     },
-    handleSubmit() {
-      if (!this.value) {
-        return;
-      }
+    handleSubmit(flag) {
       this.submitting = true;
+      var com = "";
+      if (flag == "new"){
+        this.replayId = "";
+        com = this.value;
+      }else {
+        com = this.replayText;
+      }
       var postData = {
-        comment : this.value
+        comment : com,
+        replayId : this.replayId
       }
       var _this = this;
       this.$axios.post("/about/suggest/commit",postData).then(function (res){

@@ -1,5 +1,5 @@
 <template>
-    <div class="modal" tabindex="-1" role="dialog" id="refuseAlert">
+    <div class="modal fade" tabindex="-1" role="dialog" id="refuseAlert">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -11,7 +11,7 @@
                 <div class="modal-body" style="text-align: left">
                     <div class="form-group">
                         <label for="reason">{{$t("reason")}}</label>
-                        <textarea class="form-control" id="reason" rows="3" v-model="reason"></textarea>
+                        <textarea class="form-control" id="reason" rows="3" v-model="reason" maxlength="90" placeholder="90字以内"></textarea>
                     </div>
                     <div class="form-group">
                       <label for="reason">{{$t("remarks")}}</label>

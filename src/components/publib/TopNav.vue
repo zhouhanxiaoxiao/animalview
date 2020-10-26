@@ -24,23 +24,23 @@
               <router-link to="/task"><a class="dropdown-item">{{ $t("nav_mytask") }}</a></router-link>
               <!--                            <a class="dropdown-item">{{$t("newStrain")}}</a>-->
               <!--                            <a class="dropdown-item">{{$t("useTask")}}</a>-->
-              <router-link to="/task/process"><a class="dropdown-item">{{ $t("processHandle") }}</a></router-link>
-<!--              <router-link to="/task/resourceOrder"><a class="dropdown-item">{{ $t("resourceOrder") }}</a></router-link>-->
+              <router-link to="/task/process" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'"><a class="dropdown-item">{{ $t("processHandle") }}</a></router-link>
+              <router-link to="/task/resourceOrder" v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'"><a class="dropdown-item">{{ $t("resourceOrder") }}</a></router-link>
             </div>
           </li>
-<!--          <li class="nav-item dropdown">-->
-<!--            <a class="nav-link dropdown-toggle" href="#" id="personal" role="button" data-toggle="dropdown"-->
-<!--               aria-haspopup="true" aria-expanded="false">-->
-<!--              {{ $t("nav_stock") }}-->
-<!--            </a>-->
-<!--            <div class="dropdown-menu" aria-labelledby="personal">-->
-<!--              <router-link to="/stock/currentStrain"><a class="dropdown-item">{{ $t("current_strain") }}</a>-->
-<!--              </router-link>-->
-<!--&lt;!&ndash;              <router-link to="/personal/animalStock"><a class="dropdown-item">{{ $t("current_stock") }}</a>&ndash;&gt;-->
-<!--              <router-link to="/stock/currentStock"><a class="dropdown-item">{{ $t("current_stock") }}</a>-->
-<!--              </router-link>-->
-<!--            </div>-->
-<!--          </li>-->
+          <li class="nav-item dropdown" v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
+            <a class="nav-link dropdown-toggle" href="#" id="personal" role="button" data-toggle="dropdown"
+               aria-haspopup="true" aria-expanded="false">
+              {{ $t("nav_stock") }}
+            </a>
+            <div class="dropdown-menu" aria-labelledby="personal">
+              <router-link to="/stock/currentStrain"><a class="dropdown-item">{{ $t("current_strain") }}</a>
+              </router-link>
+<!--              <router-link to="/personal/animalStock"><a class="dropdown-item">{{ $t("current_stock") }}</a>-->
+              <router-link to="/stock/currentStock"><a class="dropdown-item">{{ $t("current_stock") }}</a>
+              </router-link>
+            </div>
+          </li>
           <li class="nav-item active">
             <router-link to="/about"><a class="nav-link" href="#">{{ $t("about") }}</a></router-link>
           </li>
@@ -117,7 +117,7 @@ export default {
     },
     userHeadSrc : function (){
       return this.$axios.defaults.baseURL + 'user/userHead/' + this.userId + '.png';
-    }
+    },
   }
 }
 </script>

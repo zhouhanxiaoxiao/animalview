@@ -6,6 +6,10 @@
         :sub-title="process.projectname"
     >
       <template slot="extra">
+        <a-button type="primary" @click="submitData('pass')"
+                  v-if="canPase" :disabled="disabledPass">
+          {{ $t("pass") }}
+        </a-button>
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
                       :disabled="selectedRows.length == 0"
@@ -22,11 +26,11 @@
         <a-button @click="submitData('tmp')" v-if="isEnd">
           {{ $t("tmpSave") }}
         </a-button>
-        <a-button type="primary" @click="subTaskInfo" v-if="isEnd"
-                  :disabled="this.selectedRows.length == 0">
-          {{ $t("submit") }}
+        <a-button type="primary" @click="submitData('complete')" v-if="isEnd"
+                  :disabled="canComplete">
+          {{ $t("complete") }}
         </a-button>
-        <a-button icon="download" @click="downLoad">
+        <a-button icon="download" @click="downLoad" :disabled="this.selectedRowKeys == 0">
           {{ $t("outPut") }}
         </a-button>
         <a-upload
@@ -45,11 +49,11 @@
         </a-upload>
       </template>
       <a-row type="flex">
-<!--        <a-tag color="pink" @click="showSubTask('01')">-->
-<!--          {{ $t("showAll") }}-->
-<!--        </a-tag>-->
+        <a-tag class="pointer" color="pink" @click="showSubTask('03')">
+          {{ $t("allcomplete") + $t("allAllow") }}
+        </a-tag>
         <a-tag class="pointer" color="pink" @click="showSubTask('02')">
-          {{ $t("allcomplete") }}
+          {{ $t("allcomplete") + $t("notAllow") }}
         </a-tag>
         <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
           {{ sub.name }}
@@ -255,7 +259,8 @@ export default {
     },
     downLoad: function () {
       var postData = {
-        processId: this.process.id
+        processId: this.process.id,
+        ids : JSON.stringify(this.selectedRowKeys)
       }
       util.downLoad(postData, "/task/process/downloadAnalysis", "生信分析.xls");
     },
@@ -266,7 +271,7 @@ export default {
       if (col == "sampleindex" || col == "samplename") {
         return true;
       }
-      if (record.currentstatu == "02"){
+      if (record.currentstatu == "02" || record.currentstatu == "03"){
         return true;
       }
       return false;
@@ -294,7 +299,9 @@ export default {
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;
           // _this.subtask = res.data.retMap.subtask;
-          _this.subs = res.data.retMap.subs
+          _this.subs = res.data.retMap.subs;
+          _this.selectedRows = [];
+          _this.selectedRowKeys = [];
         }
       }).catch(function (res) {
         console.log(res);
@@ -613,7 +620,7 @@ export default {
       return true;
     },
     isEnd : function (){
-      if (this.process.taskstatu != "70"
+      if (!this.process.taskstatu.startsWith("7")
           && this.process.dismountdata == this.$store.getters.getUser.id
       ){
         return true;
@@ -625,7 +632,8 @@ export default {
         return true;
       }
       for (var item in this.selectedRows){
-        if (this.selectedRows[item].currentstatu == '02'){
+        if (this.selectedRows[item].currentstatu == '02'
+            || this.selectedRows[item].currentstatu == '03' ){
           return true;
         }
       }
@@ -644,10 +652,29 @@ export default {
         getCheckboxProps: record => ({
           props: {
             // Column configuration not to be checked
-            disabled: record.currentstatu === '02' || record.currentstatu == "09",
+            disabled: record.currentstatu == "09",
           },
         }),
       };
+    },
+    canPase : function (){
+      if (!this.process.taskstatu.startsWith("7")
+          && this.process.creater == this.$store.getters.getUser.id
+      ){
+        return true
+      }
+      return false;
+    },
+    disabledPass(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (this.selectedRows[item].currentstatu != '02'){
+          return true;
+        }
+      }
+      return false;
     },
   },
   watch: {

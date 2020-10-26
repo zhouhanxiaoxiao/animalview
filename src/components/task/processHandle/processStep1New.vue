@@ -1,18 +1,21 @@
 <template>
-  <div>
+  <div class="process-step1">
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
         :title="$t('sampleInput')"
         :sub-title="process.projectname"
     >
       <template slot="extra">
-<!--        <a-button type="primary" @click="subTaskInfo"-->
-<!--                  :disabled="canDelete">-->
-<!--          {{ $t("batchUpdate") }}-->
-<!--        </a-button>-->
+        <a-button type="danger" @click="batchUnPass()" v-if="canPase" :disabled="disabledPass">
+          {{ $t("unPass") }}
+        </a-button>
+        <a-button type="primary" @click="submitData('pass')" v-if="canPase" :disabled="disabledPass">
+          {{ $t("pass") }}
+        </a-button>
         <a-button :disabled="canDelete" type="primary" v-if="canEdit"
-                  data-toggle="collapse" href="#batchUpdate" role="button" aria-expanded="false" aria-controls="batchUpdate">
-          {{$t("batchUpdate")}}
+                  data-toggle="collapse" href="#batchUpdate" role="button" aria-expanded="false"
+                  aria-controls="batchUpdate">
+          {{ $t("batchUpdate") }}
         </a-button>
 
         <a-popconfirm placement="topLeft"
@@ -25,29 +28,28 @@
             <p>{{ $t("areyousureDelete") }}</p>
           </template>
           <a-button :disabled="canDelete" type="danger" v-if="canEdit">
-            {{$t("delete")}}
+            {{ $t("delete") }}
           </a-button>
         </a-popconfirm>
-
         <a-button @click="subTaskInfo"
                   :disabled="canDivide" type="primary" v-if="canEdit">
-          {{$t("divide")}}
+          {{ $t("divide") }}
         </a-button>
 
         <a-button @click="submitData('complete')"
                   :disabled="canDelete" type="primary" v-if="canEdit">
-          {{$t("complete")}}
+          {{ $t("submit") }}
         </a-button>
         <a-button @click="submitData('real')"
-                  :disabled="cansubmit" type="primary" v-if="canEdit">
-          {{$t("submit")}}
+                  :disabled="cansubmit" type="primary" v-if="canPase">
+          {{ $t("samplePreparation") }}
         </a-button>
         <a-button @click="submitData('tmp')" color="orange" v-if="canEdit">
-          {{$t("tmpSave")}}
+          {{ $t("tmpSave") }}
         </a-button>
-<!--        <a-button @click="submitData('real')">-->
-<!--          {{$t("submit")}}-->
-<!--        </a-button>-->
+        <!--        <a-button @click="submitData('real')">-->
+        <!--          {{$t("submit")}}-->
+        <!--        </a-button>-->
         <a-button class="editable-add-btn" v-if="canEdit"
                   @click="handleAdd"
         >
@@ -67,21 +69,27 @@
             :action="this.$axios.defaults.baseURL + '/file/import/sampleInput'"
         >
           <a-tooltip placement="topLeft" :title="$t('overText')">
-            <a-button><a-icon type="upload" />{{ $t("input") }}</a-button>
+            <a-button>
+              <a-icon type="upload"/>
+              {{ $t("input") }}
+            </a-button>
           </a-tooltip>
         </a-upload>
       </template>
       <a-row type="flex">
-<!--        <a-tag color="pink" @click="showSubTask('01')">-->
-<!--          {{ $t("showAll") }}-->
-<!--        </a-tag>-->
-        <a-tag class="pointer" color="pink" @click="showSubTask('02')">
-          {{ $t("allcomplete") }}
+        <!--        <a-tag color="pink" @click="showSubTask('01')">-->
+        <!--          {{ $t("showAll") }}-->
+        <!--        </a-tag>-->
+        <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
+          {{ $t("allAllow") }}
         </a-tag>
-        <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+        <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
+          {{ $t("submitted") }}
+        </a-tag>
+        <a-tag class="pointer" color="#2db7f5" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
           {{ sub.name }}
         </a-tag>
-        <a-tag class="pointer" color="#108ee9" @click="showSubTask('00')">
+        <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
           {{ $t("init") }}
         </a-tag>
       </a-row>
@@ -91,137 +99,137 @@
         <div class="form-row">
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="arrindex">{{$t("arrindex")}}</label>
+            <label for="arrindex">{{ $t("arrindex") }}</label>
             <a-input id="arrindex" v-model="editObj.arrindex"/>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="initSample">{{$t("initSample")}}</label>
+            <label for="initSample">{{ $t("initSample") }}</label>
             <!-- initSample -->
             <a-select id="initSample" style="width: 100%" v-model="editObj.initsample">
               <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
-                {{item.val}}
+                {{ item.val }}
               </a-select-option>
             </a-select>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="sampleName">{{$t("sampleName")}}</label>
+            <label for="sampleName">{{ $t("sampleName") }}</label>
             <a-input id="sampleName" v-model="editObj.samplename"/>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="species">{{$t("species")}}</label>
+            <label for="species">{{ $t("species") }}</label>
             <a-input id="species" v-model="editObj.species"/>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="tissue">{{this.$t("tissue") + $t("animal_stock_resource")}}</label>
+            <label for="tissue">{{ this.$t("tissue") + $t("animal_stock_resource") }}</label>
             <a-input id="tissue" v-model="editObj.tissue"/>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="sampleMsg">{{$t("sampleMsg")}}</label>
+            <label for="sampleMsg">{{ $t("sampleMsg") }}</label>
             <a-select id="sampleMsg" style="width: 100%" v-model="editObj.samplemsg">
               <a-select-option v-for="item in sampletypes(editObj.initsample)" :key="item.key" :value="item.key">
-                {{item.val}}
+                {{ item.val }}
               </a-select-option>
             </a-select>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="sampleStatu">{{$t("sampleStatu")}}</label>
+            <label for="sampleStatu">{{ $t("sampleStatu") }}</label>
             <a-select id="sampleStatu" style="width: 100%" v-model="editObj.samplestatu">
               <a-select-option v-for="item in sampletypes(editObj.initsample)" :key="item.key" :value="item.key">
-                {{item.val}}
+                {{ item.val }}
               </a-select-option>
             </a-select>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="tissueNumber">{{$t("tissueNumber") + "（g）"}}</label>
+            <label for="tissueNumber">{{ $t("tissueNumber") + "（g）" }}</label>
             <div id="tissueNumber">
               <a-input-number v-model="editObj.tissuenumber" style="width: 100%"/>
             </div>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="bloodVolume">{{$t("bloodVolume") + "(ml)"}}</label>
+            <label for="bloodVolume">{{ $t("bloodVolume") + "(ml)" }}</label>
             <div id="bloodVolume">
               <a-input-number v-model="editObj.bloodvolume" style="width: 100%"/>
             </div>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="concentration">{{concentrationName}}</label>
+            <label for="concentration">{{ concentrationName }}</label>
             <div id="concentration">
               <a-input-number v-model="editObj.concentration" style="width: 100%"/>
             </div>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="samplevolume">{{$t("sampleVolume") + "(ul)" }}</label>
+            <label for="samplevolume">{{ $t("sampleVolume") + "(ul)" }}</label>
             <div id="samplevolume">
               <a-input-number v-model="editObj.samplevolume" style="width: 100%"/>
             </div>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="totalnumber">{{totalNumberTitle}}</label>
+            <label for="totalnumber">{{ totalNumberTitle }}</label>
             <div id="totalnumber">
               <a-input-number v-model="editObj.totalnumber" style="width: 100%"/>
             </div>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="celllife">{{$t("cellLife")}}</label>
+            <label for="celllife">{{ $t("cellLife") }}</label>
             <a-input id="celllife" v-model="editObj.celllife"/>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="cellSort">{{$t("cellSort")}}</label>
+            <label for="cellSort">{{ $t("cellSort") }}</label>
             <a-select id="cellSort" style="width: 100%" v-model="editObj.cellsort">
               <a-select-option v-for="item in cellSortMethods" :key="item.key" :value="item.key">
-                {{item.val}}
+                {{ item.val }}
               </a-select-option>
             </a-select>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="databaseType">{{$t("databaseType")}}</label>
+            <label for="databaseType">{{ $t("databaseType") }}</label>
             <!-- 建库类型 -->
-            <a-select  style="width: 100%" id="databaseType" v-model="editObj.databasetype">
+            <a-select style="width: 100%" id="databaseType" v-model="editObj.databasetype">
               <a-select-option v-for="item in databaseTypes(editObj.initsample)" :key="item.key" :value="item.key">
-                {{item.val}}
+                {{ item.val }}
               </a-select-option>
             </a-select>
           </div>
 
           <div class="form-group col-md-3 col-sm-12 col-lg-2">
-            <label for="SequencingPlatform">{{$t("SequencingPlatform")}}</label>
-            <a-select  style="width: 100%" id="SequencingPlatform"
-                       v-model="editObj.sequencingplatform">
+            <label for="SequencingPlatform">{{ $t("SequencingPlatform") }}</label>
+            <a-select style="width: 100%" id="SequencingPlatform"
+                      v-model="editObj.sequencingplatform">
               <a-select-option v-for="item in seqPlants" :key="item.key" :value="item.key">
-                {{item.val}}
+                {{ item.val }}
               </a-select-option>
             </a-select>
           </div>
         </div>
-            <div class="modal-footer" style="text-align: center">
-              <a-popconfirm placement="topLeft"
-                            :ok-text="$t('yes')"
-                            :disabled="selectedRows.length == 0"
-                            :cancel-text="$t('no')"
-                            @confirm="tmpSaveData">
-                <template slot="title">
-                  <p>{{ "数据将保存到页面上，确认无误后点击'暂存'才可以真正保存数据！" }}</p>
-                </template>
-                <a-button type="primary" :disabled="selectedRows.length == 0">
-                  {{$t("confirm")}}
-                </a-button>
-              </a-popconfirm>
+        <div class="modal-footer" style="text-align: center">
+          <a-popconfirm placement="topLeft"
+                        :ok-text="$t('yes')"
+                        :disabled="selectedRows.length == 0"
+                        :cancel-text="$t('no')"
+                        @confirm="tmpSaveData">
+            <template slot="title">
+              <p>{{ "数据将保存到页面上，确认无误后点击'暂存'才可以真正保存数据！" }}</p>
+            </template>
+            <a-button type="primary" :disabled="selectedRows.length == 0">
+              {{ $t("confirm") }}
+            </a-button>
+          </a-popconfirm>
 
-            </div>
+        </div>
       </div>
     </div>
     <a-table :columns="columns"
@@ -269,130 +277,154 @@
           slot-scope="text, record,index"
       >
         <div :key="col">
-            <!-- 样本类型 -->
-            <a-select  style="width: 100%" v-if="col == 'samplemsg'"
-                       v-model="record.samplemsg"
-                       :disabled="isDisabled(record)"
-            >
-              <a-select-option v-for="item in sampletypes(record.initsample)" :key="item.key" :value="item.key">
-                {{item.val}}
-              </a-select-option>
-            </a-select>
-            <!-- 样本状态 -->
-            <a-select  style="width: 100%" v-else-if="col == 'samplestatu'"
-                       v-model="record.samplestatu"
-                       :disabled="isDisabled(record)"
-            >
-              <a-select-option v-for="item in sampleStatu(record.initsample)" :key="item.key" :value="item.key">
-                {{item.val}}
-              </a-select-option>
-            </a-select>
-            <!-- 细胞分选法 -->
-            <a-select  style="width: 100%" v-else-if="col == 'cellsort'"
-                       v-model="record.cellsort"
-                       :disabled="colIsDisabed(record.initsample,'cellsort') || isDisabled(record)"
-            >
-              <a-select-option v-for="item in cellSortMethods" :key="item.key" :value="item.key">
-                {{item.val}}
-              </a-select-option>
-            </a-select>
+          <!-- 样本类型 -->
+          <a-select style="width: 100%" v-if="col == 'samplemsg'"
+                    v-model="record.samplemsg"
+                    :disabled="isDisabled(record)"
+          >
+            <a-select-option v-for="item in sampletypes(record.initsample)" :key="item.key" :value="item.key">
+              {{ item.val }}
+            </a-select-option>
+          </a-select>
+          <!-- 样本状态 -->
+          <a-select style="width: 100%" v-else-if="col == 'samplestatu'"
+                    v-model="record.samplestatu"
+                    :disabled="isDisabled(record)"
+          >
+            <a-select-option v-for="item in sampleStatu(record.initsample)" :key="item.key" :value="item.key">
+              {{ item.val }}
+            </a-select-option>
+          </a-select>
+          <!-- 细胞分选法 -->
+          <a-select style="width: 100%" v-else-if="col == 'cellsort'"
+                    v-model="record.cellsort"
+                    :disabled="colIsDisabed(record.initsample,'cellsort') || isDisabled(record)"
+          >
+            <a-select-option v-for="item in cellSortMethods" :key="item.key" :value="item.key">
+              {{ item.val }}
+            </a-select-option>
+          </a-select>
 
-            <!-- 建库类型 -->
-            <a-select  style="width: 100%" v-else-if="col == 'databasetype'"
-                       v-model="record.databasetype"
-                       :disabled="isDisabled(record)"
+          <!-- 建库类型 -->
+          <a-select style="width: 100%" v-else-if="col == 'databasetype'"
+                    v-model="record.databasetype"
+                    :disabled="isDisabled(record)"
+          >
+            <a-select-option v-for="item in databaseTypes(record.initsample)" :key="item.key" :value="item.key">
+              {{ item.val }}
+            </a-select-option>
+          </a-select>
+          <!-- initSample -->
+          <a-select style="width: 100%" v-else-if="col == 'initsample'"
+                    v-model="record.initsample"
+                    :disabled="isDisabled(record)"
+          >
+            <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
+              {{ item.val }}
+            </a-select-option>
+          </a-select>
+          <!-- species -->
+          <div v-else-if="col == 'species'">
+            <a-select style="width: 100%"
+                      mode="default"
+                      :showSearch="true"
+                      :maxTagCount="1"
+                      v-model="record.species"
+                      :disabled="isDisabled(record)"
             >
-              <a-select-option v-for="item in databaseTypes(record.initsample)" :key="item.key" :value="item.key">
-                {{item.val}}
-              </a-select-option>
+              <a-select-option value="Homo sapiens">Homo sapiens</a-select-option>
+              <a-select-option value="Mus musculus">Mus musculus</a-select-option>
+              <a-select-option value="Drosophila melanogaster">Drosophila melanogaster</a-select-option>
+              <a-select-option value="Drosophila simulans">Drosophila simulans</a-select-option>
+              <a-select-option value="Drosophila yakuba">Drosophila yakuba</a-select-option>
+              <a-select-option value="other">other</a-select-option>
             </a-select>
-            <!-- initSample -->
-            <a-select  style="width: 100%" v-else-if="col == 'initsample'"
-                       v-model="record.initsample"
-                       :disabled="isDisabled(record)"
-            >
-              <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
-                {{item.val}}
-              </a-select-option>
-            </a-select>
-            <!-- 测序平台 -->
-            <a-select  style="width: 100%" v-else-if="col == 'sequencingplatform'"
-                       v-model="record.sequencingplatform"
-                       :disabled="isDisabled(record)"
-            >
-              <a-select-option v-for="item in seqPlants" :key="item.key" :value="item.key">
-                {{item.val}}
-              </a-select-option>
-            </a-select>
-            <a-input-number
-                v-else-if="col == 'samplevolume'"
-                style="margin: -5px 0"
-                v-model="record.samplevolume"
-                :min="0"
-                :disabled="colIsDisabed(record.initsample,'samplevolume') || isDisabled(record)"
-            />
-            <a-input-number
-                v-else-if="col == 'tissuenumber'"
-                style="margin: -5px 0"
-                v-model="record.tissuenumber"
-                :min="0"
-                :disabled="colIsDisabed(record.initsample,'tissuenumber') || isDisabled(record)"
-            />
-            <a-input-number
-                v-else-if="col == 'bloodvolume'"
-                style="margin: -5px 0"
-                v-model="record.bloodvolume"
-                :min="0"
-                :disabled="colIsDisabed(record.initsample,'bloodvolume') || isDisabled(record)"
-            />
-            <a-input-number
-                v-else-if="col == 'concentration'"
-                style="margin: -5px 0"
-                v-model="record.concentration"
-                :min="0"
-                :disabled="colIsDisabed(record.initsample,'concentration') || isDisabled(record)"
-            />
-            <a-input-number
-                v-else-if="col == 'totalnumber'"
-                style="margin: -5px 0"
-                v-model="record.totalnumber"
-                :min="0"
-                :disabled="colIsDisabed(record.initsample,'totalnumber') || isDisabled(record)"
-            />
-            <a-input
-                v-else-if="col != 'index'"
-                style="margin: -5px 0"
-                v-model="record[col]"
-                :disabled="colIsDisabed(record.initsample,col) || isDisabled(record)"
-            />
-            <template v-else>
-              {{ showText(col,text,index,record) }}
-            </template>
+            <a-input v-model="record.otherSpecies" v-if="record.species == 'other'"
+                     :disabled="isDisabled(record)"></a-input>
+          </div>
+          <!-- 测序平台 -->
+          <a-select style="width: 100%" v-else-if="col == 'sequencingplatform'"
+                    v-model="record.sequencingplatform"
+                    :disabled="isDisabled(record)"
+          >
+            <a-select-option v-for="item in seqPlants" :key="item.key" :value="item.key">
+              {{ item.val }}
+            </a-select-option>
+          </a-select>
+          <a-input-number
+              v-else-if="col == 'samplevolume'"
+              style="margin: -5px 0"
+              v-model="record.samplevolume"
+              :min="0"
+              :disabled="colIsDisabed(record.initsample,'samplevolume') || isDisabled(record)"
+          />
+          <a-input-number
+              v-else-if="col == 'tissuenumber'"
+              style="margin: -5px 0"
+              v-model="record.tissuenumber"
+              :min="0"
+              :disabled="colIsDisabed(record.initsample,'tissuenumber') || isDisabled(record)"
+          />
+          <a-input-number
+              v-else-if="col == 'bloodvolume'"
+              style="margin: -5px 0"
+              v-model="record.bloodvolume"
+              :min="0"
+              :disabled="colIsDisabed(record.initsample,'bloodvolume') || isDisabled(record)"
+          />
+          <a-input-number
+              v-else-if="col == 'concentration'"
+              style="margin: -5px 0"
+              v-model="record.concentration"
+              :min="0"
+              :disabled="colIsDisabed(record.initsample,'concentration') || isDisabled(record)"
+          />
+          <a-input-number
+              v-else-if="col == 'totalnumber'"
+              style="margin: -5px 0"
+              v-model="record.totalnumber"
+              :min="0"
+              :disabled="colIsDisabed(record.initsample,'totalnumber') || isDisabled(record)"
+          />
+          <a-input
+              v-else-if="col != 'index'"
+              style="margin: -5px 0"
+              v-model="record[col]"
+              :disabled="colIsDisabed(record.initsample,col) || isDisabled(record)"
+          />
+          <template v-else>
+            {{ showText(col, text, index, record) }}
+          </template>
         </div>
       </template>
       <template slot="operation" slot-scope="text, record">
         <div class="editable-row-operations">
-        <span v-if="record.editable">
-          <a @click="() => save(record.key)">{{$t("save")}}</a>
-          <a-popconfirm title="Sure to cancel?" @confirm="() => cancel(record.key)">
-            <a>{{$t("cancel")}}</a>
-          </a-popconfirm>
-        </span>
-          <span v-else>
-          <a :disabled="editingKey !== ''" @click="() => edit(record.key)">{{$t("edit")}}</a>
-          <a-popconfirm
+          <span v-if="record.currentstatu == '01' || record.currentstatu == '00'">
+            <a @click="submitItem(record,'complete')">{{ $t("submit") }}</a>
+            <a-popconfirm
                 v-if="data.length>1"
                 title="Sure to delete?"
                 @confirm="() => onDelete(record.key)"
             >
-          <a :disabled="editingKey !== ''">{{$t("delete")}}</a>
-        </a-popconfirm>
-        </span>
+              <a>{{ $t("delete") }}</a>
+            </a-popconfirm>
+          </span>
+          <span v-if="record.currentstatu == '02'">
+            <a @click="passItem(record,true)">{{ $t("pass") }}</a>
+            <a @click="passItem(record,false)">{{ $t("unPass") }}</a>
+          </span>
+          <span v-if="record.currentstatu == '08'">
+            <a @click="() => showReason(record.id)">{{ $t("showReason") }}</a>
+          </span>
+          <span v-if="record.currentstatu == '03'">
+            <a @click="() => submitItem(record,'real')">{{ $t("samplePreparation") }}</a>
+          </span>
         </div>
       </template>
     </a-table>
     <sub-task-info @subTaskInfo="startProcess" ref="subTask"></sub-task-info>
     <submitting :title="$t('submitting')" ref="submitting"></submitting>
+    <refuse-alert ref="refuseAlert" :modalTitle="$t('unPass')" @confirmFun="confirmFun"></refuse-alert>
   </div>
 </template>
 
@@ -400,44 +432,46 @@
 import util from "@/components/publib/util";
 import Submitting from "@/components/publib/submitting";
 import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
+import RefuseAlert from "@/components/publib/refuseAlert";
+
 export default {
   name: "processStep1New",
-  components: {SubTaskInfo, Submitting},
-  props : {
-    process : Object
+  components: {RefuseAlert, SubTaskInfo, Submitting},
+  props: {
+    process: Object
   },
   data() {
     this.cacheData = [];
     return {
-      tableLoad:false,
-      data : [],
-      columns : [],
+      tableLoad: false,
+      data: [],
+      columns: [],
       searchInput: null,
       searchedColumn: '',
-      columnNames : [],
-      selectedRowKeys : [],
-      selectedRows : [],
-      scroll :{x:1500},
+      columnNames: [],
+      selectedRowKeys: [],
+      selectedRows: [],
+      scroll: {x: 1500},
       editingKey: '',
-      subs : [],
-      curFlag : "01",
-      subId : "00",
-      editObj : {
-        arrindex : "",
-        initsample : "",
-        samplename : "",
-        species : "",
-        tissue : "",
-        samplemsg : "",
-        samplestatu : "",
-        tissuenumber : 0,
-        bloodvolume : 0,
-        concentration : 0,
-        samplevolume : 0,
-        totalnumber : 0,
-        celllife : "",
-        cellsort : "",
-        databasetype : "",
+      subs: [],
+      curFlag: "01",
+      subId: "00",
+      editObj: {
+        arrindex: "",
+        initsample: "",
+        samplename: "",
+        species: "",
+        tissue: "",
+        samplemsg: "",
+        samplestatu: "",
+        tissuenumber: 0,
+        bloodvolume: 0,
+        concentration: 0,
+        samplevolume: 0,
+        totalnumber: 0,
+        celllife: "",
+        cellsort: "",
+        databasetype: "",
       }
     };
   },
@@ -445,31 +479,42 @@ export default {
     this.initPage();
   },
   methods: {
-    tmpSaveData : function (){
+    batchUnPass : function (){
+      this.$(this.$refs.refuseAlert.$el).modal('show');
+    },
+    showReason: function (id) {
       var _this = this;
-      Object.keys(this.editObj).forEach(function (key){
-        // console.log(key,_this.editObj[key]);
-        for (var i = 0;i<_this.data.length;i++){
-          var selData = _this.data[i];
-          if (selData.currentstatu == "01" && _this.selectedRowKeys.indexOf(selData.key) != -1
-              && !util.isNull(_this.editObj[key])
-          ){
-            selData[key] = _this.editObj[key];
-          }
+      this.$axios.post("/task/process/showStopReason", {detailId: id}).then(function (res) {
+        if (res.data.code != "200") {
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.$error({
+            title: _this.$t("reason"),
+            content: res.data.retMap.reason
+          });
         }
+      }).catch(function (res) {
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
       });
     },
-    deleteInputs : function (){
+    confirmFun : function (reason,remark){
+      console.log(reason,remark);
+      this.$(this.$refs.refuseAlert.$el).modal("hide");
+      var postData = {
+        processId: this.process.id,
+        datas: JSON.stringify(this.selectedRows),
+        type: "unPass",
+        reason : reason,
+        remark : remark
+      };
       var _this = this;
       _this.$(_this.$refs.submitting.$el).modal("show");
-      var postData = {
-        inputIds : this.selectedRowKeys
-      }
-      this.$axios.post("/task/process/deleteInput",postData).then(function (res){
+      this.$axios.post("/task/process/refuseInput",postData).then(function (res){
         _this.$(_this.$refs.submitting.$el).modal("hide");
-        if (res.data.code != "200"){
+        if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
-        }else {
+        } else {
           _this.$message.success(_this.$t("commitSucc"));
           _this.initPage();
         }
@@ -478,29 +523,86 @@ export default {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         // _this.$("#submitting").modal("hide");
         _this.$message.error(_this.$t("systemErr"));
+      });
+    },
+    passItem : function (record,flag){
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      if (flag){
+        this.submitData("pass");
+      }else {
+        // this.submitData("unPass");
+        this.$(this.$refs.refuseAlert.$el).modal("show");
+      }
+    },
+    submitItem: function (record,flag) {
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      this.submitData(flag);
+    },
+    tmpSaveData: function () {
+      var _this = this;
+      Object.keys(this.editObj).forEach(function (key) {
+        // console.log(key,_this.editObj[key]);
+        for (var i = 0; i < _this.data.length; i++) {
+          var selData = _this.data[i];
+          if (selData.currentstatu == "01" && _this.selectedRowKeys.indexOf(selData.key) != -1
+              && !util.isNull(_this.editObj[key])
+          ) {
+            selData[key] = _this.editObj[key];
+          }
+        }
+      });
+    },
+    deleteInputs: function () {
+      var _this = this;
+      _this.$(_this.$refs.submitting.$el).modal("show");
+      var postData = {
+        inputIds: this.selectedRowKeys
+      }
+      this.$axios.post("/task/process/deleteInput", postData).then(function (res) {
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        if (res.data.code != "200") {
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.initPage();
+        }
+      }).catch(function (res) {
+        console.log(res);
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        // _this.$("#submitting").modal("hide");
+        _this.$message.error(_this.$t("systemErr"));
       })
     },
-    isDisabled : function (record){
-      if (!this.canEdit){
+    isDisabled: function (record) {
+      if (!this.canEdit) {
         return true;
       }
-      if (record.currentstatu == "02"){
+      if (record.currentstatu == "02"
+          || record.currentstatu == "03"
+          || record.currentstatu == "08"
+      ) {
         return true;
       }
       return false;
     },
-    downLoad : function (){
+    downLoad: function () {
       var postData = {
-        processId : this.process.id,
-        inputIds : JSON.stringify(this.selectedRowKeys)
+        processId: this.process.id,
+        inputIds: JSON.stringify(this.selectedRowKeys)
       }
       var _this = this;
       this.$axios({
-        url : "/task/process/downloadSampleInput",
-        method : 'post',
-        data : postData,
-        responseType : 'blob'
-      }).then(function (res){
+        url: "/task/process/downloadSampleInput",
+        method: 'post',
+        data: postData,
+        responseType: 'blob'
+      }).then(function (res) {
         let data = res.data;
         if (!data) {
           return
@@ -509,12 +611,12 @@ export default {
         let a = document.createElement('a')
         a.style.display = 'none'
         a.href = url
-        a.setAttribute('download','样品录入.xls')
+        a.setAttribute('download', '样品录入.xls')
         document.body.appendChild(a)
         a.click() //执行下载
         window.URL.revokeObjectURL(a.href)
         document.body.removeChild(a)
-      }).catch(function (res){
+      }).catch(function (res) {
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
@@ -529,125 +631,146 @@ export default {
       clearFilters();
       this.searchText = '';
     },
-    colIsDisabed : function (sampleType,col){
+    colIsDisabed: function (sampleType, col) {
+      if (col == "sampleindex") {
+        return true;
+      }
       if (
           (
               col == "tissuenumber"
               || col == "bloodvolume"
           )
           && sampleType != "02"
-      ){
+      ) {
         return true;
-      }else if (
+      } else if (
           (
               col == "concentration"
               || col == "samplevolume"
               || col == "totalnumber"
           )
-          && sampleType == "02"){
+          && sampleType == "02") {
         return true;
-      }else if (
+      } else if (
           (
               col == "cellsort"
               || col == "celllife"
           )
           && sampleType != "03"
-      ){
+      ) {
         return true;
       }
       return false;
     },
-    subTaskInfo : function (){
+    subTaskInfo: function () {
       this.$(this.$refs.subTask.$el).modal("show");
       // this.$("#subTaskInfo").modal("show");
     },
-    showSubTask : function (subId){
+    showSubTask: function (subId) {
       // this.$router.push({name:"processDetail",query:{subId : subId}});
       this.subId = subId;
       this.initPage();
     },
-
-    startProcess : function (subProcessName,remarks){
+    startProcess: function (subProcessName, remarks) {
       this.$(this.$refs.subTask.$el).modal("hide");
       var postData = {
-        datas : JSON.stringify(this.selectedRows),
-        processId : this.process.id,
-        type : "complete",
-        subProcessName : subProcessName,
-        remarks : remarks
+        datas: JSON.stringify(this.selectedRows),
+        processId: this.process.id,
+        type: "complete",
+        subProcessName: subProcessName,
+        remarks: remarks
       }
 
       var _this = this;
       this.$(this.$refs.submitting.$el).modal("show");
       // this.$("#submitting").modal("show");
-      this.$axios.post("/task/process/startSubTask",postData).then(function (res){
+      this.$axios.post("/task/process/startSubTask", postData).then(function (res) {
         // _this.$("#submitting").modal("hide");
         _this.$(_this.$refs.submitting.$el).modal("hide");
-        if (res.data.code != "200"){
+        if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
-        }else {
+        } else {
           _this.$message.success(_this.$t("commitSucc"));
           _this.initPage();
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         console.log(res);
         _this.$(_this.$refs.submitting.$el).modal("hide");
         // _this.$("#submitting").modal("hide");
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-
-    submitData : function (type){
+    submitData: function (type) {
       var _this = this;
+      this.data.forEach(dat => {
+        if (dat.species == 'other') {
+          dat.species = dat.otherSpecies
+        }
+      });
       var postData = {
-        processId : this.process.id,
-        datas : JSON.stringify(this.data),
-        type : type
+        processId: this.process.id,
+        datas: JSON.stringify(this.data),
+        type: type
       }
-      if (type != "tmp"){
+      if (type != "tmp") {
+        _this.selectedRows.forEach(dat => {
+          if (dat.species == 'other') {
+            dat.species = dat.otherSpecies
+          }
+        })
         postData.datas = JSON.stringify(_this.selectedRows)
       }
-      this.$("#submitting").modal("show");
-      this.$axios.post("/task/process/commitDatas",postData).then(function (res){
-        _this.$("#submitting").modal("hide");
-        if (res.data.code != "200"){
+      // this.$("#submitting").modal("show");
+      this.$(this.$refs.submitting.$el).modal("show");
+      this.$axios.post("/task/process/commitDatas", postData).then(function (res) {
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        if (res.data.code != "200") {
+          if (res.data.code == "E560") {
+            var errMsg = _this.$t("sampleIndex") + _this.$t("repeat") + "：";
+            for (var i = 0; i < res.data.retMap.sameList.length; i++) {
+              var same = res.data.retMap.sameList[i];
+              errMsg += same.sampleindex + ","
+            }
+            _this.$message.error(errMsg);
+            return;
+          }
           _this.$message.error(_this.$t(res.data.code));
-        }else {
+        } else {
           _this.$message.success(_this.$t("commitSucc"));
           _this.selectedRowKeys = [];
           _this.selectedRows = [];
           _this.initPage();
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         console.log(res);
-        _this.$("#submitting").modal("hide");
+        _this.$(_this.$refs.submitting.$el).modal("hide");
         _this.$message.error(_this.$t("systemErr"));
       });
     },
 
-    handBeforeUpload : function (file){
-      if (file.name.indexOf("样本录入-") != 0){
+    handBeforeUpload: function (file) {
+      if (file.name.indexOf("样本录入-") != 0) {
         this.$message.error(this.$t("fileNameErr"));
         return false;
       }
-      if (this.process.sampletype == "01" && file.name.indexOf("-核酸-") == -1){
+      if (this.process.sampletype == "01" && file.name.indexOf("-核酸-") == -1) {
         this.$message.error(this.$t("fileNameErr"));
         return false;
-      }else if (this.process.sampletype == "02" && file.name.indexOf("-组织-") == -1){
+      } else if (this.process.sampletype == "02" && file.name.indexOf("-组织-") == -1) {
         this.$message.error(this.$t("fileNameErr"));
         return false;
-      }else if (this.process.sampletype == "02" && !file.name.indexOf("-组织-") == -1){
+      } else if (this.process.sampletype == "02" && !file.name.indexOf("-组织-") == -1) {
         this.$message.error(this.$t("fileNameErr"));
         return false;
       }
       return true;
     },
-    handUnaccept : function (){
+    handUnaccept: function () {
       this.$message.error(this.$t("unAcceptFile"));
     },
-    handUploadChange :function (dat){
+    handUploadChange: function (dat) {
       // console.log(dat);
-      if (dat.file.status == "done"){
+      if (dat.file.status == "done") {
         this.initPage();
       }
     },
@@ -669,7 +792,7 @@ export default {
       const newData = [...this.data];
       const newCacheData = [...this.cacheData];
       const target = newData.filter(item => key === item.key)[0];
-      if (!this.checkRowData(target)){
+      if (!this.checkRowData(target)) {
         return;
       }
       target.add = false;
@@ -686,10 +809,10 @@ export default {
     cancel(key) {
       const newData = [...this.data];
       const target = newData.filter(item => key === item.key)[0];
-      if (target.add == true){
-        this.editingKey ="";
+      if (target.add == true) {
+        this.editingKey = "";
         this.onDelete(target.key);
-        return ;
+        return;
       }
       this.editingKey = '';
       if (target) {
@@ -698,24 +821,24 @@ export default {
         this.data = newData;
       }
     },
-    checkRowData : function (rowData){
-      if (this.isNull(rowData.samplename)){
+    checkRowData: function (rowData) {
+      if (this.isNull(rowData.samplename)) {
         this.$message.error(this.$t("sampleName") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.species)){
+      if (this.isNull(rowData.species)) {
         this.$message.error(this.$t("species") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.tissue)){
+      if (this.isNull(rowData.tissue)) {
         this.$message.error(this.$t("tissue") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.samplemsg)){
+      if (this.isNull(rowData.samplemsg)) {
         this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.samplestatu)){
+      if (this.isNull(rowData.samplestatu)) {
         this.$message.error(this.$t("sampleStatu") + this.$t("not_null"));
         return false;
       }
@@ -739,104 +862,114 @@ export default {
       //   this.$message.error(this.$t("totalNumber") + this.$t("not_null"));
       //   return false;
       // }
-      if (this.process.sampletype == "03" && this.isNull(rowData.celllife)){
+      if (this.process.sampletype == "03" && this.isNull(rowData.celllife)) {
         this.$message.error(this.$t("celllife") + this.$t("not_null"));
         return false;
       }
-      if (this.process.sampletype == "03" && this.isNull(rowData.cellsort)){
+      if (this.process.sampletype == "03" && this.isNull(rowData.cellsort)) {
         this.$message.error(this.$t("cellsort") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.databasetype)){
+      if (this.isNull(rowData.databasetype)) {
         this.$message.error(this.$t("databaseType") + this.$t("not_null"));
         return false;
       }
-      if (this.isNull(rowData.sequencingplatform)){
+      if (this.isNull(rowData.sequencingplatform)) {
         this.$message.error(this.$t("SequencingPlatform") + this.$t("not_null"));
         return false;
       }
       return true;
     },
-    isNull : function (d){
-      if (d == "" || d == null || d== undefined){
+    isNull: function (d) {
+      if (d == "" || d == null || d == undefined) {
         return true;
       }
       return false;
     },
-    initPage : function (){
+    initPage: function () {
       this.initColumns(this.process.sampletype);
-      if (util.isNull(this.process) || util.isNull(this.process.id)){
-        return ;
+      if (util.isNull(this.process) || util.isNull(this.process.id)) {
+        return;
       }
       var postData = {
-        processId : this.process.id,
-        curFlag : this.curFlag,
-        subId : this.subId
+        processId: this.process.id,
+        curFlag: this.curFlag,
+        subId: this.subId
       }
       var _this = this;
       this.tableLoad = true;
       _this.data = new Array();
-      this.$axios.post("/task/process/sampleInput",postData).then(function (res){
+      this.$axios.post("/task/process/sampleInput", postData).then(function (res) {
         // console.log(res);
         _this.tableLoad = false;
-        if (res.data.code != "200"){
+        if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
-        }else {
+        } else {
           if (res.data.retMap.sampleInputs == undefined
-              ||res.data.retMap.sampleInputs == null
-              ||res.data.retMap.sampleInputs.length == 0){
+              || res.data.retMap.sampleInputs == null
+              || res.data.retMap.sampleInputs.length == 0) {
             // _this.handleAdd();
-          }else {
+          } else {
             _this.editingKey = "";
-            for (var i=0;i<res.data.retMap.sampleInputs.length;i++){
+            for (var i = 0; i < res.data.retMap.sampleInputs.length; i++) {
               var d = res.data.retMap.sampleInputs[i];
               d.key = d.id;
               _this.data.push(d);
             }
-            _this.cacheData = _this.data.map(item => ({ ...item }));
+            _this.cacheData = _this.data.map(item => ({...item}));
             console.log(_this.data);
           }
           _this.subs = res.data.retMap.subs;
           _this.selectedRows = [];
           _this.selectedRowKeys = [];
+          _this.$notification.warning({
+            key: "step1",
+            placement: "bottomRight",
+            message: _this.$t("remind"),
+            description: _this.$t('processStep1Tip'),
+            duration: 60,
+            getContainer: function () {
+              return _this.$(".process-step1")[0];
+            }
+          });
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         console.log(res);
         _this.tableLoad = false;
         _this.$message.error(_this.$t("systemErr"));
       })
     },
-    handleAdd : function (){
+    handleAdd: function () {
       this.editingKey = new Date().getTime();
       const newData = this.createNewRowData();
       newData.key = this.editingKey;
       newData.editable = true;
       newData.add = true;
       this.data = [...this.data, newData];
-      this.cacheData = this.data.map(item => ({ ...item }));
+      this.cacheData = this.data.map(item => ({...item}));
     },
-    createNewRowData : function (){
+    createNewRowData: function () {
       return {
-        index:1,
-        samplename : "",
-        species : "",
-        tissue : "",
-        samplemsg : "",
-        samplestatu : "",
-        tissuenumber : 0,
-        bloodvolume : 0,
-        concentration : 0,
-        samplevolume : 0,
-        totalnumber : 0,
-        celllife:"",
-        cellsort :"",
-        databasetype : "",
-        sequencingplatform : "",
-        remarks : "",
-        files:[]
+        index: 1,
+        samplename: "",
+        species: "",
+        tissue: "",
+        samplemsg: "",
+        samplestatu: "",
+        tissuenumber: 0,
+        bloodvolume: 0,
+        concentration: 0,
+        samplevolume: 0,
+        totalnumber: 0,
+        celllife: "",
+        cellsort: "",
+        databasetype: "",
+        sequencingplatform: "",
+        remarks: "",
+        files: []
       }
     },
-    initColumns : function (type){
+    initColumns: function (type) {
       console.log(type)
       var scorllLength = 0;
       var clom = new Array();
@@ -846,41 +979,41 @@ export default {
         dataIndex: 'index',
         width: '50px',
         fixed: 'left',
-        scopedSlots: { customRender: 'index' },
+        scopedSlots: {customRender: 'index'},
       });
-      scorllLength +=50;
-      /**批次*/
+      scorllLength += 50;
+      // /**批次*/
+      // clom.push({
+      //   title: this.$t("arrindex"),
+      //   dataIndex: 'arrindex',
+      //   width: '150px',
+      //   scopedSlots: {
+      //     filterDropdown: 'filterDropdown',
+      //     filterIcon: 'filterIcon',
+      //     customRender: 'arrindex'
+      //   },
+      //   onFilter: (value, record) =>
+      //       record.arrindex
+      //           .toString()
+      //           .toLowerCase()
+      //           .includes(value.toLowerCase()),
+      //   onFilterDropdownVisibleChange: visible => {
+      //     if (visible) {
+      //       setTimeout(() => {
+      //         this.searchInput.focus();
+      //       }, 0);
+      //     }
+      //   },
+      // });
+      // scorllLength +=150;
+      /**初始样品*/
       clom.push({
-        title: this.$t("arrindex"),
-        dataIndex: 'arrindex',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'arrindex'
-        },
-        onFilter: (value, record) =>
-            record.arrindex
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength +=150;
-      /**初始样本*/
-      clom.push({
-        title: this.$t("initSample"),
+        title: `*` + this.$t("initSample"),
         dataIndex: 'initsample',
         width: '150px',
-        scopedSlots: { customRender: 'initsample' },
+        scopedSlots: {customRender: 'initsample'},
       });
-      scorllLength +=150;
+      scorllLength += 150;
       /**样本名称*/
       clom.push({
         title: this.$t("sampleName"),
@@ -904,7 +1037,7 @@ export default {
           }
         },
       });
-      scorllLength +=150;
+      scorllLength += 150;
       /**样本编号*/
       clom.push({
         title: this.$t("sampleIndex"),
@@ -928,15 +1061,15 @@ export default {
           }
         },
       });
-      scorllLength +=150;
+      scorllLength += 150;
       /**物种*/
       clom.push({
         title: this.$t("species"),
         dataIndex: 'species',
-        width: '100px',
-        scopedSlots: { customRender: 'species' },
+        width: '200px',
+        scopedSlots: {customRender: 'species'},
       });
-      scorllLength += 100;
+      scorllLength += 200;
       /**组织来源*/
       clom.push({
         title: this.$t("tissue") + this.$t("animal_stock_resource"),
@@ -963,125 +1096,125 @@ export default {
       scorllLength += 150;
       /**样本类型*/
       clom.push({
-        title: this.$t("sampleMsg"),
+        title: "*" + this.$t("sampleMsg"),
         dataIndex: 'samplemsg',
         width: '150px',
-        scopedSlots: { customRender: 'samplemsg' },
+        scopedSlots: {customRender: 'samplemsg'},
       });
       scorllLength += 150;
       /**样本状态*/
       clom.push({
-        title: this.$t("sampleStatu"),
+        title: "*" + this.$t("sampleStatu"),
         dataIndex: 'samplestatu',
         width: '150px',
-        scopedSlots: { customRender: 'samplestatu' },
+        scopedSlots: {customRender: 'samplestatu'},
       });
       scorllLength += 150;
 
       // if (type == "02"){
-        /** 组织量（g）*/
-        clom.push({
-          title: this.$t("tissueNumber") + "（g）",
-          dataIndex: 'tissuenumber',
-          width: '130px',
-          scopedSlots: { customRender: 'tissuenumber' },
-        });
-        scorllLength += 130;
+      /** 组织量（g）*/
+      clom.push({
+        title: this.$t("tissueNumber") + "（g）",
+        dataIndex: 'tissuenumber',
+        width: '130px',
+        scopedSlots: {customRender: 'tissuenumber'},
+      });
+      scorllLength += 130;
       // }
       // if (type == "02"){
-        /** 血液体积(ml)*/
-        clom.push({
-          title: this.$t("bloodVolume") + "(ml)",
-          dataIndex: 'bloodvolume',
-          width: '130px',
-          scopedSlots: { customRender: 'bloodvolume' },
-        });
-        scorllLength += 130;
+      /** 血液体积(ml)*/
+      clom.push({
+        title: this.$t("bloodVolume") + "(ml)",
+        dataIndex: 'bloodvolume',
+        width: '130px',
+        scopedSlots: {customRender: 'bloodvolume'},
+      });
+      scorllLength += 130;
       // }
       // if (type != "02"){
-        /** 浓度(ng/ul)/（细胞个数/μl) */
-        clom.push({
-          title: this.concentrationName,
-          dataIndex: 'concentration',
-          width: '130px',
-          scopedSlots: { customRender: 'concentration' },
-        });
-        scorllLength += 130;
+      /** 浓度(ng/ul)/（细胞个数/μl) */
+      clom.push({
+        title: this.concentrationName,
+        dataIndex: 'concentration',
+        width: '130px',
+        scopedSlots: {customRender: 'concentration'},
+      });
+      scorllLength += 130;
       // }
       // if (type != "02"){
-        /** 样本体积(ul) */
-        clom.push({
-          title: this.$t("sampleVolume") + "(ul)",
-          dataIndex: 'samplevolume',
-          width: '130px',
-          scopedSlots: { customRender: 'samplevolume' },
-        });
-        scorllLength += 130;
+      /** 样本体积(ul) */
+      clom.push({
+        title: this.$t("sampleVolume") + "(ul)",
+        dataIndex: 'samplevolume',
+        width: '130px',
+        scopedSlots: {customRender: 'samplevolume'},
+      });
+      scorllLength += 130;
       // }
       // if (type != "02"){
-        /** 核酸/细胞总量（ug/细胞个数） */
-        clom.push({
-          title: this.totalNumberTitle,
-          dataIndex: 'totalnumber',
-          width: '130px',
-          scopedSlots: { customRender: 'totalnumber' },
-        });
-        scorllLength += 130;
+      /** 核酸/细胞总量（ug/细胞个数） */
+      clom.push({
+        title: this.totalNumberTitle,
+        dataIndex: 'totalnumber',
+        width: '130px',
+        scopedSlots: {customRender: 'totalnumber'},
+      });
+      scorllLength += 130;
       // }
       // if (type == "03"){
-        /** 细胞活性 */
-        clom.push({
-          title: this.$t("cellLife"),
-          dataIndex: 'celllife',
-          width: '100px',
-          scopedSlots: {
-            filterDropdown: 'filterDropdown',
-            filterIcon: 'search',
-            customRender: 'celllife'
-          },
-          onFilter: (value, record) =>{
-            if (util.isNull(record.celllife)){
-              return false;
-            }
-            return record.celllife
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase());
-          },
-          onFilterDropdownVisibleChange: visible => {
-            if (visible) {
-              setTimeout(() => {
-                this.searchInput.focus();
-              }, 0);
-            }
-          },
-        });
-        scorllLength += 100;
+      /** 细胞活性 */
+      clom.push({
+        title: this.$t("cellLife"),
+        dataIndex: 'celllife',
+        width: '100px',
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'search',
+          customRender: 'celllife'
+        },
+        onFilter: (value, record) => {
+          if (util.isNull(record.celllife)) {
+            return false;
+          }
+          return record.celllife
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
+      });
+      scorllLength += 100;
       // }
       // if (type == "03"){
-        /** 细胞分选法 */
-        clom.push({
-          title: this.$t("cellSort"),
-          dataIndex: 'cellsort',
-          width: '200px',
-          scopedSlots: { customRender: 'cellsort' },
-        });
-        scorllLength += 200;
+      /** 细胞分选法 */
+      clom.push({
+        title: this.$t("cellSort"),
+        dataIndex: 'cellsort',
+        width: '200px',
+        scopedSlots: {customRender: 'cellsort'},
+      });
+      scorllLength += 200;
       // }
       /**建库类型*/
       clom.push({
-        title: this.$t("databaseType"),
+        title: "*" + this.$t("databaseType"),
         dataIndex: 'databasetype',
         width: '200px',
-        scopedSlots: { customRender: 'databasetype' },
+        scopedSlots: {customRender: 'databasetype'},
       });
       scorllLength += 200;
       /**测序平台*/
       clom.push({
-        title: this.$t("SequencingPlatform"),
+        title: "*" + this.$t("SequencingPlatform"),
         dataIndex: 'sequencingplatform',
         width: '200px',
-        scopedSlots: { customRender: 'sequencingplatform' },
+        scopedSlots: {customRender: 'sequencingplatform'},
       });
       scorllLength += 200;
       /**备注*/
@@ -1089,138 +1222,138 @@ export default {
         title: this.$t("remarks"),
         dataIndex: 'remarks',
         width: '200px',
-        scopedSlots: { customRender: 'remarks' },
+        scopedSlots: {customRender: 'remarks'},
       });
       scorllLength += 200;
-      // if (this.canOperating){
-      //   /**操作*/
-      //   clom.push({
-      //     title: this.$t("operation"),
-      //     dataIndex: 'operation',
-      //     width: '100px',
-      //     fixed: 'right',
-      //     scopedSlots: { customRender: 'operation' },
-      //   });
-      //   scorllLength += 100;
-      // }
+      if (this.canOperating) {
+        /**操作*/
+        clom.push({
+          title: this.$t("operation"),
+          dataIndex: 'operation',
+          width: '150px',
+          fixed: 'right',
+          scopedSlots: {customRender: 'operation'},
+        });
+        scorllLength += 150;
+      }
       this.scroll.x = scorllLength;
       this.columns = clom;
       this.columnNames = new Array();
-      for (var item in clom){
+      for (var item in clom) {
         this.columnNames.push(clom[item].dataIndex);
       }
     },
-    showText : function (clo,text,ind,record){
-      if (clo == "samplemsg"){
-        for (var index in this.sampletypes(record.initsample)){
+    showText: function (clo, text, ind, record) {
+      if (clo == "samplemsg") {
+        for (var index in this.sampletypes(record.initsample)) {
           var item = this.sampletypes[index];
-          if (item.key == text){
+          if (item.key == text) {
             return item.val;
           }
         }
       }
 
-      if (clo == "samplestatu"){
-        for (var statuIndex in this.sampleStatu(record.initsample)){
+      if (clo == "samplestatu") {
+        for (var statuIndex in this.sampleStatu(record.initsample)) {
           var statu = this.sampleStatu[statuIndex];
-          if (statu.key == text){
+          if (statu.key == text) {
             return statu.val;
           }
         }
       }
 
-      if (clo == "cellsort"){
-        for (var cellSortIndex in this.cellSortMethods){
+      if (clo == "cellsort") {
+        for (var cellSortIndex in this.cellSortMethods) {
           var cellSort = this.cellSortMethods[cellSortIndex];
-          if (cellSort.key == text){
+          if (cellSort.key == text) {
             return cellSort.val;
           }
         }
       }
 
-      if (clo == "databasetype"){
-        for (var databaseTypeIndex in this.databaseTypes(record.initsample)){
+      if (clo == "databasetype") {
+        for (var databaseTypeIndex in this.databaseTypes(record.initsample)) {
           var databaseType = this.databaseTypes[databaseTypeIndex];
-          if (databaseType.key == text){
+          if (databaseType.key == text) {
             return databaseType.val;
           }
         }
       }
 
-      if (clo == "sequencingplatform"){
-        for (var seqPlantsIndex in this.seqPlants){
+      if (clo == "sequencingplatform") {
+        for (var seqPlantsIndex in this.seqPlants) {
           var seqPlant = this.seqPlants[seqPlantsIndex];
-          if (seqPlant.key == text){
+          if (seqPlant.key == text) {
             return seqPlant.val;
           }
         }
       }
 
-      if (clo == "initSample"){
-        for (var initSampleIndex in this.sampleInits){
+      if (clo == "initSample") {
+        for (var initSampleIndex in this.sampleInits) {
           var sampleInit = this.sampleInits[initSampleIndex];
-          if (sampleInit.key == sampleInit){
+          if (sampleInit.key == sampleInit) {
             return sampleInit.val;
           }
         }
       }
 
-      if (clo == "index"){
+      if (clo == "index") {
         return ind + 1;
       }
       return text;
     },
-    sampletypes : function (sampleType){
+    sampletypes: function (sampleType) {
       return util.sampletypes(sampleType);
     },
-    sampleStatu : function (sampleType){
+    sampleStatu: function (sampleType) {
 
       return util.sampleStatu(sampleType);
     },
-    databaseTypes : function (sampleType){
+    databaseTypes: function (sampleType) {
       return util.databaseTypes(sampleType);
     },
   },
-  computed : {
-    concentrationName : function (){
-      if (this.process.sampletype == "01"){
+  computed: {
+    concentrationName: function () {
+      if (this.process.sampletype == "01") {
         return this.$t("concentration") + "(ng/ul)";
-      }else{
+      } else {
         return this.$t("concentration") + "(" + this.$t("cellNumber") + "/μl)";
       }
     },
-    totalNumberTitle : function (){
-      if (this.process.sampletype == "01"){
-        return this.$t("nucleicAcid") + this.$t("totalNumber") +"(ug)";
-      }else{
-        return this.$t("cell") + this.$t("totalNumber") +"(" + this.$t("cellNumber") + ")";
+    totalNumberTitle: function () {
+      if (this.process.sampletype == "01") {
+        return this.$t("nucleicAcid") + this.$t("totalNumber") + "(ug)";
+      } else {
+        return this.$t("cell") + this.$t("totalNumber") + "(" + this.$t("cellNumber") + ")";
       }
     },
-    seqPlants : function (){
+    seqPlants: function () {
       return util.seqPlants();
     },
-    sampleInits : function (){
+    sampleInits: function () {
       return util.sampleInits();
     },
-    cellSortMethods : function (){
+    cellSortMethods: function () {
       return util.cellSortMethods();
     },
-    canOperating : function (){
-      if (this.process.taskstatu != "10"){
+    canOperating: function () {
+      if (this.process.taskstatu.startsWith("7")) {
         return false;
       }
       if (!this.$store.getters.isCurrentUser(this.process.sampleinput)
-        && !this.isAdmin
-      ){
+          && !this.isAdmin
+      ) {
         return false;
       }
       return true;
     },
     rowSelection() {
-      const { selectedRowKeys,selectedRows } = this;
+      const {selectedRowKeys, selectedRows} = this;
       return {
-        selectedRowKeys : selectedRowKeys,
-        selectedRows : selectedRows,
+        selectedRowKeys: selectedRowKeys,
+        selectedRows: selectedRows,
         onChange: (selectedRowKeys, selectedRows) => {
           console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
           this.selectedRowKeys = selectedRowKeys;
@@ -1229,69 +1362,92 @@ export default {
         getCheckboxProps: record => ({
           props: {
             // Column configuration not to be checked
-            disabled: record.currentstatu == '00' ,
+            disabled: record.currentstatu == '00',
           },
         }),
       };
     },
-    cansubmit(){
-      if (this.selectedRowKeys.length == 0){
+    cansubmit() {
+      if (this.selectedRowKeys.length == 0) {
         return true;
       }
-      for (var item in this.selectedRows){
-        if (this.selectedRows[item].currentstatu != '02'){
+      for (var item in this.selectedRows) {
+        if (this.selectedRows[item].currentstatu != '03') {
           return true;
         }
       }
       return false;
     },
-    canDivide(){
-      if (this.selectedRowKeys.length == 0){
+
+    canDivide() {
+      if (this.selectedRowKeys.length == 0) {
         return true;
       }
-      for (var item in this.selectedRows){
+      for (var item in this.selectedRows) {
         if (!util.isNull(this.selectedRows[item].subid)
-            || this.selectedRows[item].currentstatu == "02"
-        ){
+            || this.selectedRows[item].currentstatu == "02" || this.selectedRows[item].currentstatu == '03'
+        ) {
           return true;
         }
       }
       return false;
     },
-    canDelete(){
-      if (this.selectedRowKeys.length == 0){
+    canDelete() {
+      if (this.selectedRowKeys.length == 0) {
         return true;
       }
-      for (var item in this.selectedRows){
-        if (this.selectedRows[item].currentstatu == '02'){
+      for (var item in this.selectedRows) {
+        if (this.selectedRows[item].currentstatu == '02'
+            || this.selectedRows[item].currentstatu == '03'
+            || this.selectedRows[item].currentstatu == '08'
+        ) {
           return true;
         }
       }
       return false;
     },
-    canEdit : function (){
-      if (this.process.taskstatu != '70'
+    canEdit: function () {
+      if (!this.process.taskstatu.startsWith("7")
           && this.process.sampleinput == this.$store.getters.getUser.id
-      ){
+      ) {
         return true
       }
       return false;
-    }
+    },
+    canPase: function () {
+      if (!this.process.taskstatu.startsWith("7")
+          && this.process.samplepreparation == this.$store.getters.getUser.id
+      ) {
+        return true
+      }
+      return false;
+    },
+    disabledPass() {
+      if (this.selectedRowKeys.length == 0) {
+        return true;
+      }
+      for (var item in this.selectedRows) {
+        if (this.selectedRows[item].currentstatu != '02') {
+          return true;
+        }
+      }
+      return false;
+    },
   },
-  watch : {
-    process:{
-      handler:function (){
+  watch: {
+    process: {
+      handler: function () {
         // console.log(newVal)
         this.initPage();
       },
-      deep : true
+      deep: true
     }
   }
 }
 </script>
 
 <style scoped>
-  .editable-row-operations a {
-    margin-right: 8px;
-  }
+.editable-row-operations a {
+  margin-right: 8px;
+}
 </style>

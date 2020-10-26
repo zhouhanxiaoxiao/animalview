@@ -1,12 +1,12 @@
 <template>
   <div>
     <top-nav></top-nav>
-    <div class="main-container">
+    <div class="main-container process-detailAll">
       <a-tabs type="card" @change="callback">
         <a-tab-pane key="6" :tab="$t('baseInfo')">
           <process-base-info :process="process"></process-base-info>
         </a-tab-pane>
-        <template v-if="process.taskstatu != 10">
+        <template v-if="process.taskstatu != 10 && process.taskstatu != 21 && process.taskstatu != 22">
           <a-tab-pane key="1" :tab="$t('sampleInput')">
             <process-step1-new :process="process"></process-step1-new>
           </a-tab-pane>
@@ -24,9 +24,15 @@
           </a-tab-pane>
         </template>
         <div slot="tabBarExtraContent">
+          <a-tag class="pointer" color="#f50" v-if="this.process.taskstatu == '71'">
+            {{ "基因组学中心已拒绝：" + this.fail.reason }}
+          </a-tag>
+          <a-tag class="pointer" color="#f50" v-else-if="this.process.taskstatu == '72'">
+            {{ "部门负责人已拒绝：" + this.fail.reason }}
+          </a-tag>
           <a-popconfirm placement="topLeft"
                         :ok-text="$t('yes')"
-                        v-if="this.process.taskstatu != '70'"
+                        v-else-if="!isStop"
                         :cancel-text="$t('no')"
                         @confirm="completeTask">
             <template slot="title">
@@ -61,7 +67,8 @@ export default {
   data : function (){
     return{
       taskId:"",
-      process :{}
+      process :{},
+      fail : {}
     }
   },
   beforeMount() {
@@ -104,6 +111,7 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         }else {
           _this.process = res.data.retMap.process;
+          _this.fail = res.data.retMap.fail;
         }
       }).catch(function (res){
         console.log(res);
@@ -122,6 +130,12 @@ export default {
     getTaskId : function (){
       return this.$route.query.taskId;
     },
+    isStop : function (){
+      if (this.process.taskstatu.startsWith("7")){
+        return true;
+      }
+      return false;
+    }
   },
 }
 </script>

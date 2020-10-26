@@ -33,6 +33,11 @@ Vue.prototype.$md5 = md5;
 // VueCookies.config('1h');
 Vue.prototype.$cookies = VueCookies;
 
+Vue.prototype.$systemFlag = "local";
+// Vue.prototype.$systemFlag = "animal";
+// Vue.prototype.$systemFlag = "seqpro";
+
+
 /*
 * axios 全局设置
 * */

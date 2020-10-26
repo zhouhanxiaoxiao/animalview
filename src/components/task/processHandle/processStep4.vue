@@ -6,6 +6,10 @@
         :sub-title="process.projectname"
     >
       <template slot="extra">
+        <a-button type="primary" @click="submitData('pass')"
+                  v-if="canPase" :disabled="disabledPass">
+          {{ $t("pass") }}
+        </a-button>
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
                       :disabled="selectedRows.length == 0"
@@ -29,7 +33,7 @@
         </a-button>
         <a-button type="primary" @click="submitData('real')" v-if="this.isEnd"
                   :disabled="cansubmit">
-          {{ $t("submit") }}
+          {{ $t("bioinformaticsAnalysis") }}
         </a-button>
         <a-button @click="submitData('tmp')" v-if="this.isEnd">
           {{ $t("tmpSave") }}
@@ -53,11 +57,11 @@
         </a-upload>
       </template>
       <a-row type="flex">
-<!--        <a-tag color="pink" @click="showSubTask('01')">-->
-<!--          {{ $t("showAll") }}-->
-<!--        </a-tag>-->
+        <a-tag class="pointer" color="pink" @click="showSubTask('03')">
+          {{ $t("allcomplete") + $t("allAllow") }}
+        </a-tag>
         <a-tag class="pointer" color="pink" @click="showSubTask('02')">
-          {{ $t("allcomplete") }}
+          {{ $t("allcomplete") + $t("notAllow")}}
         </a-tag>
         <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
           {{ sub.name }}
@@ -270,7 +274,7 @@ export default {
       if (col == "sampleindex" || col == "samplename") {
         return true;
       }
-      if (record.currentstatu == "02"){
+      if (record.currentstatu == "02" || record.currentstatu == "03"){
         return true;
       }
       return false;
@@ -598,7 +602,9 @@ export default {
       }
       for (var item in this.selectedRows){
         if (!util.isNull(this.selectedRows[item].subid)
-            || this.selectedRows[item].currentstatu == "02"){
+            || this.selectedRows[item].currentstatu == "02"
+            || this.selectedRows[item].currentstatu == '03'
+        ){
           return true;
         }
       }
@@ -609,7 +615,7 @@ export default {
         return true;
       }
       for (var item in this.selectedRows){
-        if (this.selectedRows[item].currentstatu != '02'){
+        if (this.selectedRows[item].currentstatu != '03'){
           return true;
         }
       }
@@ -620,14 +626,14 @@ export default {
         return true;
       }
       for (var item in this.selectedRows){
-        if (this.selectedRows[item].currentstatu == '02'){
+        if (this.selectedRows[item].currentstatu == '02' || this.selectedRows[item].currentstatu == '03'){
           return true;
         }
       }
       return false;
     },
     isEnd : function (){
-      if (this.process.taskstatu != "70"
+      if (!this.process.taskstatu.startsWith("7")
           && this.process.dismountdata == this.$store.getters.getUser.id
       ){
         return true;
@@ -652,7 +658,25 @@ export default {
         }),
       };
     },
-
+    canPase : function (){
+      if (!this.process.taskstatu.startsWith("7")
+          && this.process.creater == this.$store.getters.getUser.id
+      ){
+        return true
+      }
+      return false;
+    },
+    disabledPass(){
+      if (this.selectedRowKeys.length == 0){
+        return true;
+      }
+      for (var item in this.selectedRows){
+        if (this.selectedRows[item].currentstatu != '02'){
+          return true;
+        }
+      }
+      return false;
+    },
   },
   watch: {
     process: {

@@ -2,17 +2,18 @@
     <div>
         <top-nav></top-nav>
         <div class="task-main">
-            <task-table :page-location="'mytask'"></task-table>
+<!--            <task-table :page-location="'mytask'"></task-table>-->
+          <task-table-new :page-location="'mytask'"></task-table-new>
         </div>
     </div>
 </template>
 
 <script>
     import TopNav from "@/components/publib/TopNav";
-    import TaskTable from "@/components/task/TaskTable";
+    import TaskTableNew from "@/components/task/taskMain/taskTableNew";
     export default {
         name: "TaskMain",
-        components: {TaskTable, TopNav}
+        components: {TaskTableNew, TopNav}
     }
 </script>
 

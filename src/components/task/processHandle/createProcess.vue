@@ -4,16 +4,41 @@
     <div class="process-container">
       <a-divider orientation="left">{{$t("processMsg")}}</a-divider>
       <div class="form-row">
-        <div class="form-group col-md-4 col-sm-12 col-lg-3">
-          <label for="projectName">{{ $t("projectName") }}</label>
-          <a-input id="projectName" v-model="projectName"/>
+        <div class="form-group col-md-6 col-sm-12 col-lg-4">
+          <label for="projectName">
+            {{ $t("projectName") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
+          <a-input :addon-before="projectPre" id="projectName"
+                   placeholder="例：果蝇近缘物种雌雄脑睾丸子宫转录组"
+                   v-model="projectName"/>
         </div>
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
-          <label for="dataType">{{ $t("dataType") }}</label>
-          <a-input id="dataType" v-model="dataType"/>
+          <label for="dataType">
+            {{ $t("dataType") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
+<!--          <a-input id="dataType" v-model="dataType"/>-->
+          <div id="dataType">
+            <a-select style="width: 100%" v-model="dataType">
+              <a-select-option v-for="dt in dataTypes" :key="dt" :value="dt">
+                {{ dt }}
+              </a-select-option>
+            </a-select>
+          </div>
+        </div>
+        <div class="form-group col-md-4 col-sm-12 col-lg-2" v-if="this.dataType == '其他'">
+          <label for="otherdataType">
+            {{ $t("other") + $t("dataType") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
+          <a-input id="otherdataType" v-model="otherDataType"/>
         </div>
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
-          <label for="principal">{{ $t("principal") }}</label>
+          <label for="principal">
+            {{ $t("principal") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
           <div id="principal">
             <a-select  style="width: 100%" v-model="principal" :disabled="true">
               <a-select-option v-for="user in users" :key="user.id" :value="user.id">
@@ -23,7 +48,10 @@
           </div>
         </div>
         <div class="form-group col-md-4 col-sm-12 col-lg-3">
-          <label for="email">{{ $t("userEmail") }}</label>
+          <label for="email">
+            {{ $t("userEmail") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
           <a-tooltip placement="topRight" title="数据下载及报告分析完成后将发送相关信息至以上邮箱列表" :mouseLeaveDelay="1"
                      :auto-adjust-overflow="true">
           <a-select id="email" mode="tags" style="width: 100%" v-model="emails">
@@ -35,7 +63,10 @@
         </div>
         <!--样本类型-->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
-          <label for="sampleMsg">{{$t("sampleMsg")  }}</label>
+          <label for="sampleMsg">
+            {{$t("sampleMsg")  }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
           <div id="sampleMsg">
             <a-select style="width: 100%" v-model="sampleMsg" mode="multiple">
               <a-select-option value="01">{{$t("nucleicAcid") + $t("sample")}}</a-select-option>
@@ -44,11 +75,19 @@
             </a-select>
           </div>
         </div>
-        <div style="display: none">
+        <!--  项目描述  -->
+        <div class="form-group-sm col-md-12">
+          <label for="projectDesc">{{$t("projectDesc")}}</label>
+          <textarea class="form-control" id="projectDesc" v-model="projectDesc" maxlength="1000"
+                    placeholder="例：果蝇近缘物种雌雄脑睾丸子宫转录组" rows="3"></textarea>
+        </div>
         <a-divider orientation="left">{{$t("staffing")}}</a-divider>
         <!--样品录入负责人-->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
-          <label for="sampleInput">{{$t("sampleInput") + $t("principal") }}</label>
+          <label for="sampleInput">
+            {{$t("sampleInput") + $t("principal") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
           <div id="sampleInput">
             <a-select  style="width: 100%" v-model="sampleInput">
               <a-select-option v-for="user in users" :key="user.id">
@@ -59,7 +98,10 @@
         </div>
         <!--样品制备负责人-->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
-          <label for="samplePreparation">{{$t("samplePreparation") + $t("principal") }}</label>
+          <label for="samplePreparation">
+            {{$t("samplePreparation") + $t("principal") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
           <div id="samplePreparation">
             <a-select  style="width: 100%" v-model="samplePreparation">
               <a-select-option v-for="user in users" :key="user.id">
@@ -70,7 +112,10 @@
         </div>
         <!--文库制备负责人-->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
-          <label for="libraryPreparation">{{$t("libraryPreparation") + $t("principal") }}</label>
+          <label for="libraryPreparation">
+            {{$t("libraryPreparation") + $t("principal") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
           <div id="libraryPreparation">
             <a-select style="width: 100%" v-model="libraryPreparation">
               <a-select-option v-for="user in users" :key="user.id">
@@ -81,7 +126,10 @@
         </div>
         <!--下机数据负责人-->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
-          <label for="dismountData">{{$t("dismountData") + $t("principal") }}</label>
+          <label for="dismountData">
+            {{$t("dismountData") + $t("principal") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
           <div id="dismountData">
             <a-select style="width: 100%" v-model="dismountData">
               <a-select-option v-for="user in users" :key="user.id">
@@ -92,7 +140,10 @@
         </div>
         <!--生信分析负责人-->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
-          <label for="bioinformaticsAnalysis">{{$t("bioinformaticsAnalysis") + $t("principal") }}</label>
+          <label for="bioinformaticsAnalysis">
+            {{$t("bioinformaticsAnalysis") + $t("principal") }}
+            <icon-font style="font-size: 20px" type="icon-bitian" />
+          </label>
           <div id="bioinformaticsAnalysis">
             <a-select style="width: 100%" v-model="bioinformaticsAnalysis">
               <a-select-option v-for="user in users" :key="user.id">
@@ -105,11 +156,9 @@
         <!--  备注  -->
         <div class="form-group-sm col-md-12">
           <label for="remarks">{{$t("remarks")}}</label>
-          <textarea class="form-control" id="remarks" v-model="remarks" placeholder="例：我很着急" rows="3"></textarea>
-        </div>
+          <textarea class="form-control" id="remarks" v-model="remarks" placeholder="例：我很着急" rows="3" maxlength="1000"></textarea>
         </div>
       </div>
-
       <div class="modal-footer" style="margin-top: 20px">
         <button type="button" class="btn btn-primary"
                 @click="submitData">{{$t("submit")}}</button>
@@ -122,12 +171,21 @@
 <script>
 import TopNav from "@/components/publib/TopNav";
 import Submitting from "@/components/publib/submitting";
+import {formatDate} from "@/components/publib/date";
+import {Icon} from "ant-design-vue";
+import util from "@/components/publib/util";
+
+const IconFont = Icon.createFromIconfontCN({
+  scriptUrl: util.alicdnIcon,
+});
+
 export default {
   name: "createProcess",
-  components: {Submitting, TopNav},
+  components: {Submitting, TopNav,IconFont},
   data:function (){
     return{
       projectName :"",
+      otherDataType : "",
       dataType:"",
       principal:this.$store.getters.getUser.id,
       emails : [],
@@ -135,10 +193,12 @@ export default {
       remarks:"",
       sampleMsg : [],
       samplePreparation:"",
-      libraryPreparation:"",
-      sampleInput : "",
+      libraryPreparation : "",
+      sampleInput : this.$store.getters.getUser.id,
       dismountData : "",
-      bioinformaticsAnalysis :""
+      bioinformaticsAnalysis :"",
+      projectDesc : "",
+      dataTypes : ["10x单细胞转录组","普通转录组","全基因组","全外显子组","HiC基因组","其他"]
     }
   },
   beforeMount : function() {
@@ -152,6 +212,19 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         }else {
           _this.users = res.data.retMap.users;
+          _this.samplePreparation = util.getuserIdByRole(_this.users,"31");
+          _this.libraryPreparation = util.getuserIdByRole(_this.users,"32");
+          _this.dismountData = util.getuserIdByRole(_this.users,"33");
+          _this.bioinformaticsAnalysis = util.getuserIdByRole(_this.users,"34");
+          _this.$notification.warning({
+            message: _this.$t("remind"),
+            description: _this.$t('processSelectPre'),
+            duration : null,
+            placement:"bottomRight",
+            getContainer : function (){
+              return _this.$(".process-container")[0];
+            }
+          });
         }
       }).catch(function (res){
         console.log(res);
@@ -163,7 +236,7 @@ export default {
         return ;
       }
       var postData = {
-        projectName : this.projectName,
+        projectName : this.projectPre + this.projectName,
         dataType : this.dataType,
         principal : this.principal,
         emails : this.emails,
@@ -173,7 +246,11 @@ export default {
         dismountData : this.dismountData,
         bioinformaticsAnalysis : this.bioinformaticsAnalysis,
         sampleInput : this.sampleInput,
-        remarks : this.remarks
+        remarks : this.remarks,
+        projectDesc : this.projectDesc
+      };
+      if (postData.dataType == "其他"){
+        postData.dataType = this.otherDataType;
       }
       var _this = this;
       _this.$("#submitting").modal("show");
@@ -209,6 +286,10 @@ export default {
         this.$message.error(this.$t("dataType") + this.$t("not_null"));
         return false;
       }
+      if (this.dataType == "其他" && this.otherDataType == ""){
+        this.$message.error(this.$t("other") + this.$t("dataType") + this.$t("not_null"));
+        return false;
+      }
       if (this.principal == ""){
         this.$message.error(this.$t("principal") + this.$t("not_null"));
         return false;
@@ -220,22 +301,22 @@ export default {
         this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
         return false;
       }
-      // if (this.samplePreparation == ""){
-      //   this.$message.error(this.$t("samplePreparation") + this.$t("not_null"));
-      //   return false;
-      // }
-      // if (this.libraryPreparation == ""){
-      //   this.$message.error(this.$t("libraryPreparation") + this.$t("not_null"));
-      //   return false;
-      // }
-      // if (this.dismountData == ""){
-      //   this.$message.error(this.$t("dismountData") + this.$t("not_null"));
-      //   return false;
-      // }
-      // if (this.bioinformaticsAnalysis == ""){
-      //   this.$message.error(this.$t("bioinformaticsAnalysis") + this.$t("not_null"));
-      //   return false;
-      // }
+      if (this.samplePreparation == ""){
+        this.$message.error(this.$t("samplePreparation") + this.$t("not_null"));
+        return false;
+      }
+      if (this.libraryPreparation == ""){
+        this.$message.error(this.$t("libraryPreparation") + this.$t("not_null"));
+        return false;
+      }
+      if (this.dismountData == ""){
+        this.$message.error(this.$t("dismountData") + this.$t("not_null"));
+        return false;
+      }
+      if (this.bioinformaticsAnalysis == ""){
+        this.$message.error(this.$t("bioinformaticsAnalysis") + this.$t("not_null"));
+        return false;
+      }
       return true;
     }
   },
@@ -249,6 +330,13 @@ export default {
           }
         }
       }
+    },
+  },
+  computed : {
+    projectPre : function (){
+      return this.$store.getters.getUser.group.groupname + "-"
+          + this.$store.getters.getUser.name + "-"
+          + formatDate(new Date(),"yyyyMM") + "-";
     },
   }
 }
