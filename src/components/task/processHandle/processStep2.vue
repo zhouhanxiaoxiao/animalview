@@ -38,7 +38,7 @@
           {{ $t("submit") }}
         </a-button>
         <a-button type="primary" @click="submitData('real')"
-                  v-if="isEnd"
+                  v-if="canPase"
                   :disabled="cansubmit">
           {{ $t("libraryPreparation") }}
         </a-button>
@@ -62,18 +62,26 @@
         </a-upload>
       </template>
       <a-row type="flex">
-        <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
-          {{ $t("allAllow") }}
-        </a-tag>
-        <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-          {{ $t("submitted") }}
-        </a-tag>
-        <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
-          {{ sub.name }}
-        </a-tag>
-        <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
-          {{ $t("init") }}
-        </a-tag>
+        <a-tooltip>
+          <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
+            {{ $t("allAllow") + "(" + operators.creater.name + ")"}}
+          </a-tag>
+          <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
+            {{ $t("submitted") + "(" + operators.creater.name + ")"}}
+          </a-tag>
+          <template v-if="isEnd">
+            <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+              {{ sub.name }}
+            </a-tag>
+          </template>
+          <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
+            {{ $t("init") + "(" + operators.make.name + ")"}}
+          </a-tag>
+          <template slot="title">
+            {{$t("process.tagListTip")}}
+          </template>
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
       </a-row>
     </a-page-header>
     <a-table :columns="columns"
@@ -83,6 +91,84 @@
              :row-selection="rowSelection"
              :pagination="false"
              size="middle">
+      <!--   自定义列名 开始  -->
+
+      <template slot="transformSampleTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.transformTip")}}
+          </template>
+          {{$t("transformSample")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <template slot="derivativeindexTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.derivativeindexTip")}}
+          </template>
+          {{$t("derivativeindex")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <template slot="testDateTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{$t("testDate")}}
+      </template>
+
+      <template slot="concentrationTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{"浓度(ng/ul)/（细胞个数/μl)"}}
+      </template>
+
+      <template slot="sampleVolumeTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{this.$t("sampleVolume") + "(ul)"}}
+      </template>
+
+      <template slot="totalNumberTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{"核酸/细胞总量（ug/细胞个数）"}}
+      </template>
+
+      <template slot="cellLifeTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{$t("cellLife")}}
+      </template>
+
+      <template slot="checkResultTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{$t("checkResult")}}
+      </template>
+
+      <template slot="checkUserTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{$t("checkUser")}}
+      </template>
+
+      <template slot="reviewerTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{$t("reviewer")}}
+      </template>
+
+      <template slot="databaseTypeTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{$t("databaseType")}}
+      </template>
+
+      <template slot="operationTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.operationTip")}}
+          </template>
+          {{$t("operation")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <!--   自定义列名 结束  -->
       <div
           slot="filterDropdown"
           slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -144,7 +230,7 @@
           <a-select  style="width: 100%" v-else-if="col == 'transform'"
                      v-model="record.transform"
                      :disabled="isStop(record) || !isTissu(record) || isDisabled(record)"
-
+                     @change="sampleInitChange(record)"
           >
             <a-select-option v-for="item in transformSamples" :key="item.key" :value="item.key">
               {{item.val}}
@@ -202,7 +288,7 @@
                     :disabled="isStop(record) || isDisabled(record)"
                     @change="e => handleChange(e.target.value, record.key, col)"
           >
-            <a-select-option v-for="item in databaseTypes(record.initsample)" :key="item.key" :value="item.key">
+            <a-select-option v-for="item in databaseTypes(record.initsample,record.transform)" :key="item.key" :value="item.key">
               {{ item.val }}
             </a-select-option>
           </a-select>
@@ -224,14 +310,32 @@
               :min="0"
               @change="e => handleChange(e.target.value, record.key, col)"
           />
-          <a-input-number
-              v-else-if="col == 'concentration'"
-              style="width: 100%"
-              v-model="record.concentration"
-              :disabled="isStop(record)|| isDisabled(record)"
-              :min="0"
-              @change="e => handleChange(e.target.value, record.key, col)"
-          />
+
+          <a-input v-else-if="col == 'concentration'"
+                   :disabled="isStop(record)|| isDisabled(record)"
+                   v-model="record.concentration"
+          >
+            <a-select slot="addonAfter" default-value="ng/ul"
+                      v-model="record.concentrationunit"
+                      :disabled="isStop(record)|| isDisabled(record)"
+                      style="width:130px">
+              <a-select-option value="ng/ul">
+                ng/ul
+              </a-select-option>
+              <a-select-option value="细胞个数/μl">
+                细胞个数/μl
+              </a-select-option>
+            </a-select>
+          </a-input>
+
+<!--          <a-input-number-->
+<!--              v-else-if="col == 'concentration'"-->
+<!--              style="width: 100%"-->
+<!--              v-model="record.concentration"-->
+<!--              :disabled="isStop(record)|| isDisabled(record)"-->
+<!--              :min="0"-->
+<!--              @change="e => handleChange(e.target.value, record.key, col)"-->
+<!--          />-->
           <a-input-number
               v-else-if="col == 'totalnumber'"
               style="width: 100%"
@@ -269,20 +373,36 @@
       <template slot="operation" slot-scope="text, record">
         <div class="editable-row-operations">
           <span>
-            <a @click="showReason(record.id)" v-if="isStop(record)">{{ $t("showReason") }}</a>
+            <a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a" v-if="record.currentstatu == '03'"/>
+            <a-icon type="clock-circle" theme="twoTone" two-tone-color="#FFCC00" v-if="record.currentstatu == '02'"/>
+            <a-icon type="close-circle" theme="twoTone" two-tone-color="#eb2f96" v-if="record.currentstatu == '07'"/>
+            <a-icon type="stop" theme="twoTone" two-tone-color="#CC0000" v-if="record.currentstatu == '09'"/>
             &nbsp;
-            <a @click="showStopAlert(record.id)" v-if="!isStop(record) && !isDisabled(record)">{{ $t("stop") }}</a>
+          </span>
+          <span v-if="record.currentstatu == '03'">
             &nbsp;
-            <a @click="showFileList(record.id)" >{{ "查看附件" }}</a>
+            <a-badge :count="record.libNum">
+              <a @click="() => submitItem(record,'real')" :disabled="!canPase">{{ $t("libraryPreparation") }}</a>
+            </a-badge>
             &nbsp;
           </span>
           <span v-if="record.currentstatu == '02'">
             &nbsp;
-            <a @click="passItem(record,true)">{{ $t("pass") }}</a>
+            <a @click="passItem(record,true)" :disabled="!canPase">{{ $t("pass") }}</a>
             &nbsp;
-            <a @click="passItem(record,false)">{{ $t("unPass") }}</a>
+            <a @click="passItem(record,false)" :disabled="!canPase">{{ $t("unPass") }}</a>
             &nbsp;
           </span>
+          <span>
+            &nbsp;
+            <a @click="showReason(record.id)" v-if="isStop(record)">{{ $t("showReason") }}</a>
+            &nbsp;
+            <a @click="showStopAlert(record.id)" v-if="!isStop(record) && !isDisabled(record)">{{ $t("stop") }}</a>
+            &nbsp;
+            <a @click="showFileList(record.id)" >{{ "附件" }}</a>
+            &nbsp;
+          </span>
+
         </div>
       </template>
     </a-table>
@@ -301,10 +421,15 @@ import Submitting from "@/components/publib/submitting";
 import RefuseAlert from "@/components/publib/refuseAlert";
 import ShowFilelist from "@/components/publib/showFilelist";
 import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
+import {Icon} from "ant-design-vue";
+
+const IconFont = Icon.createFromIconfontCN({
+  scriptUrl: util.alicdnIcon,
+});
 
 export default {
   name: "processStep2",
-  components: {SubTaskInfo, ShowFilelist, RefuseAlert, Submitting},
+  components: {SubTaskInfo, ShowFilelist, RefuseAlert, Submitting,IconFont},
   props: {
     taskId: String,
     process: Object,
@@ -328,13 +453,24 @@ export default {
       curFlag : "01",
       subProcessName : "",
       remarks : "",
-      subId : "00"
+      subId : "00",
+      operators : {},
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
+    sampleInitChange : function (record){
+      record.databasetype = "";
+    },
+    submitItem: function (record,flag) {
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      this.submitData(flag);
+    },
     passItem : function (record,flag){
       this.selectedRows = new Array();
       this.selectedRows.push(record);
@@ -412,6 +548,7 @@ export default {
       if (record.currentstatu == "02"
           || record.currentstatu == "03"
           || record.currentstatu == "09"
+          || record.currentstatu == "07"
       ){
         return true;
       }
@@ -496,17 +633,16 @@ export default {
       this.$(this.$refs.refuseAlert.$el).modal("show");
     },
     stopProcess : function (reason,remark){
-      this.$("#refuseAlert").modal("hide");
+      // this.$("#refuseAlert").modal("hide");
+      this.$(this.$refs.refuseAlert.$el).modal("hide");
       var postData = {
         makeId : this.stopId,
         reason : reason,
         remark : remark
       }
       var _this = this;
-      // this.$("#submitting").modal("show");
       this.$(this.$refs.submitting.$el).modal("show");
       this.$axios.post("/task/process/stopMake",postData).then(function (res){
-        // _this.$("#submitting").modal("hide");
         _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
@@ -515,7 +651,6 @@ export default {
           _this.initPage();
         }
       }).catch(function (res){
-        // _this.$("#submitting").modal("hide");
         _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
@@ -553,10 +688,58 @@ export default {
       }else if (
           col == "samplename"
           || col == "selfnumber"
+          || col == "species"
+          || col == "tissue"
       ){
         return true;
       }
       return false;
+    },
+    checkNull : function (list){
+      for (var i=0;i<list.length;i++){
+        var item = list[i];
+        if (util.isNull(item.testdate)){
+          this.$message.error(this.$t("testDate") +this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(item.concentration)){
+          this.$message.error("浓度(ng/ul)/（细胞个数/μl)" +this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(item.concentrationunit)){
+          this.$message.error("浓度单位" +this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(item.samplevolume)){
+          this.$message.error(this.$t("sampleVolume") + "(ul)" +this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(item.totalnumber)){
+          this.$message.error("核酸/细胞总量（ug/细胞个数）" +this.$t("not_null"));
+          return false;
+        }
+        if ((item.initsample == "03" || item.transform == "03") && util.isNull(item.celllife)){
+          this.$message.error(this.$t("cellLife") +this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(item.checkresult)){
+          this.$message.error(this.$t("checkResult") +this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(item.checkuser)){
+          this.$message.error(this.$t("checkUser") +this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(item.reviewer)){
+          this.$message.error(this.$t("reviewer") +this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(item.databasetype)){
+          this.$message.error(this.$t("databaseType") +this.$t("not_null"));
+          return false;
+        }
+      }
+      return true;
     },
     submitData: function (flag) {
       var postData = {
@@ -572,6 +755,12 @@ export default {
       }
       var _this = this;
       // this.$("#submitting").modal("show");
+
+      if (flag == "complete"){
+        if (!this.checkNull(this.selectedRows)){
+          return ;
+        }
+      }
       this.$(this.$refs.submitting.$el).modal("show");
       this.$axios.post("/task/process/submitMakes", postData).then(function (res) {
         console.log(res);
@@ -582,9 +771,21 @@ export default {
         } else {
           _this.$message.success(_this.$t("commitSucc"));
           _this.value = "";
-          _this.selectedRowKeys = [];
-          _this.selectedRows = [];
-          _this.initPage();
+          if (flag == "pass"){
+            _this.$confirm({
+              title: _this.$t("process.passTip") + _this.$t("libraryPreparation") + "?",
+              content: _this.$t("process.passContextTip") + _this.$t("libraryPreparation"),
+              onOk() {
+                _this.submitData("real");
+              },
+              onCancel() {
+                _this.initPage();
+              },
+              class: 'test',
+            });
+          }else {
+            _this.initPage();
+          }
           // window.location.reload();
         }
       }).catch(function (res) {
@@ -625,6 +826,7 @@ export default {
           _this.allUsers = res.data.retMap.allUsers;
           // _this.subTask = res.data.retMap.subtask;
           _this.subs = res.data.retMap.subs;
+          _this.operators = res.data.retMap.operators;
           _this.selectedRows = [];
           _this.selectedRowKeys = [];
         }
@@ -657,7 +859,8 @@ export default {
       scorllLength +=150;
       /**转化样本*/
       clom.push({
-        title: this.$t("transformSample"),
+        // title: this.$t("transformSample"),
+        slots : {title : "transformSampleTitle"},
         dataIndex: 'transform',
         width: '150px',
         scopedSlots: { customRender: 'transform' },
@@ -717,9 +920,9 @@ export default {
       scorllLength += 150;
       /**样本衍生编号*/
       clom.push({
-        title: this.$t("derivativeindex"),
         dataIndex: 'derivativeindex',
         width: '150px',
+        slots : {title : "derivativeindexTitle"},
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -801,7 +1004,7 @@ export default {
       scorllLength += 150;
       /**检测日期*/
       clom.push({
-        title: this.$t("testDate"),
+        slots : {title : "testDateTitle"},
         dataIndex: 'testdate',
         width: '150px',
         scopedSlots: {
@@ -829,15 +1032,17 @@ export default {
       scorllLength += 150;
       /** 浓度(ng/ul)/（细胞个数/μl) */
       clom.push({
-        title: this.concentrationName,
+        // title: this.concentrationName,
+        slots : {title : "concentrationTitle"},
         dataIndex: 'concentration',
-        width: '150px',
+        width: '250px',
         scopedSlots: {customRender: 'concentration'},
       });
-      scorllLength += 150;
+      scorllLength += 250;
       /** 样本体积(ul) */
       clom.push({
-        title: this.$t("sampleVolume") + "(ul)",
+        // title: this.$t("sampleVolume") + "(ul)",
+        slots : {title : "sampleVolumeTitle"},
         dataIndex: 'samplevolume',
         width: '150px',
         scopedSlots: {customRender: 'samplevolume'},
@@ -845,18 +1050,46 @@ export default {
       scorllLength += 150;
       /** 核酸/细胞总量（ug/细胞个数） */
       clom.push({
-        title: this.totalNumberTitle,
+        // title: this.totalNumberTitle,
+        slots : {title : "totalNumberTitle"},
         dataIndex: 'totalnumber',
         width: '150px',
         scopedSlots: {customRender: 'totalnumber'},
       });
       scorllLength += 150;
+
+      /** 260/280 */
+      clom.push({
+        title: "260/280",
+        dataIndex: 'm260280',
+        width: '150px',
+        scopedSlots: {customRender: 'm260280'},
+      });
+      scorllLength += 150;
+      /** 260/230 */
+      clom.push({
+        title: "260/230",
+        dataIndex: 'm260230',
+        width: '150px',
+        scopedSlots: {customRender: 'm260230'},
+      });
+      scorllLength += 150;
+      /** RQN */
+      clom.push({
+        title: "RQN",
+        dataIndex: 'rqn',
+        width: '150px',
+        scopedSlots: {customRender: 'rqn'},
+      });
+      scorllLength += 150;
+
       // if (type == "03") {
         /** 细胞活性 */
         clom.push({
-          title: this.$t("cellLife"),
+          // title: this.$t("cellLife"),
+          slots : {title : "cellLifeTitle"},
           dataIndex: 'celllife',
-          width: '100px',
+          width: '200px',
           scopedSlots: {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
@@ -879,7 +1112,7 @@ export default {
             }
           },
         });
-        scorllLength += 100;
+        scorllLength += 200;
       // }
       // if (type == "03") {
         /** 细胞分选法 */
@@ -903,7 +1136,8 @@ export default {
       scorllLength += 150;
       /** 检测结果 */
       clom.push({
-        title: this.$t("checkResult"),
+        // title: this.$t("checkResult"),
+        slots : {title : "checkResultTitle"},
         dataIndex: 'checkresult',
         width: '150px',
         scopedSlots: {customRender: 'checkresult'},
@@ -919,7 +1153,8 @@ export default {
       scorllLength += 200;
       /** 检测员 */
       clom.push({
-        title: this.$t("checkUser"),
+        // title: this.$t("checkUser"),
+        slots : {title : "checkUserTitle"},
         dataIndex: 'checkuser',
         width: '150px',
         scopedSlots: {customRender: 'checkuser'},
@@ -927,7 +1162,8 @@ export default {
       scorllLength += 150;
       /** 审核人 */
       clom.push({
-        title: this.$t("reviewer"),
+        // title: this.$t("reviewer"),
+        slots : {title : "reviewerTitle"},
         dataIndex: 'reviewer',
         width: '150px',
         scopedSlots: {customRender: 'reviewer'},
@@ -935,7 +1171,8 @@ export default {
       scorllLength += 150;
       /**建库类型*/
       clom.push({
-        title: this.$t("databaseType"),
+        // title: this.$t("databaseType"),
+        slots : {title : "databaseTypeTitle"},
         dataIndex: 'databasetype',
         width: '200px',
         scopedSlots: {customRender: 'databasetype'},
@@ -976,7 +1213,8 @@ export default {
 
       /**操作*/
       clom.push({
-        title: this.$t("operation"),
+        // title: this.$t("operation"),
+        slots : {title : "operationTitle"},
         dataIndex: 'operation',
         width: '150px',
         fixed: 'right',
@@ -1002,15 +1240,6 @@ export default {
     onDelete(key) {
       const data = [...this.data];
       this.data = data.filter(item => item.key !== key);
-    },
-    edit(key) {
-      const newData = [...this.data];
-      const target = newData.filter(item => key === item.key)[0];
-      this.editingKey = key;
-      if (target) {
-        target.editable = true;
-        this.data = newData;
-      }
     },
     save(key) {
       const newData = [...this.data];
@@ -1108,11 +1337,17 @@ export default {
       }
       return true;
     },
-    databaseTypes: function (type) {
-      return util.databaseTypes(type);
+    databaseTypes: function (type,trans) {
+      if (util.isNull(trans)){
+        return util.databaseTypes(type);
+      }else {
+        return util.databaseTypes(trans);
+      }
     },
     isStop : function (record){
-      if (record.currentstatu == "09"){
+      if (record.currentstatu == "09"
+          || record.currentstatu == "07"
+      ){
         return true;
       }
       return false;
@@ -1220,7 +1455,8 @@ export default {
         getCheckboxProps: record => ({
           props: {
             // Column configuration not to be checked
-            disabled: record.currentstatu == "09",
+            disabled: record.currentstatu == "07"
+                || record.currentstatu == "09",
           },
         }),
       };
@@ -1311,7 +1547,11 @@ export default {
         return true;
       }
       for (var item in this.selectedRows){
-        if (this.selectedRows[item].currentstatu == '02' || this.selectedRows[item].currentstatu == '03'){
+        if (this.selectedRows[item].currentstatu == '02'
+            || this.selectedRows[item].currentstatu == '03'
+            || this.selectedRows[item].currentstatu == '09'
+            || this.selectedRows[item].currentstatu == '07'
+        ){
           return true;
         }
       }
@@ -1322,7 +1562,7 @@ export default {
     },
     isEnd : function (){
       if (!this.process.taskstatu.startsWith("7")
-          && this.process.samplepreparation == this.$store.getters.getUser.id
+          && this.$store.getters.isCurrentUser(this.process.samplepreparation)
       ){
         return true;
       }
@@ -1330,7 +1570,7 @@ export default {
     },
     canPase : function (){
       if (!this.process.taskstatu.startsWith("7")
-          && this.process.creater == this.$store.getters.getUser.id
+          && this.$store.getters.isCurrentUser(this.process.creater)
       ){
         return true
       }

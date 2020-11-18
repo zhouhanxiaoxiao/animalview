@@ -98,7 +98,8 @@ export default {
     },
     showDetail: function (task) {
       if (task.tasktype == "02"){
-        this.$router.push({name:"askDetail",query:{taskId:task.id}});
+        // this.$router.push({name:"askDetail",query:{taskId:task.id}});
+        this.$router.push({name:"askTaskMain",query:{taskId:task.id}});
       }else if (task.tasktype == "01"){
         this.$router.push({name:"userAllow",query:{taskId:task.id}});
       }else if (task.tasktype == "03"){

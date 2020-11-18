@@ -9,10 +9,10 @@
           <a-input v-model="process.projectname" :disabled="true"/>
         </a-tooltip>
       </div>
-      <div class="form-group col-md-4 col-sm-12 col-lg-2">
-        <label for="dataType">{{ $t("dataType") }}</label>
-        <a-input id="dataType" v-model="process.datatype" :disabled="true"/>
-      </div>
+<!--      <div class="form-group col-md-4 col-sm-12 col-lg-2">-->
+<!--        <label for="dataType">{{ $t("dataType") }}</label>-->
+<!--        <a-input id="dataType" v-model="process.datatype" :disabled="true"/>-->
+<!--      </div>-->
       <div class="form-group col-md-4 col-sm-12 col-lg-2">
         <label for="principal">{{ $t("principal") }}</label>
         <div id="principal">
@@ -25,7 +25,7 @@
       </div>
       <div class="form-group col-md-4 col-sm-12 col-lg-3">
         <label for="email">{{ $t("userEmail") }}</label>
-        <a-tooltip placement="topRight" title="数据下载及报告分析完成后将发送相关信息至以上邮箱列表"
+        <a-tooltip placement="topRight" :title="$t('process.emailsTip')"
                    :mouseLeaveDelay="1"
                    :auto-adjust-overflow="true">
           <div id="email">
@@ -36,23 +36,31 @@
         </a-tooltip>
       </div>
       <!--样本类型-->
-      <div class="form-group col-md-4 col-sm-12 col-lg-2">
-        <label for="sampleMsg">{{$t("sampleMsg")  }}</label>
-        <div id="sampleMsg">
-          <a-select style="width: 100%" v-model="sampleTypes" mode="multiple" :disabled="true">
-            <a-select-option value="01">{{$t("nucleicAcid") + $t("sample")}}</a-select-option>
-            <a-select-option value="02">{{$t("tissue") + $t("sample")}}</a-select-option>
-            <a-select-option value="03">{{$t("cell") + $t("sample")}}</a-select-option>
-          </a-select>
-        </div>
-      </div>
+<!--      <div class="form-group col-md-4 col-sm-12 col-lg-2">-->
+<!--        <label for="sampleMsg">{{$t("sampleMsg")  }}</label>-->
+<!--        <div id="sampleMsg">-->
+<!--          <a-select style="width: 100%" v-model="sampleTypes" mode="multiple" :disabled="true">-->
+<!--            <a-select-option value="01">{{$t("nucleicAcid") + $t("sample")}}</a-select-option>-->
+<!--            <a-select-option value="02">{{$t("tissue") + $t("sample")}}</a-select-option>-->
+<!--            <a-select-option value="03">{{$t("cell") + $t("sample")}}</a-select-option>-->
+<!--          </a-select>-->
+<!--        </div>-->
+<!--      </div>-->
       <!--  项目描述  -->
       <div class="form-group-sm col-md-12">
         <label for="projectDesc">{{$t("projectDesc")}}</label>
         <textarea class="form-control" id="projectDesc" v-model="process.projectdesc" maxlength="1000"
                   placeholder="例：果蝇近缘物种雌雄脑睾丸子宫转录组" rows="3" :disabled="true"></textarea>
       </div>
-      <a-divider orientation="left">{{$t("staffing")}}</a-divider>
+      <a-divider orientation="left">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.preSelectTip")}}
+          </template>
+          {{$t("staffing")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </a-divider>
       <!--样品录入负责人-->
       <div class="form-group col-md-4 col-sm-12 col-lg-2">
         <label for="sampleInput">{{$t("sampleInput") + $t("principal") }}</label>
@@ -161,7 +169,8 @@ export default {
       refuseFlag : "",
       reason : "",
       remark : "",
-      fail : {}
+      fail : {},
+      groupReviewer : []
     }
   },
   beforeMount() {
@@ -189,16 +198,17 @@ export default {
           _this.task = res.data.retMap.task;
           _this.fail = res.data.retMap.fail;
           _this.groupAdmin = res.data.retMap.groupAdmin;
-          _this.$notification.warning({
-            key:"processBase",
-            placement:"bottomRight",
-            message: _this.$t("remind"),
-            description: _this.$t('processSelectPre'),
-            duration : 60,
-            getContainer : function (){
-              return _this.$(".process-detailAll")[0];
-            }
-          });
+          _this.groupReviewer = res.data.retMap.groupReviewer;
+          // _this.$notification.warning({
+          //   key:"processBase",
+          //   placement:"bottomRight",
+          //   message: _this.$t("remind"),
+          //   description: _this.$t('processSelectPre'),
+          //   duration : 60,
+          //   getContainer : function (){
+          //     return _this.$(".process-detailAll")[0];
+          //   }
+          // });
         }
       }).catch(function (res){
         console.log(res);
@@ -221,7 +231,7 @@ export default {
       this.$(this.$refs.refuse.$el).modal("show");
     },
     updateProcessByPi : function (flag){
-      if (flag == "confirm" || !this.checkPre()){
+      if (flag == "confirm" && !this.checkPre()){
         return ;
       }
       var _this = this;
@@ -270,7 +280,7 @@ export default {
       return  true;
     },
     updateProcess : function (flag){
-      if (flag == "confirm" || !this.checkPre()){
+      if (flag == "confirm" && !this.checkPre()){
         return ;
       }
       var postData = {
@@ -311,19 +321,22 @@ export default {
   computed : {
     isNotConfirm : function (){
       if (
-          (this.process.taskstatu == "10" || this.process.taskstatu == "21")
-          && this.task.currentuser == this.$store.getters.getUser.id
+          (this.process.taskstatu == "21")
+          && this.$store.getters.isReviewer
       ){
         return false;
       }
       return true;
     },
     isPInotConfirm : function (){
-      if (
-          (this.process.taskstatu == "10" || this.process.taskstatu == "22")
-          && this.groupAdmin.id == this.$store.getters.getUser.id
-      ){
-        return false;
+      for (var i = 0;i<this.groupReviewer.length;i++){
+        var reviewer = this.groupReviewer[i];
+        if (
+            (this.process.taskstatu == "10")
+            && reviewer.id == this.$store.getters.getUser.id
+        ){
+          return false;
+        }
       }
       return true;
     },

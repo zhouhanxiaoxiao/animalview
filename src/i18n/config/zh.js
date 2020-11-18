@@ -19,20 +19,21 @@ const zh={
     verificationStatuErr: "验证码输入错误",
     verificationStatuOK : "验证通过",
     registerSucc : "注册成功，请等待管理员审核！",
+    workReservation : "工作预约",
     edit:"编辑",
     delete:"删除",
     save:"保存",
     input : "导入",
     nav_hello : "你好",
     nav_home : "主页",
-    nav_task : "任务",
-    nav_mytask : "我的任务",
+    nav_task : "任务中心",
+    nav_mytask : "执行状态",
     nav_personal : "个人中心",
     nav_stock : "库存中心",
     personnal_btn_enter:"录入",
     personnal_btn_stock:"库存",
-    current_stock: "现有库存",
-    current_strain: "现有品系",
+    current_stock: "扩繁品系",
+    current_strain: "保种品系",
     animal_stock_stockID : "编号",
     animal_stock_genotype : "基因型",
     animal_stock_resource : "来源",
@@ -42,6 +43,7 @@ const zh={
     save_success : "保存成功！",
     reset : "重置",
     init : "未提交",
+    fail : "失败",
 
     submit : "提交",
     choose : "请选择",
@@ -124,7 +126,7 @@ const zh={
     animalName : "物种",
     useType : "用途",
     supporter : "材料提供人员",
-    processHandle : "流程管理",
+    processHandle : "测序提交",
     processMsg : "项目信息",
     projectName : "项目名称",
     dataType : "数据类型",
@@ -134,6 +136,7 @@ const zh={
     samplePreparation :"样本制备",
     sampleInput : "样本录入",
     libraryPreparation :"文库制备",
+    uploadConfirm : "上机确认",
     dismountData : "数据交付",
     bioinformaticsAnalysis : "生信分析",
     sampleMsg : "样本类型",
@@ -240,14 +243,19 @@ const zh={
     confirmDelete : "一旦删除将不可恢复，是否确认删除？",
     other : "其他",
     projectDesc : "项目描述",
+    processAllConfirm : "总览",
 
-    processSelectPre : "1.如果预期负责人不在列表中，请先注册之后再选择！\n2.标有星号（*）的条目为必填项目\n3.邮箱可以从下拉中选择或手动填写",
+    support : "供应商",
+
+    processSelectPre : "1.如果预期负责人不在列表中，请先注册之后再选择！\n2.\n3.邮箱可以从下拉中选择或手动填写",
     processStep1Tip :"操作说明：1.点击‘新增’增加一行数据，填写内容后，点击‘暂存’保存页面数据。" +
         "2.也可通过选中数据导出Excel模板，按照模板内容编写数据再进行导入。3.样本编号一栏无需填写，选择‘初始样本’、‘建库类型’之后点击" +
         "‘暂存’将自动生成‘样本编号’。4.数据填写完成之后可点击‘完成’，数据将进入‘已完成未审核’列表，待创建者审核完成之后，数据进入‘已完成已审核’列表" +
         "5.选中'已完成已审核列'表中的数据，点击‘样本制备‘进入样本制备环节。",
     remind : "提醒",
     repeat : "重复",
+    history : "历史记录",
+    overDate : "过期时间",
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",
@@ -263,7 +271,26 @@ const zh={
     E520 : "基因型已存在！",
     E550 : "部门名称已存在！",
     E551 : "角色名称重复",
-    E552 : "角色编号重复"
-
+    E552 : "角色编号重复",
+    process : {
+        addnewrowTip: "填写完数据之后，请点击‘暂存’按钮保存数据！",
+        allStep :"工作流程",
+        processTip : "操作提示",
+        emailsTip : "数据下载及报告分析完成后将发送相关信息至以上邮箱列表。若列表中无预期邮箱，可以手动输入邮箱！",
+        preSelectTip : "如果预期负责人不在列表中，请先注册之后再选择！",
+        projectInfoTip : "标有星号（*）的条目为必填项目",
+        sampleInitTip : "请先选择此列，再进行其他项填写！若修改此列，将清空‘样本类型’、‘样本状态’、‘建库类型’",
+        transformTip : "若修改此列，将清空‘建库类型’列",
+        sampleIndexTip : "请先填写‘初始样本’、‘样本类型’、‘建库类型’。点击‘暂存’生成此列。",
+        speciesTip : "若选择‘其他’，请填写NCBI标准名称。",
+        derivativeindexTip : "若初始样本为‘组织样本’，请先选择‘转化样本’、‘建库类型’，点击‘暂存’生成此列。",
+        passTip : "是否将这些条目提交至",
+        passContextTip : "若不提交，后续可在‘已审核’列表中选中相应条目进入",
+        beforeBioTip : "提交生信分析之前，请先联系",
+        dropdownTip : "若导入，必须严格按照下拉文本填写！",
+        operationTip : "已审核列表中红色圆圈中的的数字表示已提交次数。",
+        tagListTip : "括号中为当前列表操作人",
+        overDateTip : "超过此时间，数据链接将自动失效！"
+    }
 }
 export default zh;

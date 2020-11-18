@@ -21,6 +21,8 @@ import processDetailNew from "@/components/task/processHandle/processDetailNew";
 import errorPage from "@/components/publib/errorPage";
 import currentStock from "@/components/stockcenter/currentStock";
 import currentStrainNew from "@/components/stockcenter/currentStrainNew";
+import history from "@/components/history/history";
+import askTaskMain from "@/components/task/askTask/askTaskMain";
 
 /*配置路由*/
 const routes=[
@@ -36,12 +38,14 @@ const routes=[
     {path: '/stock/currentStock',name:"currentStock",component: currentStock,meta: {index: 0}},
     {path: '/personal/main',name:"personalMain",component: personalMain,meta: {index: 0}},
     {path: '/task/askDetail',name:"askDetail",component: askDetail,meta: {index: 0}},
+    {path: '/task/askTaskMain',name:"askTaskMain",component: askTaskMain,meta: {index: 0}},
     {path: '/error',name:"error",component: errorPage,meta: {index: 0}},
     {path: '/task/partnerDetail',name:"partnerDetail",component: partnerDetail,meta: {index: 0}},
     {path: '/task/processDetail',name:"processDetail",component: processDetail,meta: {index: 0}},
     {path: '/task/processInit',name:"processInit",component: processInit,meta: {index: 0}},
     {path: '/task/processDetailNew',name:"processDetailNew",component: processDetailNew,meta: {index: 0}},
     {path: '/task/userAllow',name:"userAllow",component: userallow,meta: {index: 0}},
+    {path: '/task/history',name: "history",component: history,meta: {index : 0}},
     // {path: '/stock/currentStrain',component: CurrentStrain,meta: {index: 0}},
     {path: '/stock/currentStrain',component: currentStrainNew,meta: {index: 0}},
     {path: '/task/resourceOrder',name:"resource",component: resource,meta: {index: 0}},

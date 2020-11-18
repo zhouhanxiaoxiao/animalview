@@ -25,7 +25,8 @@
               <!--                            <a class="dropdown-item">{{$t("newStrain")}}</a>-->
               <!--                            <a class="dropdown-item">{{$t("useTask")}}</a>-->
               <router-link to="/task/process" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'"><a class="dropdown-item">{{ $t("processHandle") }}</a></router-link>
-              <router-link to="/task/resourceOrder" v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'"><a class="dropdown-item">{{ $t("resourceOrder") }}</a></router-link>
+              <router-link to="/task/resourceOrder" v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'"><a class="dropdown-item">{{ $t("workReservation") }}</a></router-link>
+              <router-link to="/task/history" v-if="this.$systemFlag == 'local'"><a class="dropdown-item">{{ $t("history") }}</a></router-link>
             </div>
           </li>
           <li class="nav-item dropdown" v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
@@ -129,6 +130,7 @@ export default {
   width: 100%;
   top: 0px;
   z-index: 99;
+  box-shadow: 0 5px 4px -4px #C0C0C0;
 }
 
 li {

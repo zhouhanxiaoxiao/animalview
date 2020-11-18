@@ -57,7 +57,8 @@ name: "partnerDetail",
       records :[],
       partner :{},
       fail : {},
-      task : {}
+      task : {},
+      supporter :{}
     }
   },
   beforeMount() {
@@ -88,6 +89,7 @@ name: "partnerDetail",
           _this.partner = res.data.retMap.partner;
           _this.fail = res.data.retMap.fail;
           _this.task = res.data.retMap.task;
+          _this.supporter = res.data.retMap.supporter;
         }
       }).catch(function (res){
         console.log(res);
@@ -171,7 +173,7 @@ name: "partnerDetail",
       return this.$route.query.taskId;
     },
     showTitle : function (){
-      return this.creater.name + "提出的协作请求！";
+      return this.creater.name + "向您（" + this.supporter.name + "）提出的协作请求！";
     },
     subTitle : function (){
       var sub = "时间："

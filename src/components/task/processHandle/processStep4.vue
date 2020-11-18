@@ -2,10 +2,21 @@
   <div>
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
-        :title="$t('dismountData')"
         :sub-title="process.projectname"
     >
+      <template slot="title">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.beforeBioTip") + bioAnalysis.name + "(" + bioAnalysis.email + ")"}}
+          </template>
+          {{$t('dismountData')}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
       <template slot="extra">
+        <a-button type="danger" @click="batchUnPass()" v-if="canPase" :disabled="disabledPass">
+          {{ $t("unPass") }}
+        </a-button>
         <a-button type="primary" @click="submitData('pass')"
                   v-if="canPase" :disabled="disabledPass">
           {{ $t("pass") }}
@@ -29,9 +40,9 @@
         </a-button>
         <a-button type="primary" @click="submitData('complete')" v-if="this.isEnd"
                   :disabled="canComplete">
-          {{ $t("complete") }}
+          {{ $t("submit") }}
         </a-button>
-        <a-button type="primary" @click="submitData('real')" v-if="this.isEnd"
+        <a-button type="primary" @click="submitData('real')" v-if="canPase"
                   :disabled="cansubmit">
           {{ $t("bioinformaticsAnalysis") }}
         </a-button>
@@ -57,18 +68,24 @@
         </a-upload>
       </template>
       <a-row type="flex">
-        <a-tag class="pointer" color="pink" @click="showSubTask('03')">
-          {{ $t("allcomplete") + $t("allAllow") }}
-        </a-tag>
-        <a-tag class="pointer" color="pink" @click="showSubTask('02')">
-          {{ $t("allcomplete") + $t("notAllow")}}
-        </a-tag>
-        <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
-          {{ sub.name }}
-        </a-tag>
-        <a-tag class="pointer" color="#108ee9" @click="showSubTask('00')">
-          {{ $t("init") }}
-        </a-tag>
+        <a-tooltip>
+          <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
+            {{ $t("allAllow") + "(" + operators.creater.name + ")"}}
+          </a-tag>
+          <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
+            {{ $t("submitted") + "(" + operators.creater.name + ")"}}
+          </a-tag>
+          <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+            {{ sub.name }}
+          </a-tag>
+          <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
+            {{ $t("init") + "(" + operators.dis.name + ")"}}
+          </a-tag>
+          <template slot="title">
+            {{$t("process.tagListTip")}}
+          </template>
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
       </a-row>
     </a-page-header>
     <a-table :columns="columns"
@@ -78,6 +95,27 @@
              :scroll="scroll"
              :pagination="false"
              size="middle">
+
+      <template slot="operationTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.operationTip")}}
+          </template>
+          {{$t("operation")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <template slot="overDateTip">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.overDateTip")}}
+          </template>
+          {{$t("overDate")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
       <div
           slot="filterDropdown"
           slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -125,7 +163,13 @@
               {{ item.val }}
             </a-select-option>
           </a-select>
-          <!--          <template v-if="record.editable">-->
+
+          <!-- 过期时间 -->
+          <a-date-picker v-else-if="col == 'lasttime'"
+                         format="YYYY-MM-DD"
+                         :disabled="isDisabled(col,record)"
+                         v-model="record.lasttime"/>
+
           <!-- 序号 -->
           <a-input
               v-else-if="col != 'index'"
@@ -135,48 +179,54 @@
               :value="text"
               @change="e => handleChange(e.target.value, record.key, col)"
           />
-
           <template v-else>
             {{ showText(col, text, index) }}
           </template>
-          <!--          </template>-->
-
-          <!--          <template v-else>-->
-          <!--            {{ showText(col,text,index) }}-->
-          <!--          </template>-->
         </div>
       </template>
-<!--      <template slot="operation" slot-scope="text, record">-->
-<!--        <div class="editable-row-operations">-->
-<!--        <span v-if="record.editable">-->
-<!--          <a @click="() => save(record.key)">{{ $t("save") }}</a>-->
-<!--           &nbsp;-->
-<!--          <a-popconfirm title="Sure to cancel?" @confirm="() => cancel(record.key)">-->
-<!--            <a>{{ $t("cancel") }}</a>-->
-<!--          </a-popconfirm>-->
-<!--        </span>-->
-<!--          <span v-else>-->
-<!--          <a :disabled="editingKey !== ''" @click="() => edit(record.key)">{{ $t("edit") }}</a>-->
-<!--          &nbsp;-->
-<!--            <a-popconfirm-->
-<!--                v-if="data.length>1"-->
-<!--                title="Sure to delete?"-->
-<!--                @confirm="() => onDelete(record.key)"-->
-<!--            >-->
-<!--          <a :disabled="editingKey !== ''">{{ $t("delete") }}</a>-->
-<!--        </a-popconfirm>-->
-<!--        </span>-->
-<!--        </div>-->
-<!--      </template>-->
+      <template slot="operation" slot-scope="text, record">
+        <div class="editable-row-operations">
+          <span>
+            <a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a" v-if="record.currentstatu == '03'"/>
+            <a-icon type="clock-circle" theme="twoTone" two-tone-color="#FFCC00" v-if="record.currentstatu == '02'"/>
+            <a-icon type="close-circle" theme="twoTone" two-tone-color="#eb2f96" v-if="record.currentstatu == '07'"/>
+            <a-icon type="stop" theme="twoTone" two-tone-color="#CC0000" v-if="record.currentstatu == '09'"/>
+          </span>
+          <span v-if="record.currentstatu == '01' || record.currentstatu == '00'">
+            <a @click="submitItem(record,'complete')" :disabled="!isEnd">{{ $t("submit") }}</a>
+            &nbsp;
+            <a-popconfirm
+                v-if="data.length>1"
+                title="Sure to delete?"
+                @confirm="deleteItem(record)"
+                :disabled="!isEnd"
+            >
+              <a :disabled="!isEnd">{{ $t("delete") }}</a>
+            </a-popconfirm>
+          </span>
+          <span v-if="record.currentstatu == '02'">
+            <a @click="passItem(record,true)" :disabled="!canPase">{{ $t("pass") }}</a>
+            &nbsp;
+            <a @click="passItem(record,false)" :disabled="!canPase">{{ $t("unPass") }}</a>
+          </span>
+          <span v-if="record.currentstatu == '07'">
+            &nbsp;
+            <a @click="showReason(record.id)">{{ $t("showReason") }}</a>
+            &nbsp;
+          </span>
+          <span v-if="record.currentstatu == '03'">
+            &nbsp;
+            <a-badge :count="record.bioNum">
+            <a @click="() => submitItem(record,'real')" :disabled="!isEnd">{{ $t("bioinformaticsAnalysis") }}</a>
+            </a-badge>
+            &nbsp;
+          </span>
+        </div>
+      </template>
     </a-table>
-    <!--    <div class="modal-footer" v-if="this.canOperating">-->
-    <!--      <button type="button" class="btn btn-warning"-->
-    <!--              :disabled="editingKey !== ''" @click="submitData('tmp')">{{$t("tmpSave")}}</button>-->
-    <!--      <button type="button" class="btn btn-primary"-->
-    <!--              :disabled="editingKey !== ''" @click="submitData('real')">{{$t("submit")}}</button>-->
-    <!--    </div>-->
     <submitting :title="$t('submitting')" ref="submitting"></submitting>
     <sub-task-info ref="subTask" @subTaskInfo="startProcess"></sub-task-info>
+    <refuse-alert :modal-title="$t('unPass')" ref="unPassAlert" @confirmFun="confirmFun"></refuse-alert>
   </div>
 </template>
 
@@ -184,10 +234,12 @@
 import Submitting from "@/components/publib/submitting";
 import util from "@/components/publib/util";
 import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
+import RefuseAlert from "@/components/publib/refuseAlert";
+import {formatDate} from "@/components/publib/date";
 
 export default {
   name: "processStep4",
-  components: {SubTaskInfo, Submitting},
+  components: {RefuseAlert, SubTaskInfo, Submitting},
   props: {
     process: Object,
   },
@@ -203,17 +255,92 @@ export default {
       allUsers: [],
       selectedRowKeys : [],
       selectedRows : [],
+      subs :[],
       subtask: {},
       showAll : false,
       subProcessName : "",
       remarks : "",
-      subId : "00"
+      subId : "00",
+      bioAnalysis : "",
+      operators : {}
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
+    showReason : function (makeId){
+      var _this = this;
+      this.$axios.post("/task/process/showStopReason",{detailId : makeId}).then(function (res){
+        if (res.data.code != "200") {
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.$error({
+            title: _this.$t("reason"),
+            content : res.data.retMap.reason
+          });
+        }
+      }).catch(function (res){
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
+    deleteItem : function (record){
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      this.deleteByIds();
+    },
+    passItem : function (record,flag){
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      if (flag){
+        this.submitData("pass");
+      }else {
+        this.$(this.$refs.unPassAlert.$el).modal("show");
+      }
+    },
+    submitItem: function (record,flag) {
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      this.submitData(flag);
+    },
+    confirmFun : function (reason,remark){
+      this.$(this.$refs.unPassAlert.$el).modal("hide");
+      var postData = {
+        processId: this.process.id,
+        datas: JSON.stringify(this.selectedRows),
+        type: 'unPass',
+        subProcessName : this.subProcessName,
+        remarks : this.remarks,
+        reason : reason,
+        remark : remark
+      }
+      var _this = this;
+      this.$(this.$refs.submitting.$el).modal("show");
+      this.$axios.post("/task/process/refuseDis", postData).then(function (res) {
+        console.log(res);
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        if (res.data.code != 200) {
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.initPage();
+        }
+      }).catch(function (res) {
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
+    batchUnPass : function (){
+      this.$(this.$refs.unPassAlert.$el).modal("show");
+    },
     deleteByIds : function (){
       var _this = this;
       var postData = {
@@ -274,7 +401,13 @@ export default {
       if (col == "sampleindex" || col == "samplename") {
         return true;
       }
-      if (record.currentstatu == "02" || record.currentstatu == "03"){
+      if (record == null){
+        return false;
+      }
+      if (record.currentstatu == "02"
+          || record.currentstatu == "03"
+          || record.currentstatu == "07"
+      ){
         return true;
       }
       return false;
@@ -304,6 +437,9 @@ export default {
             for (var ind in res.data.retMap.datas) {
               var d = res.data.retMap.datas[ind];
               d.key = d.id;
+              if (!util.isNull(d.lasttime)) {
+                d.lasttime = formatDate(new Date(d.lasttime), "yyyy-MM-dd");
+              }
               _this.data.push(d);
             }
           }
@@ -311,6 +447,8 @@ export default {
           _this.allUsers = res.data.retMap.allUsers;
           // _this.subtask = res.data.retMap.subtask;
           _this.subs = res.data.retMap.subs;
+          _this.operators = res.data.retMap.operators;
+          _this.bioAnalysis = res.data.retMap.bioAnalysis;
           _this.selectedRowKeys = [];
           _this.selectedRows = [];
         }
@@ -388,6 +526,74 @@ export default {
         },
       });
       scorllLength += 150;
+
+      // if (this.isJYZXZZ){
+      //   /**供应商数据账号*/
+      //   clom.push({
+      //     title: this.$t("support") + this.$t("dateaccount"),
+      //     dataIndex: 'superaccount',
+      //     width: '150px',
+      //     scopedSlots: {
+      //       filterDropdown: 'filterDropdown',
+      //       filterIcon: 'filterIcon',
+      //       customRender: 'superaccount'
+      //     },
+      //     onFilter: (value, record) =>{
+      //       if (util.isNull(record.superaccount)){
+      //         return false;
+      //       }
+      //       return record.superaccount
+      //           .toString()
+      //           .toLowerCase()
+      //           .includes(value.toLowerCase());
+      //     },
+      //     onFilterDropdownVisibleChange: visible => {
+      //       if (visible) {
+      //         setTimeout(() => {
+      //           this.searchInput.focus();
+      //         }, 0);
+      //       }
+      //     },
+      //   });
+      //   scorllLength += 150;
+      //   /**供应商数据密码*/
+      //   clom.push({
+      //     title:this.$t("support") + this.$t("datepassword"),
+      //     dataIndex: 'superpwd',
+      //     width: '150px',
+      //     scopedSlots: {customRender: 'superpwd'},
+      //   });
+      //   scorllLength += 150;
+      //   /**供应商数据目录*/
+      //   clom.push({
+      //     title: this.$t("support") +this.$t("datepath"),
+      //     dataIndex: 'superpath',
+      //     width: '300px',
+      //     scopedSlots: {
+      //       filterDropdown: 'filterDropdown',
+      //       filterIcon: 'filterIcon',
+      //       customRender: 'superpath'
+      //     },
+      //     onFilter: (value, record) =>{
+      //       if (util.isNull(record.superpath)){
+      //         return false;
+      //       }
+      //       return record.superpath
+      //           .toString()
+      //           .toLowerCase()
+      //           .includes(value.toLowerCase());
+      //     },
+      //     onFilterDropdownVisibleChange: visible => {
+      //       if (visible) {
+      //         setTimeout(() => {
+      //           this.searchInput.focus();
+      //         }, 0);
+      //       }
+      //     },
+      //   });
+      //   scorllLength += 300;
+      // }
+
       /**数据账号*/
       clom.push({
         title: this.$t("dateaccount"),
@@ -460,6 +666,17 @@ export default {
         scopedSlots: {customRender: 'sequencingplatform'},
       });
       scorllLength += 200;
+
+      /**备注*/
+      clom.push({
+        // title: this.$t("overDate"),
+        slots : {title : "overDateTip"},
+        dataIndex: 'lasttime',
+        width: '200px',
+        scopedSlots: {customRender: 'lasttime'},
+      });
+      scorllLength += 200;
+
       /**备注*/
       clom.push({
         title: this.$t("remarks"),
@@ -468,17 +685,17 @@ export default {
         scopedSlots: {customRender: 'remarks'},
       });
       scorllLength += 200;
-      // if (this.canOperating) {
-      //   /**操作*/
-      //   clom.push({
-      //     title: this.$t("operation"),
-      //     dataIndex: 'operation',
-      //     width: '100px',
-      //     fixed: 'right',
-      //     scopedSlots: {customRender: 'operation'},
-      //   });
-      //   scorllLength += 100;
-      // }
+
+      /**操作*/
+      clom.push({
+        // title: this.$t("operation"),
+        slots : {title : "operationTitle"},
+        dataIndex: 'operation',
+        width: '150px',
+        fixed: 'right',
+        scopedSlots: {customRender: 'operation'},
+      });
+      scorllLength += 150;
 
       this.scroll.x = scorllLength;
       this.columns = clom;
@@ -564,7 +781,22 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.$message.success(_this.$t("commitSucc"));
-          _this.initPage();
+          if (type == "pass"){
+            _this.$confirm({
+              title: _this.$t("process.passTip") + _this.$t("bioinformaticsAnalysis") + "?",
+              content: _this.$t("process.passContextTip") + _this.$t("bioinformaticsAnalysis") + ";"
+                  + _this.$t("process.beforeBioTip") + _this.bioAnalysis.name + "(" + _this.bioAnalysis.email + ")",
+              onOk() {
+                _this.submitData("real");
+              },
+              onCancel() {
+                _this.initPage();
+              },
+              class: 'test',
+            });
+          }else {
+            _this.initPage();
+          }
         }
       }).catch(function (res) {
         // _this.$("#submitting").modal('hide');
@@ -582,17 +814,6 @@ export default {
     }
   },
   computed: {
-    canOperating: function () {
-      if (this.process.taskstatu != "40") {
-        return false;
-      }
-      if (!this.$store.getters.isCurrentUser(this.process.dismountdata)
-          && !this.isAdmin
-      ) {
-        return false;
-      }
-      return true;
-    },
     seqPlants: function () {
       return util.seqPlants();
     },
@@ -626,7 +847,10 @@ export default {
         return true;
       }
       for (var item in this.selectedRows){
-        if (this.selectedRows[item].currentstatu == '02' || this.selectedRows[item].currentstatu == '03'){
+        if (this.selectedRows[item].currentstatu == '02'
+            || this.selectedRows[item].currentstatu == '03'
+            || this.selectedRows[item].currentstatu == '07'
+        ){
           return true;
         }
       }
@@ -634,7 +858,7 @@ export default {
     },
     isEnd : function (){
       if (!this.process.taskstatu.startsWith("7")
-          && this.process.dismountdata == this.$store.getters.getUser.id
+          && this.$store.getters.isCurrentUser(this.process.dismountdata)
       ){
         return true;
       }
@@ -653,14 +877,14 @@ export default {
         getCheckboxProps: record => ({
           props: {
             // Column configuration not to be checked
-            disabled: record.currentstatu == "09",
+            disabled: record.currentstatu == "09" || record.currentstatu == "07",
           },
         }),
       };
     },
     canPase : function (){
       if (!this.process.taskstatu.startsWith("7")
-          && this.process.creater == this.$store.getters.getUser.id
+          && this.$store.getters.isCurrentUser(this.process.creater)
       ){
         return true
       }
@@ -677,6 +901,12 @@ export default {
       }
       return false;
     },
+    isJYZXZZ : function (){
+      if (this.$store.getters.getUser.group.groupname == "基因组学中心"){
+        return true;
+      }
+      return false;
+    }
   },
   watch: {
     process: {

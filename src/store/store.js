@@ -34,6 +34,15 @@ export default new Vuex.Store({
             }
             return false;
         },
+        isReviewer(state){
+            for (var i = 0; i < state.user.roles.length; i++) {
+                var role = state.user.roles[i];
+                if (role.roletype == "999999" || role.roletype == "40") {
+                    return true;
+                }
+            }
+            return false;
+        },
         isAdmin(state) {
             for (var i = 0; i < state.user.roles.length; i++) {
                 var role = state.user.roles[i];
@@ -68,6 +77,7 @@ export default new Vuex.Store({
                 }
             }
             return false;
-        }
+        },
+
     }
 })

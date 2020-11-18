@@ -6,6 +6,9 @@
         :sub-title="process.projectname"
     >
       <template slot="extra">
+        <a-button type="danger" @click="batchUnPass()" v-if="canPase" :disabled="disabledPass">
+          {{ $t("unPass") }}
+        </a-button>
         <a-button type="primary" @click="submitData('pass')"
                   v-if="canPase" :disabled="disabledPass">
           {{ $t("pass") }}
@@ -28,7 +31,7 @@
         </a-button>
         <a-button type="primary" @click="submitData('complete')" v-if="isEnd"
                   :disabled="canComplete">
-          {{ $t("complete") }}
+          {{ $t("submit") }}
         </a-button>
         <a-button icon="download" @click="downLoad" :disabled="this.selectedRowKeys == 0">
           {{ $t("outPut") }}
@@ -49,18 +52,24 @@
         </a-upload>
       </template>
       <a-row type="flex">
-        <a-tag class="pointer" color="pink" @click="showSubTask('03')">
-          {{ $t("allcomplete") + $t("allAllow") }}
-        </a-tag>
-        <a-tag class="pointer" color="pink" @click="showSubTask('02')">
-          {{ $t("allcomplete") + $t("notAllow") }}
-        </a-tag>
-        <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
-          {{ sub.name }}
-        </a-tag>
-        <a-tag class="pointer" color="#108ee9" @click="showSubTask('00')">
-          {{ $t("init") }}
-        </a-tag>
+        <a-tooltip>
+          <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
+            {{ $t("allAllow") + "(" + operators.creater.name + ")"}}
+          </a-tag>
+          <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
+            {{ $t("submitted") + "(" + operators.creater.name + ")"}}
+          </a-tag>
+          <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+            {{ sub.name }}
+          </a-tag>
+          <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
+            {{ $t("init") + "(" + operators.bio.name + ")"}}
+          </a-tag>
+          <template slot="title">
+            {{$t("process.tagListTip")}}
+          </template>
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
       </a-row>
     </a-page-header>
     <a-table :columns="columns"
@@ -107,9 +116,6 @@
           slot-scope="text, record, index"
       >
         <div :key="col">
-          <!--          <template v-if="record.editable">-->
-          <!-- 序号 -->
-          <!-- 审核人 -->
           <a-select style="width: 100%" v-if="col == 'analyst'"
                     v-model="record.analyst"
                     :disabled="isDisabled(col,record)"
@@ -119,6 +125,13 @@
               {{ item.name }}
             </a-select-option>
           </a-select>
+
+          <a-tag style="cursor: pointer" @click="gotoPath(record.reportpath)"
+                 v-else-if="col == 'reportpath' && record.currentstatu != '01' && record.currentstatu != '00'"
+          >
+            {{ record.reportpath }}
+          </a-tag>
+
           <a-input
               v-else-if="col != 'index'"
               style="margin: -5px 0"
@@ -130,45 +143,44 @@
           <template v-else>
             {{ showText(col, text, index) }}
           </template>
-          <!--          </template>-->
-          <!--          <template v-else>-->
-          <!--            {{ showText(col, text, index) }}-->
-          <!--          </template>-->
         </div>
       </template>
-      <!--      <template slot="operation" slot-scope="text, record">-->
-      <!--        <div class="editable-row-operations">-->
-      <!--        <span v-if="record.editable">-->
-      <!--          <a @click="() => save(record.key)">{{ $t("save") }}</a>-->
-      <!--           &nbsp;-->
-      <!--          <a-popconfirm title="Sure to cancel?" @confirm="() => cancel(record.key)">-->
-      <!--            <a>{{ $t("cancel") }}</a>-->
-      <!--          </a-popconfirm>-->
-      <!--        </span>-->
-      <!--          <span v-else>-->
-      <!--          <a :disabled="editingKey !== ''" @click="() => edit(record.key)">{{ $t("edit") }}</a>-->
-      <!--          &nbsp;-->
-      <!--            <a-popconfirm-->
-      <!--                v-if="data.length>1"-->
-      <!--                title="Sure to delete?"-->
-      <!--                @confirm="() => onDelete(record.key)"-->
-      <!--            >-->
-      <!--          <a :disabled="editingKey !== ''">{{ $t("delete") }}</a>-->
-      <!--        </a-popconfirm>-->
-      <!--        </span>-->
-      <!--        </div>-->
-      <!--      </template>-->
+      <template slot="operation" slot-scope="text, record">
+        <div class="editable-row-operations">
+          <span>
+            <a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a" v-if="record.currentstatu == '03'"/>
+            <a-icon type="clock-circle" theme="twoTone" two-tone-color="#FFCC00" v-if="record.currentstatu == '02'"/>
+            <a-icon type="close-circle" theme="twoTone" two-tone-color="#eb2f96" v-if="record.currentstatu == '07'"/>
+            <a-icon type="stop" theme="twoTone" two-tone-color="#CC0000" v-if="record.currentstatu == '09'"/>
+          </span>
+          <span v-if="record.currentstatu == '01' || record.currentstatu == '00'">
+            <a @click="submitItem(record,'complete')" :disabled="!isEnd">{{ $t("submit") }}</a>
+            &nbsp;
+            <a-popconfirm
+                v-if="data.length>1"
+                title="Sure to delete?"
+                @confirm="deleteItem(record)"
+                :disabled="!isEnd"
+            >
+              <a :disabled="!isEnd">{{ $t("delete") }}</a>
+            </a-popconfirm>
+          </span>
+          <span v-if="record.currentstatu == '02'">
+            <a @click="passItem(record,true)" :disabled="!canPase">{{ $t("pass") }}</a>
+            &nbsp;
+            <a @click="passItem(record,false)" :disabled="!canPase">{{ $t("unPass") }}</a>
+          </span>
+          <span v-if="record.currentstatu == '07'">
+            &nbsp;
+            <a @click="showReason(record.id)">{{ $t("showReason") }}</a>
+            &nbsp;
+          </span>
+        </div>
+      </template>
     </a-table>
-    <!--    <div class="modal-footer" v-if="this.canOperating">-->
-    <!--      <button type="button" class="btn btn-warning"-->
-    <!--              :disabled="editingKey !== ''" @click="submitData('tmp')">{{ $t("tmpSave") }}-->
-    <!--      </button>-->
-    <!--      <button type="button" class="btn btn-primary"-->
-    <!--              :disabled="editingKey !== ''" @click="submitData('real')">{{ $t("submit") }}-->
-    <!--      </button>-->
-    <!--    </div>-->
     <submitting :title="$t('submitting')" ref="submitting"></submitting>
     <sub-task-info @subTaskInfo="startProcess" ref="subTask"></sub-task-info>
+    <refuse-alert :modal-title="$t('unPass')" ref="unPassAlert" @confirmFun="confirmFun"></refuse-alert>
   </div>
 </template>
 
@@ -176,10 +188,11 @@
 import Submitting from "@/components/publib/submitting";
 import util from "@/components/publib/util";
 import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
+import RefuseAlert from "@/components/publib/refuseAlert";
 
 export default {
   name: "processStep5",
-  components: {SubTaskInfo, Submitting},
+  components: {RefuseAlert, SubTaskInfo, Submitting},
   props: {
     process: Object,
   },
@@ -199,13 +212,89 @@ export default {
       subProcessName : "",
       remarks : "",
       subId : "00",
-      subs : []
+      subs : [],
+      operators : ""
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
+    gotoPath : function (path){
+      window.open(path,"_blank");
+    },
+    showReason : function (makeId){
+      var _this = this;
+      this.$axios.post("/task/process/showStopReason",{detailId : makeId}).then(function (res){
+        if (res.data.code != "200") {
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.$error({
+            title: _this.$t("reason"),
+            content : res.data.retMap.reason
+          });
+        }
+      }).catch(function (res){
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
+    passItem : function (record,flag){
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      if (flag){
+        this.submitData("pass");
+      }else {
+        this.$(this.$refs.unPassAlert.$el).modal("show");
+      }
+    },
+    confirmFun : function (reason,remark){
+      this.$(this.$refs.unPassAlert.$el).modal("hide");
+      var _this = this;
+      var post = {
+        processId: this.process.id,
+        subId : this.subId,
+        datas: JSON.stringify(this.selectedRows),
+        type: 'unPass',
+        subProcessName : this.subProcessName,
+        remarks : this.remarks,
+        reason : reason,
+        remark : remark,
+      }
+      this.$(this.$refs.submitting.$el).modal("show");
+      this.$axios.post("/task/process/refuseAnalysis", post).then(function (res) {
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        if (res.data.code != 200) {
+          _this.$message.error(_this.$t(res.data.code));
+        } else {
+          _this.$message.success(_this.$t("commitSucc"));
+          _this.initPage();
+        }
+      }).catch(function (res) {
+        _this.$(_this.$refs.submitting.$el).modal("hide");
+        console.log(res);
+        _this.$message.error(_this.$t("systemErr"));
+      });
+    },
+    submitItem: function (record,flag) {
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      this.submitData(flag);
+    },
+    batchUnPass : function (){
+      this.$(this.$refs.unPassAlert.$el).modal("show");
+    },
+    deleteItem : function (record){
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      this.deleteByIds();
+    },
     deleteByIds : function (){
       var _this = this;
       var postData = {
@@ -271,7 +360,10 @@ export default {
       if (col == "sampleindex" || col == "samplename") {
         return true;
       }
-      if (record.currentstatu == "02" || record.currentstatu == "03"){
+      if (record.currentstatu == "02"
+          || record.currentstatu == "03"
+          || record.currentstatu == "07"
+      ){
         return true;
       }
       return false;
@@ -300,6 +392,7 @@ export default {
           _this.allUsers = res.data.retMap.allUsers;
           // _this.subtask = res.data.retMap.subtask;
           _this.subs = res.data.retMap.subs;
+          _this.operators = res.data.retMap.operators;
           _this.selectedRows = [];
           _this.selectedRowKeys = [];
         }
@@ -408,7 +501,7 @@ export default {
       clom.push({
         title: this.$t("reportpath"),
         dataIndex: 'reportpath',
-        width: '300px',
+        width: '500px',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -431,7 +524,7 @@ export default {
           }
         },
       });
-      scorllLength += 300;
+      scorllLength += 500;
       /**分析流程/参数*/
       clom.push({
         title: this.$t("args"),
@@ -496,17 +589,16 @@ export default {
         },
       });
       scorllLength += 200;
-      // if (this.canOperating) {
-      //   /**操作*/
-      //   clom.push({
-      //     title: this.$t("operation"),
-      //     dataIndex: 'operation',
-      //     width: '100px',
-      //     fixed: 'right',
-      //     scopedSlots: {customRender: 'operation'},
-      //   });
-      //   scorllLength += 100;
-      // }
+
+      /**操作*/
+      clom.push({
+        title: this.$t("operation"),
+        dataIndex: 'operation',
+        width: '150px',
+        fixed: 'right',
+        scopedSlots: {customRender: 'operation'},
+      });
+      scorllLength += 150;
 
       this.scroll.x = scorllLength;
       this.columns = clom;
@@ -621,7 +713,7 @@ export default {
     },
     isEnd : function (){
       if (!this.process.taskstatu.startsWith("7")
-          && this.process.dismountdata == this.$store.getters.getUser.id
+          && this.$store.getters.isCurrentUser(this.process.dismountdata)
       ){
         return true;
       }
@@ -659,7 +751,7 @@ export default {
     },
     canPase : function (){
       if (!this.process.taskstatu.startsWith("7")
-          && this.process.creater == this.$store.getters.getUser.id
+          && this.$store.getters.isCurrentUser(this.process.creater)
       ){
         return true
       }

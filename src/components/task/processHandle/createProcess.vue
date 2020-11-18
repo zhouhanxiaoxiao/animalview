@@ -2,7 +2,15 @@
   <div>
     <top-nav></top-nav>
     <div class="process-container">
-      <a-divider orientation="left">{{$t("processMsg")}}</a-divider>
+      <a-divider orientation="left">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.projectInfoTip")}}
+          </template>
+          {{$t("processMsg")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </a-divider>
       <div class="form-row">
         <div class="form-group col-md-6 col-sm-12 col-lg-4">
           <label for="projectName">
@@ -10,10 +18,10 @@
             <icon-font style="font-size: 20px" type="icon-bitian" />
           </label>
           <a-input :addon-before="projectPre" id="projectName"
-                   placeholder="例：果蝇近缘物种雌雄脑睾丸子宫转录组"
+                   placeholder="例：2019.10开始，长期项目，近缘物种，性别，左右对称"
                    v-model="projectName"/>
         </div>
-        <div class="form-group col-md-4 col-sm-12 col-lg-2">
+        <div class="form-group col-md-4 col-sm-12 col-lg-2" style="display: none">
           <label for="dataType">
             {{ $t("dataType") }}
             <icon-font style="font-size: 20px" type="icon-bitian" />
@@ -52,7 +60,7 @@
             {{ $t("userEmail") }}
             <icon-font style="font-size: 20px" type="icon-bitian" />
           </label>
-          <a-tooltip placement="topRight" title="数据下载及报告分析完成后将发送相关信息至以上邮箱列表" :mouseLeaveDelay="1"
+          <a-tooltip placement="topRight" :title="$t('process.emailsTip')" :mouseLeaveDelay="1"
                      :auto-adjust-overflow="true">
           <a-select id="email" mode="tags" style="width: 100%" v-model="emails">
             <a-select-option v-for="user in users" :key="user.email">
@@ -62,7 +70,7 @@
           </a-tooltip>
         </div>
         <!--样本类型-->
-        <div class="form-group col-md-4 col-sm-12 col-lg-2">
+        <div class="form-group col-md-4 col-sm-12 col-lg-2" style="display: none">
           <label for="sampleMsg">
             {{$t("sampleMsg")  }}
             <icon-font style="font-size: 20px" type="icon-bitian" />
@@ -81,7 +89,15 @@
           <textarea class="form-control" id="projectDesc" v-model="projectDesc" maxlength="1000"
                     placeholder="例：果蝇近缘物种雌雄脑睾丸子宫转录组" rows="3"></textarea>
         </div>
-        <a-divider orientation="left">{{$t("staffing")}}</a-divider>
+        <a-divider orientation="left">
+          <a-tooltip>
+            <template slot="title">
+              {{$t("process.preSelectTip")}}
+            </template>
+            {{$t("staffing")}}
+            <a-icon type="question-circle" theme="twoTone"/>
+          </a-tooltip>
+        </a-divider>
         <!--样品录入负责人-->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="sampleInput">
@@ -156,7 +172,7 @@
         <!--  备注  -->
         <div class="form-group-sm col-md-12">
           <label for="remarks">{{$t("remarks")}}</label>
-          <textarea class="form-control" id="remarks" v-model="remarks" placeholder="例：我很着急" rows="3" maxlength="1000"></textarea>
+          <textarea class="form-control" id="remarks" v-model="remarks" placeholder="例：注意事项..." rows="3" maxlength="1000"></textarea>
         </div>
       </div>
       <div class="modal-footer" style="margin-top: 20px">
@@ -164,7 +180,8 @@
                 @click="submitData">{{$t("submit")}}</button>
       </div>
     </div>
-    <submitting :title="$t('submitting')"></submitting>
+    <submitting ref="submitting" :title="$t('submitting')"></submitting>
+    <process-tip-alert ref="processTip"></process-tip-alert>
   </div>
 </template>
 
@@ -174,6 +191,7 @@ import Submitting from "@/components/publib/submitting";
 import {formatDate} from "@/components/publib/date";
 import {Icon} from "ant-design-vue";
 import util from "@/components/publib/util";
+import ProcessTipAlert from "@/components/task/processHandle/processTipAlert";
 
 const IconFont = Icon.createFromIconfontCN({
   scriptUrl: util.alicdnIcon,
@@ -181,7 +199,7 @@ const IconFont = Icon.createFromIconfontCN({
 
 export default {
   name: "createProcess",
-  components: {Submitting, TopNav,IconFont},
+  components: {ProcessTipAlert, Submitting, TopNav,IconFont},
   data:function (){
     return{
       projectName :"",
@@ -201,12 +219,13 @@ export default {
       dataTypes : ["10x单细胞转录组","普通转录组","全基因组","全外显子组","HiC基因组","其他"]
     }
   },
-  beforeMount : function() {
+  mounted : function() {
     this.initPage();
   },
   methods:{
     initPage : function (){
       var _this = this;
+      _this.$(this.$refs.processTip.$el).modal("show");
       this.$axios.post("/user/getAllUsers").then(function (res){
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
@@ -216,15 +235,6 @@ export default {
           _this.libraryPreparation = util.getuserIdByRole(_this.users,"32");
           _this.dismountData = util.getuserIdByRole(_this.users,"33");
           _this.bioinformaticsAnalysis = util.getuserIdByRole(_this.users,"34");
-          _this.$notification.warning({
-            message: _this.$t("remind"),
-            description: _this.$t('processSelectPre'),
-            duration : null,
-            placement:"bottomRight",
-            getContainer : function (){
-              return _this.$(".process-container")[0];
-            }
-          });
         }
       }).catch(function (res){
         console.log(res);
@@ -282,14 +292,14 @@ export default {
         this.$message.error(this.$t("projectName") + this.$t("not_null"));
         return false;
       }
-      if (this.dataType == ""){
-        this.$message.error(this.$t("dataType") + this.$t("not_null"));
-        return false;
-      }
-      if (this.dataType == "其他" && this.otherDataType == ""){
-        this.$message.error(this.$t("other") + this.$t("dataType") + this.$t("not_null"));
-        return false;
-      }
+      // if (this.dataType == ""){
+      //   this.$message.error(this.$t("dataType") + this.$t("not_null"));
+      //   return false;
+      // }
+      // if (this.dataType == "其他" && this.otherDataType == ""){
+      //   this.$message.error(this.$t("other") + this.$t("dataType") + this.$t("not_null"));
+      //   return false;
+      // }
       if (this.principal == ""){
         this.$message.error(this.$t("principal") + this.$t("not_null"));
         return false;
@@ -297,10 +307,10 @@ export default {
         this.$message.error(this.$t("userEmail") + this.$t("not_null"));
         return false;
       }
-      if (this.sampleMsg.length == 0){
-        this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
-        return false;
-      }
+      // if (this.sampleMsg.length == 0){
+      //   this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
+      //   return false;
+      // }
       if (this.samplePreparation == ""){
         this.$message.error(this.$t("samplePreparation") + this.$t("not_null"));
         return false;

@@ -3,9 +3,15 @@ import App from './App.vue'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import "zico/css/zico.min.css";
+import "viewerjs/dist/viewer.css";
 import axios from "axios";
 import router from "@/router/router";
 import i18n from "@/i18n";
+import Viewer from "v-viewer";
+Vue.use(Viewer)
+Viewer.setDefaults({
+  Options: { "inline": true, "button": true, "navbar": true, "title": true, "toolbar": true, "tooltip": true, "movable": true, "zoomable": true, "rotatable": true, "scalable": true, "transition": true, "fullscreen": true, "keyboard": true, "url": "data-source" }
+});
 
 import globalVariable from "@/api/global_variable";
 import $ from "jquery";
@@ -41,7 +47,7 @@ Vue.prototype.$systemFlag = "local";
 /*
 * axios 全局设置
 * */
-axios.defaults.baseURL = 'http://localhost:8081/'; //本机测试
+axios.defaults.baseURL = 'http://192.168.10.11:8081/'; //本机测试
 // axios.defaults.baseURL = 'http://119.90.33.35:3566/'; //果蝇管理系统
 // axios.defaults.baseURL = 'http://119.90.33.35:3568/'; // 流程管理系统
 axios.interceptors.request.use(config => {

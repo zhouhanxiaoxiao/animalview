@@ -41,21 +41,20 @@
           {{ $t("submit") }}
         </a-button>
         <a-button @click="submitData('real')"
-                  :disabled="cansubmit" type="primary" v-if="canPase">
+                  :disabled="cansubmit" type="primary" v-if="isCreater">
           {{ $t("samplePreparation") }}
         </a-button>
         <a-button @click="submitData('tmp')" color="orange" v-if="canEdit">
           {{ $t("tmpSave") }}
         </a-button>
-        <!--        <a-button @click="submitData('real')">-->
-        <!--          {{$t("submit")}}-->
-        <!--        </a-button>-->
-        <a-button class="editable-add-btn" v-if="canEdit"
-                  @click="handleAdd"
-        >
-          {{ $t("add") }}
-        </a-button>
-        <a-button icon="download" @click="downLoad" :disabled="this.selectedRowKeys.length == 0">
+        <a-tooltip placement="topLeft" :title="$t('process.addnewrowTip')">
+          <a-button class="editable-add-btn" v-if="canEdit"
+                    @click="handleAdd"
+          >
+            {{ $t("add") }}
+          </a-button>
+        </a-tooltip>
+        <a-button icon="download" @click="downLoad">
           {{ $t("outPut") }}
         </a-button>
         <a-upload
@@ -77,21 +76,26 @@
         </a-upload>
       </template>
       <a-row type="flex">
-        <!--        <a-tag color="pink" @click="showSubTask('01')">-->
-        <!--          {{ $t("showAll") }}-->
-        <!--        </a-tag>-->
-        <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
-          {{ $t("allAllow") }}
-        </a-tag>
-        <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-          {{ $t("submitted") }}
-        </a-tag>
-        <a-tag class="pointer" color="#2db7f5" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
-          {{ sub.name }}
-        </a-tag>
-        <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
-          {{ $t("init") }}
-        </a-tag>
+        <a-tooltip>
+          <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
+            {{ $t("allAllow") + "(" + operators.creater.name + ")"}}
+          </a-tag>
+          <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
+            {{ $t("submitted") + "(" + operators.make.name + ")"}}
+          </a-tag>
+          <template  v-if="canEdit">
+            <a-tag class="pointer" color="#2db7f5" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
+              {{ sub.name }}
+            </a-tag>
+          </template>
+          <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
+            {{ $t("init") + "(" + operators.creater.name + ")"}}
+          </a-tag>
+          <template slot="title">
+            {{$t("process.tagListTip")}}
+          </template>
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
       </a-row>
     </a-page-header>
     <div class="collapse" id="batchUpdate">
@@ -228,7 +232,6 @@
               {{ $t("confirm") }}
             </a-button>
           </a-popconfirm>
-
         </div>
       </div>
     </div>
@@ -240,6 +243,103 @@
              :row-selection="rowSelection"
              :pagination="false"
              size="middle">
+      <!--   自定义列名 开始  -->
+      <template slot="initSampleTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.sampleInitTip")}}
+          </template>
+          <icon-font style="font-size: 20px" type="icon-bitian" />
+          {{this.$t("initSample")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <template slot="sampleNameTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{this.$t("sampleName")}}
+      </template>
+
+      <template slot="sampleIndexTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.sampleIndexTip")}}
+          </template>
+          <icon-font style="font-size: 20px" type="icon-bitian" />
+          {{this.$t("sampleIndex")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+      <template slot="speciesTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.speciesTip")}}
+          </template>
+          <icon-font style="font-size: 20px" type="icon-bitian" />
+          {{this.$t("species")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <template slot="tissueTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{this.$t("tissue") + this.$t("animal_stock_resource")}}
+      </template>
+
+      <template slot="sampleMsgTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.dropdownTip")}}
+          </template>
+          <icon-font style="font-size: 20px" type="icon-bitian" />
+          {{$t("sampleMsg")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+      <template slot="sampleStatuTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.dropdownTip")}}
+          </template>
+          <icon-font style="font-size: 20px" type="icon-bitian" />
+          {{$t("sampleStatu")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <template slot="databaseTypeTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.dropdownTip")}}
+          </template>
+          <icon-font style="font-size: 20px" type="icon-bitian" />
+          {{$t("databaseType")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <template slot="SequencingPlatformTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.dropdownTip")}}
+          </template>
+          <icon-font style="font-size: 20px" type="icon-bitian" />
+          {{$t("SequencingPlatform")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <template slot="operationTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{$t("process.operationTip")}}
+          </template>
+          {{$t("operation")}}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
+      <!--   自定义列名 结束  -->
       <div
           slot="filterDropdown"
           slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -318,6 +418,7 @@
           <a-select style="width: 100%" v-else-if="col == 'initsample'"
                     v-model="record.initsample"
                     :disabled="isDisabled(record)"
+                    @change="sampleInitChange(record)"
           >
             <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
               {{ item.val }}
@@ -372,13 +473,30 @@
               :min="0"
               :disabled="colIsDisabed(record.initsample,'bloodvolume') || isDisabled(record)"
           />
-          <a-input-number
-              v-else-if="col == 'concentration'"
-              style="margin: -5px 0"
-              v-model="record.concentration"
-              :min="0"
-              :disabled="colIsDisabed(record.initsample,'concentration') || isDisabled(record)"
-          />
+          <a-input v-else-if="col == 'concentration'"
+                   :disabled="colIsDisabed(record.initsample,'concentration') || isDisabled(record)"
+                   v-model="record.concentration"
+          >
+            <a-select slot="addonAfter" default-value="ng/ul"
+                      v-model="record.concentrationunit"
+                      :disabled="colIsDisabed(record.initsample,'concentration') || isDisabled(record)"
+                      style="width:130px">
+              <a-select-option value="ng/ul">
+                ng/ul
+              </a-select-option>
+              <a-select-option value="细胞个数/μl">
+                细胞个数/μl
+              </a-select-option>
+            </a-select>
+          </a-input>
+
+<!--          <a-input-number-->
+<!--              v-else-if="col == 'concentration'"-->
+<!--              style="margin: -5px 0"-->
+<!--              v-model="record.concentration"-->
+<!--              :min="0"-->
+<!--              :disabled="colIsDisabed(record.initsample,'concentration') || isDisabled(record)"-->
+<!--          />-->
           <a-input-number
               v-else-if="col == 'totalnumber'"
               style="margin: -5px 0"
@@ -399,25 +517,45 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <div class="editable-row-operations">
+          <span>
+            <a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a" v-if="record.currentstatu == '03'"/>
+            <a-icon type="clock-circle" theme="twoTone" two-tone-color="#FFCC00" v-if="record.currentstatu == '02'"/>
+            <a-icon type="close-circle" theme="twoTone" two-tone-color="#eb2f96" v-if="record.currentstatu == '08'"/>
+            <a-icon type="stop" theme="twoTone" two-tone-color="#CC0000" v-if="record.currentstatu == '09'"/>
+            &nbsp;
+          </span>
           <span v-if="record.currentstatu == '01' || record.currentstatu == '00'">
-            <a @click="submitItem(record,'complete')">{{ $t("submit") }}</a>
+            &nbsp;
+            <a @click="submitItem(record,'complete')" :disabled="!canEdit">{{ $t("submit") }}</a>
+            &nbsp;
             <a-popconfirm
                 v-if="data.length>1"
                 title="Sure to delete?"
-                @confirm="() => onDelete(record.key)"
+                @confirm="() => onDelete(record)"
+                :disabled="!canOperating"
             >
-              <a>{{ $t("delete") }}</a>
+              <a :disabled="!canOperating">{{ $t("delete") }}</a>
             </a-popconfirm>
+            &nbsp;
           </span>
           <span v-if="record.currentstatu == '02'">
-            <a @click="passItem(record,true)">{{ $t("pass") }}</a>
-            <a @click="passItem(record,false)">{{ $t("unPass") }}</a>
+            &nbsp;
+            <a @click="passItem(record,true)" :disabled="!canPase">{{ $t("pass") }}</a>
+            &nbsp;
+            <a @click="passItem(record,false)" :disabled="!canPase">{{ $t("unPass") }}</a>
+            &nbsp;
           </span>
           <span v-if="record.currentstatu == '08'">
+            &nbsp;
             <a @click="() => showReason(record.id)">{{ $t("showReason") }}</a>
+            &nbsp;
           </span>
           <span v-if="record.currentstatu == '03'">
-            <a @click="() => submitItem(record,'real')">{{ $t("samplePreparation") }}</a>
+            &nbsp;
+            <a-badge :count="record.makeNum">
+              <a @click="() => submitItem(record,'real')" :disabled="!canOperating">{{ $t("samplePreparation") }}</a>
+            </a-badge>
+            &nbsp;
           </span>
         </div>
       </template>
@@ -433,10 +571,15 @@ import util from "@/components/publib/util";
 import Submitting from "@/components/publib/submitting";
 import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
 import RefuseAlert from "@/components/publib/refuseAlert";
+import {Icon} from "ant-design-vue";
+
+const IconFont = Icon.createFromIconfontCN({
+  scriptUrl: util.alicdnIcon,
+});
 
 export default {
   name: "processStep1New",
-  components: {RefuseAlert, SubTaskInfo, Submitting},
+  components: {RefuseAlert, SubTaskInfo, Submitting,IconFont},
   props: {
     process: Object
   },
@@ -456,6 +599,7 @@ export default {
       subs: [],
       curFlag: "01",
       subId: "00",
+      operators : {},
       editObj: {
         arrindex: "",
         initsample: "",
@@ -479,6 +623,11 @@ export default {
     this.initPage();
   },
   methods: {
+    sampleInitChange : function (record){
+      record.samplemsg = "";
+      record.samplestatu = "";
+      record.databasetype = "";
+    },
     batchUnPass : function (){
       this.$(this.$refs.refuseAlert.$el).modal('show');
     },
@@ -721,6 +870,13 @@ export default {
         postData.datas = JSON.stringify(_this.selectedRows)
       }
       // this.$("#submitting").modal("show");
+
+      if (type == "complete"){
+        if (!this.checkNull(this.selectedRows)){
+          return ;
+        }
+      }
+
       this.$(this.$refs.submitting.$el).modal("show");
       this.$axios.post("/task/process/commitDatas", postData).then(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
@@ -737,9 +893,22 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.$message.success(_this.$t("commitSucc"));
-          _this.selectedRowKeys = [];
-          _this.selectedRows = [];
           _this.initPage();
+          // if (type == "pass"){
+          //   _this.$confirm({
+          //     title: _this.$t("process.passTip") + _this.$t("samplePreparation") + "?",
+          //     content: _this.$t("process.passContextTip") + _this.$t("samplePreparation"),
+          //     onOk() {
+          //       _this.submitData("real");
+          //     },
+          //     onCancel() {
+          //       _this.initPage();
+          //     },
+          //     class: 'test',
+          //   });
+          // }else {
+          //   _this.initPage();
+          // }
         }
       }).catch(function (res) {
         console.log(res);
@@ -769,117 +938,61 @@ export default {
       this.$message.error(this.$t("unAcceptFile"));
     },
     handUploadChange: function (dat) {
-      // console.log(dat);
       if (dat.file.status == "done") {
         this.initPage();
       }
     },
-    onDelete(key) {
-      const data = [...this.data];
-      this.data = data.filter(item => item.key !== key);
+    onDelete(record) {
+      this.selectedRows = new Array();
+      this.selectedRows.push(record);
+      this.selectedRowKeys = new Array();
+      this.selectedRowKeys.push(record.id);
+      this.deleteInputs();
     },
-    edit(key) {
-      const newData = [...this.data];
-      const target = newData.filter(item => key === item.key)[0];
-      this.editingKey = key;
-      if (target) {
-        target.editable = true;
-        this.data = newData;
-      }
-    },
-    save(key) {
-      console.log(key);
-      const newData = [...this.data];
-      const newCacheData = [...this.cacheData];
-      const target = newData.filter(item => key === item.key)[0];
-      if (!this.checkRowData(target)) {
-        return;
-      }
-      target.add = false;
-      const targetCache = newCacheData.filter(item => key === item.key)[0];
-      if (target && targetCache) {
-        this.data = newData;
-        Object.assign(targetCache, target);
-        this.cacheData = newCacheData;
-      }
-      target.editable = false;
-      this.editingKey = '';
-      // console.log(this.data);
-    },
-    cancel(key) {
-      const newData = [...this.data];
-      const target = newData.filter(item => key === item.key)[0];
-      if (target.add == true) {
-        this.editingKey = "";
-        this.onDelete(target.key);
-        return;
-      }
-      this.editingKey = '';
-      if (target) {
-        Object.assign(target, this.cacheData.filter(item => key === item.key)[0]);
-        target.editable = false;
-        this.data = newData;
-      }
-    },
-    checkRowData: function (rowData) {
-      if (this.isNull(rowData.samplename)) {
-        this.$message.error(this.$t("sampleName") + this.$t("not_null"));
-        return false;
-      }
-      if (this.isNull(rowData.species)) {
-        this.$message.error(this.$t("species") + this.$t("not_null"));
-        return false;
-      }
-      if (this.isNull(rowData.tissue)) {
-        this.$message.error(this.$t("tissue") + this.$t("not_null"));
-        return false;
-      }
-      if (this.isNull(rowData.samplemsg)) {
-        this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
-        return false;
-      }
-      if (this.isNull(rowData.samplestatu)) {
-        this.$message.error(this.$t("sampleStatu") + this.$t("not_null"));
-        return false;
-      }
-      // if (this.process.sampletype == "02" && this.isNull(rowData.tissueNumber)){
-      //   this.$message.error(this.$t("tissueNumber") + this.$t("not_null"));
-      //   return false;
-      // }
-      // if (this.process.sampletype == "02" && this.isNull(rowData.bloodVolume)){
-      //   this.$message.error(this.$t("bloodVolume") + this.$t("not_null"));
-      //   return false;
-      // }
-      // if (this.process.sampletype != "02" && this.isNull(rowData.concentration)){
-      //   this.$message.error(this.$t("concentration") + this.$t("not_null"));
-      //   return false;
-      // }
-      // if (this.process.sampletype != "02" && this.isNull(rowData.sampleVolume)){
-      //   this.$message.error(this.$t("sampleVolume") + this.$t("not_null"));
-      //   return false;
-      // }
-      // if (this.process.sampletype != "02" && this.isNull(rowData.totalNumber)){
-      //   this.$message.error(this.$t("totalNumber") + this.$t("not_null"));
-      //   return false;
-      // }
-      if (this.process.sampletype == "03" && this.isNull(rowData.celllife)) {
-        this.$message.error(this.$t("celllife") + this.$t("not_null"));
-        return false;
-      }
-      if (this.process.sampletype == "03" && this.isNull(rowData.cellsort)) {
-        this.$message.error(this.$t("cellsort") + this.$t("not_null"));
-        return false;
-      }
-      if (this.isNull(rowData.databasetype)) {
-        this.$message.error(this.$t("databaseType") + this.$t("not_null"));
-        return false;
-      }
-      if (this.isNull(rowData.sequencingplatform)) {
-        this.$message.error(this.$t("SequencingPlatform") + this.$t("not_null"));
-        return false;
+
+    checkNull : function (list){
+      for (var i=0; i<list.length; i++){
+        var rowData = list[0];
+        if (this.isNull(rowData.initsample)) {
+          this.$message.error(this.$t("initSample") + this.$t("not_null"));
+          return false;
+        }
+        if (this.isNull(rowData.sampleindex)) {
+          this.$message.error(this.$t("sampleIndex") + this.$t("not_null"));
+          return false;
+        }
+        if (this.isNull(rowData.samplename)) {
+          this.$message.error(this.$t("sampleName") + this.$t("not_null"));
+          return false;
+        }
+        if (this.isNull(rowData.species)) {
+          this.$message.error(this.$t("species") + this.$t("not_null"));
+          return false;
+        }
+        if (this.isNull(rowData.tissue)) {
+          this.$message.error(this.$t("tissue") + this.$t("animal_stock_resource") + this.$t("not_null"));
+          return false;
+        }
+        if (this.isNull(rowData.samplemsg)) {
+          this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
+          return false;
+        }
+        if (this.isNull(rowData.samplestatu)) {
+          this.$message.error(this.$t("sampleStatu") + this.$t("not_null"));
+          return false;
+        }
+        if (this.isNull(rowData.databasetype)) {
+          this.$message.error(this.$t("databaseType") + this.$t("not_null"));
+          return false;
+        }
+        if (this.isNull(rowData.sequencingplatform)) {
+          this.$message.error(this.$t("SequencingPlatform") + this.$t("not_null"));
+          return false;
+        }
       }
       return true;
     },
+
     isNull: function (d) {
       if (d == "" || d == null || d == undefined) {
         return true;
@@ -920,18 +1033,19 @@ export default {
             console.log(_this.data);
           }
           _this.subs = res.data.retMap.subs;
+          _this.operators = res.data.retMap.operators;
           _this.selectedRows = [];
           _this.selectedRowKeys = [];
-          _this.$notification.warning({
-            key: "step1",
-            placement: "bottomRight",
-            message: _this.$t("remind"),
-            description: _this.$t('processStep1Tip'),
-            duration: 60,
-            getContainer: function () {
-              return _this.$(".process-step1")[0];
-            }
-          });
+          // _this.$notification.warning({
+          //   key: "step1",
+          //   placement: "bottomRight",
+          //   message: _this.$t("remind"),
+          //   description: _this.$t('processStep1Tip'),
+          //   duration: 60,
+          //   getContainer: function () {
+          //     return _this.$(".process-step1")[0];
+          //   }
+          // });
         }
       }).catch(function (res) {
         console.log(res);
@@ -1008,15 +1122,15 @@ export default {
       // scorllLength +=150;
       /**初始样品*/
       clom.push({
-        title: `*` + this.$t("initSample"),
         dataIndex: 'initsample',
         width: '150px',
+        slots: { title: 'initSampleTitle' },
         scopedSlots: {customRender: 'initsample'},
       });
       scorllLength += 150;
       /**样本名称*/
       clom.push({
-        title: this.$t("sampleName"),
+        slots: { title: 'sampleNameTitle' },
         dataIndex: 'samplename',
         width: '150px',
         scopedSlots: {
@@ -1040,9 +1154,9 @@ export default {
       scorllLength += 150;
       /**样本编号*/
       clom.push({
-        title: this.$t("sampleIndex"),
         dataIndex: 'sampleindex',
         width: '150px',
+        slots: { title: 'sampleIndexTitle' },
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -1064,16 +1178,16 @@ export default {
       scorllLength += 150;
       /**物种*/
       clom.push({
-        title: this.$t("species"),
         dataIndex: 'species',
         width: '200px',
+        slots: { title: 'speciesTitle' },
         scopedSlots: {customRender: 'species'},
       });
       scorllLength += 200;
       /**组织来源*/
       clom.push({
-        title: this.$t("tissue") + this.$t("animal_stock_resource"),
         dataIndex: 'tissue',
+        slots: { title: 'tissueTitle' },
         width: '150px',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
@@ -1096,7 +1210,7 @@ export default {
       scorllLength += 150;
       /**样本类型*/
       clom.push({
-        title: "*" + this.$t("sampleMsg"),
+        slots: { title: 'sampleMsgTitle' },
         dataIndex: 'samplemsg',
         width: '150px',
         scopedSlots: {customRender: 'samplemsg'},
@@ -1104,7 +1218,7 @@ export default {
       scorllLength += 150;
       /**样本状态*/
       clom.push({
-        title: "*" + this.$t("sampleStatu"),
+        slots: { title: 'sampleStatuTitle' },
         dataIndex: 'samplestatu',
         width: '150px',
         scopedSlots: {customRender: 'samplestatu'},
@@ -1134,12 +1248,12 @@ export default {
       // if (type != "02"){
       /** 浓度(ng/ul)/（细胞个数/μl) */
       clom.push({
-        title: this.concentrationName,
+        title: "浓度",
         dataIndex: 'concentration',
-        width: '130px',
+        width: '250px',
         scopedSlots: {customRender: 'concentration'},
       });
-      scorllLength += 130;
+      scorllLength += 250;
       // }
       // if (type != "02"){
       /** 样本体积(ul) */
@@ -1203,7 +1317,7 @@ export default {
       // }
       /**建库类型*/
       clom.push({
-        title: "*" + this.$t("databaseType"),
+        slots: { title: 'databaseTypeTitle' },
         dataIndex: 'databasetype',
         width: '200px',
         scopedSlots: {customRender: 'databasetype'},
@@ -1211,7 +1325,7 @@ export default {
       scorllLength += 200;
       /**测序平台*/
       clom.push({
-        title: "*" + this.$t("SequencingPlatform"),
+        slots: { title: 'SequencingPlatformTitle' },
         dataIndex: 'sequencingplatform',
         width: '200px',
         scopedSlots: {customRender: 'sequencingplatform'},
@@ -1225,17 +1339,16 @@ export default {
         scopedSlots: {customRender: 'remarks'},
       });
       scorllLength += 200;
-      if (this.canOperating) {
-        /**操作*/
-        clom.push({
-          title: this.$t("operation"),
-          dataIndex: 'operation',
-          width: '150px',
-          fixed: 'right',
-          scopedSlots: {customRender: 'operation'},
-        });
-        scorllLength += 150;
-      }
+      /**操作*/
+      clom.push({
+        slots: { title: 'operationTitle' },
+        // title: this.$t("operation"),
+        dataIndex: 'operation',
+        width: '150px',
+        fixed: 'right',
+        scopedSlots: {customRender: 'operation'},
+      });
+      scorllLength += 150;
       this.scroll.x = scorllLength;
       this.columns = clom;
       this.columnNames = new Array();
@@ -1362,7 +1475,9 @@ export default {
         getCheckboxProps: record => ({
           props: {
             // Column configuration not to be checked
-            disabled: record.currentstatu == '00',
+            disabled: record.currentstatu == '00'
+                || record.currentstatu == '09'
+                || record.currentstatu == '08',
           },
         }),
       };
@@ -1378,14 +1493,14 @@ export default {
       }
       return false;
     },
-
     canDivide() {
       if (this.selectedRowKeys.length == 0) {
         return true;
       }
       for (var item in this.selectedRows) {
         if (!util.isNull(this.selectedRows[item].subid)
-            || this.selectedRows[item].currentstatu == "02" || this.selectedRows[item].currentstatu == '03'
+            || this.selectedRows[item].currentstatu == "02"
+            || this.selectedRows[item].currentstatu == '03'
         ) {
           return true;
         }
@@ -1408,7 +1523,15 @@ export default {
     },
     canEdit: function () {
       if (!this.process.taskstatu.startsWith("7")
-          && this.process.sampleinput == this.$store.getters.getUser.id
+          && this.$store.getters.isCurrentUser(this.process.sampleinput)
+      ) {
+        return true
+      }
+      return false;
+    },
+    isCreater : function (){
+      if (!this.process.taskstatu.startsWith("7")
+          && this.$store.getters.isCurrentUser(this.process.creater)
       ) {
         return true
       }
@@ -1416,7 +1539,7 @@ export default {
     },
     canPase: function () {
       if (!this.process.taskstatu.startsWith("7")
-          && this.process.samplepreparation == this.$store.getters.getUser.id
+          && this.$store.getters.isCurrentUser(this.process.samplepreparation)
       ) {
         return true
       }

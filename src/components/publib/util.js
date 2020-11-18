@@ -12,15 +12,12 @@ var util = {
         if (obj == undefined) {
             return true;
         }
-        if (obj == "") {
+        if (obj === "" ) {
             return true
         }
         if (obj.length == 0) {
             return true;
         }
-        // if (obj >= 0){
-        //     return true;
-        // }
         return false;
     },
     sampletypes: function (sampletype) {

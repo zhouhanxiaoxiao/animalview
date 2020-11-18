@@ -6,7 +6,7 @@
         <div style="width: 100%;padding: 20px 20px;min-height: 150px" >
           <template v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
             <a-statistic
-                title="最近一个月新增库存"
+                title="最近一个月新增扩繁品系"
                 :value="oneMonthStockNumber"
                 :precision="0"
                 :value-style="{ color: '#3f8600' }"
@@ -17,7 +17,7 @@
               </template>
             </a-statistic>
             <a-statistic
-                title="最近一个月新增品系"
+                title="最近一个月新增保种品系"
                 :value="oneMonthStrainNumber"
                 :precision="0"
                 :value-style="{ color: '#3f8600' }"
@@ -30,7 +30,7 @@
             </a-statistic>
 
             <a-statistic
-                :title="$t('current_strain')"
+                :title="'现有' + $t('current_strain')"
                 :value="allStrainNumber"
                 :precision="0"
                 :value-style="{ color: '#3f8600' }"
@@ -42,7 +42,7 @@
             </a-statistic>
 
             <a-statistic
-                :title="$t('current_stock')"
+                :title="'现有' + $t('current_stock')"
                 :value="stockNumber"
                 :precision="0"
                 :value-style="{ color: '#3f8600' }"
@@ -144,6 +144,7 @@ export default {
 <style scoped>
 .main-page {
   margin-top: 100px;
+  margin-bottom: 50px;
   background-color: white;
   width: 90%;
   margin-left: 5%;
