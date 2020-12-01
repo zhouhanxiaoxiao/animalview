@@ -89,7 +89,8 @@
       <template slot="operation" slot-scope="text, record">
         <div class="editable-row-operations">
           <span>
-            <a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a" v-if="record.prestatu != '01' && record.prestatu != '03'"/>
+            <a-icon type="check-circle" theme="twoTone" two-tone-color="#52c41a"
+                    v-if="record.prestatu != '01' && record.prestatu != '03'"/>
             <a-icon type="clock-circle" theme="twoTone" two-tone-color="#FFCC00" v-if="record.prestatu == '01'"/>
             <a-icon type="close-circle" theme="twoTone" two-tone-color="#eb2f96" v-if="record.prestatu == '03'"/>
           </span>
@@ -98,7 +99,7 @@
           &nbsp;
           <a @click="showRefuseAlert(record)" v-if="record.prestatu == '01'">{{ $t("fail") }}</a>
           &nbsp;
-          <a  @click="() => showReason(record.id)" v-if="record.prestatu == '03'">{{ $t("showReason") }}</a>
+          <a @click="() => showReason(record.id)" v-if="record.prestatu == '03'">{{ $t("showReason") }}</a>
         </div>
       </template>
     </a-table>
@@ -116,30 +117,30 @@ import RefuseAlert from "@/components/publib/refuseAlert";
 export default {
   name: "askStep2",
   components: {RefuseAlert, Submitting},
-  props : {
-    taskId : String,
+  props: {
+    taskId: String,
   },
-  data : function (){
+  data: function () {
     return {
-      prepares : [],
-      columns :[],
-      tableLoad : false,
-      selectedRowKeys : [],
-      selectedRows : [],
+      prepares: [],
+      columns: [],
+      tableLoad: false,
+      selectedRowKeys: [],
+      selectedRows: [],
       scroll: {x: 1500},
-      columnNames :[],
-      task : {},
-      ask : {},
+      columnNames: [],
+      task: {},
+      ask: {},
     }
   },
   mounted() {
     this.initPage();
   },
-  methods : {
-    batchRefuse :function (){
+  methods: {
+    batchRefuse: function () {
       this.$(this.$refs.refuseAlert.$el).modal("show");
     },
-    showReason : function (id){
+    showReason: function (id) {
       var _this = this;
       this.$axios.post("/task/process/showStopReason", {detailId: id}).then(function (res) {
         if (res.data.code != "200") {
@@ -155,164 +156,164 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    checkNull : function (list){
-      for (var i = 0; i < list.length; i++){
+    checkNull: function (list) {
+      for (var i = 0; i < list.length; i++) {
         var prepare = list[i];
-        if (util.isNull(prepare.completetime)){
-          this.$message.error(this.$t("readyTime") +this.$t("not_null"));
-          return  false;
+        if (util.isNull(prepare.completetime)) {
+          this.$message.error(this.$t("readyTime") + this.$t("not_null"));
+          return false;
         }
-        if (util.isNull(prepare.realexptime)){
-          this.$message.error(this.$t("allowTime") +this.$t("not_null"));
-          return  false;
+        if (util.isNull(prepare.realexptime)) {
+          this.$message.error(this.$t("allowTime") + this.$t("not_null"));
+          return false;
         }
-        if (util.isNull(prepare.realage)){
-          this.$message.error(this.$t("realAge") +this.$t("not_null"));
-          return  false;
+        if (util.isNull(prepare.realage)) {
+          this.$message.error(this.$t("realAge") + this.$t("not_null"));
+          return false;
         }
-        if (util.isNull(prepare.realnumber)){
-          this.$message.error(this.$t("realNumber") +this.$t("not_null"));
-          return  false;
+        if (util.isNull(prepare.realnumber)) {
+          this.$message.error(this.$t("realNumber") + this.$t("not_null"));
+          return false;
         }
       }
       return true;
     },
-    refusePrepare : function(reason,remark){
+    refusePrepare: function (reason, remark) {
       this.$(this.$refs.refuseAlert.$el).modal("hide");
       var postData = {
-        prepares : JSON.stringify(this.selectedRowKeys),
-        reason : reason,
-        remark : remark
+        prepares: JSON.stringify(this.selectedRowKeys),
+        reason: reason,
+        remark: remark
       }
       var _this = this;
       this.$(this.$refs.submitting.$el).modal("show");
-      this.$axios.post("/task/ask/refusePrepare",postData).then(function (res){
+      this.$axios.post("/task/ask/refusePrepare", postData).then(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
-        if (res.data.code != "200"){
+        if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
-        }else {
+        } else {
           _this.initPage();
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    submitPrepare : function (){
-      if (!this.checkNull(this.selectedRows)){
-        return ;
+    submitPrepare: function () {
+      if (!this.checkNull(this.selectedRows)) {
+        return;
       }
       var list = new Array();
-      for (var i = 0;i<this.selectedRows.length;i++){
+      for (var i = 0; i < this.selectedRows.length; i++) {
         var pre = this.prepares[i];
-        pre.needmore = pre.needmore?"Y" : "N";
+        pre.needmore = pre.needmore ? "Y" : "N";
         list.push(pre);
       }
       var postData = {
-        prepares : JSON.stringify(list)
+        prepares: JSON.stringify(list)
       }
       var _this = this;
       this.$(this.$refs.submitting.$el).modal("show");
-      this.$axios.post("/task/ask/confirmPrepare",postData).then(function (res){
+      this.$axios.post("/task/ask/confirmPrepare", postData).then(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
-        if (res.data.code != "200"){
+        if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
-        }else {
+        } else {
           _this.initPage();
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    completePrepare : function (record){
+    completePrepare: function (record) {
       this.selectedRows = new Array();
       this.selectedRows.push(record);
       this.selectedRowKeys = new Array();
       this.selectedRowKeys.push(record.id);
       this.submitPrepare();
     },
-    showRefuseAlert : function (record){
+    showRefuseAlert: function (record) {
       this.selectedRows = new Array();
       this.selectedRows.push(record);
       this.selectedRowKeys = new Array();
       this.selectedRowKeys.push(record.id);
       this.$(this.$refs.refuseAlert.$el).modal("show");
     },
-    isDisable : function (col,record){
-      if (record.prestatu != "01"){
+    isDisable: function (col, record) {
+      if (record.prestatu != "01") {
         return true;
       }
-      if (!this.$store.getters.isCurrentUser(this.task.currentuser)){
+      if (!this.$store.getters.isCurrentUser(this.task.currentuser)) {
         return true;
       }
       if (col == "detail.purpose" || col == "starttime" || col == "remarks1"
-          || col == "endtime" || col == "createtime" || col == "needmore"){
+          || col == "endtime" || col == "createtime" || col == "needmore") {
         return true;
       }
       return false;
     },
-    tempSave : function (){
+    tempSave: function () {
       var list = new Array();
-      for (var i = 0;i<this.prepares.length;i++){
+      for (var i = 0; i < this.prepares.length; i++) {
         var pre = this.prepares[i];
-        pre.needmore = pre.needmore?"Y" : "N";
+        pre.needmore = pre.needmore ? "Y" : "N";
         list.push(pre);
       }
       var postData = {
-        prepares : JSON.stringify(list)
+        prepares: JSON.stringify(list)
       }
       var _this = this;
       this.$(this.$refs.submitting.$el).modal("show");
-      this.$axios.post("/task/ask/updatePrepares",postData).then(function (res){
+      this.$axios.post("/task/ask/updatePrepares", postData).then(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
-        if (res.data.code != "200"){
+        if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
-        }else {
+        } else {
           _this.initPage();
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    initPage : function (){
+    initPage: function () {
       this.initColumns();
 
       var postData = {
-        taskId : this.taskId
+        taskId: this.taskId
       }
       var _this = this;
       _this.prepares = new Array()
       _this.tableLoad = true;
 
-      this.$axios.post("/task/ask/getAllPrepares",postData).then(function (res){
+      this.$axios.post("/task/ask/getAllPrepares", postData).then(function (res) {
         // console.log(res);
         _this.tableLoad = false;
-        if (res.data.code != "200"){
+        if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
-        }else {
+        } else {
           console.log(res);
-          for (var i=0;i<res.data.retMap.prepares.length;i++){
+          for (var i = 0; i < res.data.retMap.prepares.length; i++) {
             var pre = res.data.retMap.prepares[i];
             pre.key = pre.id;
-            pre.detail.expectedtime = formatDate(new Date(pre.detail.expectedtime),"yyyy-MM-dd");
-            pre.createtime = formatDate(new Date(pre.createtime),"yyyy-MM-dd");
-            if (!util.isNull(pre.starttime)){
-              pre.starttime = formatDate(new Date(pre.starttime),"yyyy-MM-dd");
-              pre.endtime = formatDate(new Date(pre.endtime),"yyyy-MM-dd");
+            pre.detail.expectedtime = formatDate(new Date(pre.detail.expectedtime), "yyyy-MM-dd");
+            pre.createtime = formatDate(new Date(pre.createtime), "yyyy-MM-dd");
+            if (!util.isNull(pre.starttime)) {
+              pre.starttime = formatDate(new Date(pre.starttime), "yyyy-MM-dd");
+              pre.endtime = formatDate(new Date(pre.endtime), "yyyy-MM-dd");
             }
-            if (!util.isNull(pre.createtime)){
-              pre.createtime = formatDate(new Date(pre.createtime),"yyyy-MM-dd");
+            if (!util.isNull(pre.createtime)) {
+              pre.createtime = formatDate(new Date(pre.createtime), "yyyy-MM-dd");
             }
-            if (!util.isNull(pre.completetime)){
-              pre.completetime = formatDate(new Date(pre.completetime),"yyyy-MM-dd");
+            if (!util.isNull(pre.completetime)) {
+              pre.completetime = formatDate(new Date(pre.completetime), "yyyy-MM-dd");
             }
-            if (!util.isNull(pre.realexptime)){
-              pre.realexptime = formatDate(new Date(pre.realexptime),"yyyy-MM-dd");
+            if (!util.isNull(pre.realexptime)) {
+              pre.realexptime = formatDate(new Date(pre.realexptime), "yyyy-MM-dd");
             }
             pre.needmore = pre.needmore == "Y";
             _this.prepares.push(pre);
@@ -322,13 +323,13 @@ export default {
           _this.selectedRowKeys = [];
           _this.selectedRows = [];
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         _this.tableLoad = false;
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    initColumns : function (){
+    initColumns: function () {
       var scorllLength = 0;
       var clom = new Array();
       /**序号*/
@@ -470,7 +471,7 @@ export default {
 
       /**操作*/
       clom.push({
-        slots : {title : "operationTitle"},
+        slots: {title: "operationTitle"},
         // title: this.$t("operation"),
         dataIndex: 'operation',
         width: '150px',
@@ -494,12 +495,12 @@ export default {
       return text;
     },
   },
-  watch : {
-    taskId(){
+  watch: {
+    taskId() {
       this.initPage();
     }
   },
-  computed : {
+  computed: {
     rowSelection() {
       const {selectedRowKeys, selectedRows} = this;
       return {
@@ -516,10 +517,10 @@ export default {
         }),
       };
     },
-    isSupport : function (){
+    isSupport: function () {
       return this.$store.getters.isCurrentUser(this.task.currentuser);
     },
-    isCreater : function (){
+    isCreater: function () {
       return this.$store.getters.isCurrentUser(this.task.createuser);
     }
   }

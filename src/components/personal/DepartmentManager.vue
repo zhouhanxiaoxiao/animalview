@@ -2,22 +2,19 @@
   <div>
     <a-page-header
         style="border: 1px solid rgb(235, 237, 240)"
-        :title="$t('userManager')"
+        :title="$t('departmentManager')"
     >
       <template slot="extra">
-<!--        <a-button type="primary" @click="newDepartment">-->
-<!--          {{ $t("newDepartment") }}-->
-<!--        </a-button>-->
-        <a-button type="primary" @click="addNewRole">
-          {{ $t("newRole") }}
+        <a-button type="primary" @click="showNewDep">
+          {{ $t("newDepartment") }}
         </a-button>
-        <a-button type="primary" @click="updateUsers" :disabled="this.selectedRows.length == 0">
+        <a-button type="primary" :disabled="this.selectedRows.length == 0" @click="updateDepart">
           {{ $t("update") }}
         </a-button>
       </template>
     </a-page-header>
     <a-table :columns="columns"
-             :data-source="allUsers" bordered
+             :data-source="groups" bordered
              :loading="tableLoad"
              :row-selection="rowSelection"
              :pagination="false"
@@ -56,36 +53,29 @@
       <template
           v-for="col in this.columnNames"
           :slot="col"
-          slot-scope="text, record, index"
+          slot-scope="text,record"
       >
         <div :key="col">
-          <a-select
-              mode="multiple"
-              style="width: 200px"
-              v-model="record.rolesIds"
-              v-if="col == 'roles'"
-              @change="consoleValue(record.rolesIds)"
+          <div v-if="col == 'users'">
+            <a-tag v-for="user in record.users" :key="user.id">
+              {{ user.name }}
+            </a-tag>
+          </div>
+          <a-select style="width: 100%" v-else-if="col == 'groupadmin'"
+                    v-model="record.groupadmin"
           >
-            <a-select-option v-for="role in roles" :key="role.id" :value="role.id">
-              {{ role.rolename }}
-            </a-select-option>
-          </a-select>
-          <a-select v-else-if="col == 'group.groupname'"
-                    v-model="record.roleid"
-                    style="width: 100%">
-            <a-select-option v-for="group in groups" :key="group.id" :value="group.id">
-              {{ group.groupname }}
+            <a-select-option v-for="item in allUsers" :key="item.id" :value="item.id">
+              {{ item.name }}
             </a-select-option>
           </a-select>
           <template v-else>
-            {{ showText(col, text, index) }}
+            {{ showtext(text) }}
           </template>
         </div>
       </template>
     </a-table>
     <new-department ref="newDep" :users="allUsers" @submitDepart="submitDepart"></new-department>
-    <submitting ref="submitting" :title="$t('submitting')"></submitting>
-    <new-role ref="newRole" @sumintNewRole="sumintNewRole"></new-role>
+    <submitting :title="$t('submitting')" ref="submitting"></submitting>
   </div>
 </template>
 
@@ -93,75 +83,34 @@
 import util from "@/components/publib/util";
 import NewDepartment from "@/components/personal/newDepartment";
 import Submitting from "@/components/publib/submitting";
-import NewRole from "@/components/personal/newRole";
 
 export default {
-  name: "userManager",
-  components: {NewRole, Submitting, NewDepartment},
+  name: "DepartmentManager",
+  components: {Submitting, NewDepartment},
   data : function (){
     return {
       tableLoad: false,
-      data: [],
+      groups: [],
       selectedRowKeys : [],
       selectedRows : [],
       columns: [],
       columnNames: [],
+      allUsers :[],
       scroll: {x: 1500},
-      editingKey: '',
-      allUsers: [],
-      roles : [],
-      groups : []
     }
   },
-  beforeMount() {
+  mounted() {
     this.initPage();
   },
+
   methods : {
-    addNewRole : function (){
-      this.$(this.$refs.newRole.$el).modal("show");
-    },
-    sumintNewRole : function(role){
-      this.$(this.$refs.newRole.$el).modal("hide");
-      this.$(this.$refs.submitting.$el).modal("show");
-      var _this = this;
-      this.$axios.post("/user/manager/addNewRole",role).then(function (res){
-        _this.$(_this.$refs.submitting.$el).modal("hide");
-        if (res.data.code != "200"){
-          _this.$message.error(_this.$t(res.data.code));
-        }else {
-          _this.$message.success(_this.$t("commitSucc"));
-          _this.initPage();
-        }
-      }).catch(function (res){
-        _this.$(_this.$refs.submitting.$el).modal("hide");
-        console.log(res);
-        _this.$message.error(_this.$t("systemErr"));
-      });
-    },
-    updateUsers : function (){
-      if (this.selectedRows.length == 0){
-        return ;
-      }
-      this.$(this.$refs.submitting.$el).modal("show");
-      var _this = this;
+    updateDepart : function (){
       var postData = {
-        users : JSON.stringify(this.selectedRows)
+        list : JSON.stringify(this.selectedRows)
       }
-      this.$axios.post("/user/manager/updateUsers", postData).then(function (res){
-        _this.$(_this.$refs.submitting.$el).modal("hide");
-        if (res.data.code != "200"){
-          _this.$message.error(_this.$t(res.data.code));
-        }else {
-          _this.$message.success(_this.$t("commitSucc"));
-          _this.initPage();
-        }
-      }).catch(function (res){
-        _this.$(_this.$refs.submitting.$el).modal("hide");
-        console.log(res);
-        _this.$message.error(_this.$t("systemErr"));
-      });
+      util.commonPost("/personal/groups/updateDepartment",postData,this.initPage,this.$refs.submitting.$el);
     },
-    newDepartment : function(){
+    showNewDep : function (){
       this.$(this.$refs.newDep.$el).modal("show");
     },
     submitDepart : function (group){
@@ -182,60 +131,92 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       });
     },
+    preventDefault : function (){
+      var _this = this;
+      this.$confirm({
+        title: _this.$t("confirmDelete"),
+        okText: 'Yes',
+        okType: 'danger',
+        cancelText: 'No',
+        onOk() {
+          console.log('OK');
+        },
+        onCancel() {
+          _this.initPage();
+        },
+      });
+    },
+    showtext : function (text){
+      return text;
+    },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
       this.searchText = selectedKeys[0];
       this.searchedColumn = dataIndex;
     },
-
     handleReset(clearFilters) {
       clearFilters();
       this.searchText = '';
     },
-    consoleValue : function (record){
-      console.log(record);
-    },
-    getRoleIds : function (roles){
-      var roleIds = new Array();
-      roles.map(role=>roleIds.push(role.id));
-      return roleIds;
-    },
     initPage : function (){
       this.initColumns();
       var _this = this;
-      this.$axios.post("/user/manager/init").then(function (res){
+      this.$axios.post("/personal/groups/init").then(function (res){
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
         }else {
-          _this.allUsers = res.data.retMap.users;
-          _this.roles = res.data.retMap.roles;
           _this.groups = res.data.retMap.groups;
-          _this.allUsers.map(user=>user.key=user.id);
-          _this.selectedRowKeys = new Array();
-          _this.selectedRows = new Array();
+          _this.allUsers = res.data.retMap.allUsers;
         }
       }).catch(function (res){
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
-      });
+      })
     },
     initColumns : function (){
       var clom = new Array();
-      /**用户名*/
+      /**部门名称*/
       clom.push({
-        title: this.$t("userName"),
-        dataIndex: 'name',
+        title: this.$t("departmentName"),
+        dataIndex: 'groupname',
         width: '150px',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
-          customRender: 'name'
+          customRender: 'groupname'
         },
         onFilter: (value, record) =>{
-          if (util.isNull(record.name)){
+          if (util.isNull(record.groupname)){
             return false;
           }
-          return record.name
+          return record.groupname
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
+      });
+      /**部门负责人*/
+      clom.push({
+        title: "部门负责人",
+        dataIndex: 'groupadmin',
+        width: '150px',
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'groupadmin'
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.admin.name)){
+            return false;
+          }
+          return record.admin.name
               .toString()
               .toLowerCase()
               .includes(value.toLowerCase());
@@ -249,21 +230,21 @@ export default {
         },
       });
 
-      /**邮箱*/
+      /**部门成员*/
       clom.push({
-        title: this.$t("userEmail"),
-        dataIndex: 'email',
+        title: "部门成员",
+        dataIndex: 'users',
         width: '150px',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
-          customRender: 'email'
+          customRender: 'users'
         },
         onFilter: (value, record) =>{
-          if (util.isNull(record.email)){
+          if (util.isNull(record.users)){
             return false;
           }
-          return record.email
+          return record.users.length
               .toString()
               .toLowerCase()
               .includes(value.toLowerCase());
@@ -277,75 +258,11 @@ export default {
         },
       });
 
-      /**角色*/
-      clom.push({
-        title: this.$t("role"),
-        dataIndex: 'roles',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'roles'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.roles)){
-            return false;
-          }
-          for (var i = 0;i< record.roles.length; i++){
-            var role = record.roles[i];
-            if (role.rolename.toString()
-                .toLowerCase()
-                .includes(value.toLowerCase())){
-              return true
-            }
-          }
-          return false;
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-
-      /**组别*/
-      clom.push({
-        title: this.$t("department"),
-        dataIndex: 'group.groupname',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'group.groupname'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.group.groupname)){
-            return false;
-          }
-          return record.group.groupname
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
       this.columns = clom;
       this.columnNames = new Array();
       for (var item in clom){
         this.columnNames.push(clom[item].dataIndex);
       }
-    },
-    showText : function (col, text, index){
-      console.log(col, text, index);
-      return text;
     }
   },
   computed : {

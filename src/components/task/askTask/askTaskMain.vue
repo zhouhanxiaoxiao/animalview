@@ -12,6 +12,9 @@
         <a-tab-pane key="3" tab="实验员确认">
           <ask-step3 :task-id="getTaskId"></ask-step3>
         </a-tab-pane>
+        <a-tab-pane key="4" tab="说点什么...">
+          <ask-step4 :task-id="getTaskId"></ask-step4>
+        </a-tab-pane>
       </a-tabs>
     </div>
   </div>
@@ -22,10 +25,11 @@ import TopNav from "@/components/publib/TopNav";
 import AskStep1 from "@/components/task/askTask/askStep1";
 import AskStep2 from "@/components/task/askTask/askStep2";
 import AskStep3 from "@/components/task/askTask/askStep3";
+import AskStep4 from "@/components/task/askTask/askStep4";
 
 export default {
   name: "askTaskMain",
-  components: {AskStep3, AskStep2, AskStep1, TopNav},
+  components: {AskStep4, AskStep3, AskStep2, AskStep1, TopNav},
   data : function (){
     return {
 

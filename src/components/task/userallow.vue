@@ -27,7 +27,7 @@
           <textarea class="form-control" id="remarks" rows="2" disabled :value="fail.remarks"></textarea>
         </div>
       </div>
-      <div class="modal-footer" style="margin-top: 10px" v-if="task.taskstatu == '01'">
+      <div class="modal-footer" style="margin-top: 10px" v-if="canHandle">
         <button type="button" class="btn btn-danger" @click="refuseAllow">{{$t("refuse")}}</button>
         <button type="button" class="btn btn-primary" @click="selectRoles">{{$t("confirm")}}</button>
       </div>
@@ -53,7 +53,8 @@ export default {
       task : {},
       creater : {},
       roles : [],
-      fail :{}
+      fail :{},
+      reviewers : []
     }
   },
   mounted: function() {
@@ -78,6 +79,7 @@ export default {
           _this.creater = res.data.retMap.creater;
           _this.roles = res.data.retMap.roles;
           _this.fail = res.data.retMap.fail;
+          _this.reviewers = res.data.retMap.reviewers;
         }
       }).catch(function (res){
         console.log(res);
@@ -152,6 +154,18 @@ export default {
   computed : {
     getTaskId : function (){
       return this.$route.query.taskId;
+    },
+    canHandle : function (){
+      if (this.task.taskstatu != '01'){
+        return false;
+      }
+      for (var i = 0 ; i < this.reviewers.length; i++){
+        var reviewer = this.reviewers[i];
+        if (this.$store.getters.isCurrentUser(reviewer.id)){
+          return true;
+        }
+      }
+      return false;
     }
   }
 }

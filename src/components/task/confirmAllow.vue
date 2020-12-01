@@ -14,7 +14,7 @@
             <div id="selectRoles">
               <multiselect
                   v-model="selectRoles"
-                  :options="roles"
+                  :options="roleList"
                   :searchable="true"
                   :close-on-select="true"
                   :allow-empty="false"
@@ -64,6 +64,20 @@ export default {
         return true;
       }
       return false;
+    },
+    roleList : function (){
+      if (this.$store.getters.isAdmin){
+        return this.roles;
+      }
+      var list = new Array();
+      for (var i = 0; i<this.roles.length;i++){
+        var role = this.roles[i];
+        if (role.roletype == '20'
+            || role.roletype == '40'){
+          list.push(role);
+        }
+      }
+      return list;
     }
   }
 }

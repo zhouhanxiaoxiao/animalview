@@ -34,7 +34,7 @@
             <template v-if="loading['01'].statu == '03'">
               <a slot="actions" @click="nextStep(item,'01')" :disabled="!isCreater">{{ $t("samplePreparation") }}</a>
             </template>
-            <a slot="actions" @click="showDetail('1')">{{ $t("detail") }}</a>
+            <a slot="actions" @click="showDetail('1','p1',loading['01'].statu)">{{ $t("detail") }}</a>
             <div>{{ item.samplename + "-" + item.sampleindex }}</div>
           </a-list-item>
         </a-list>
@@ -76,7 +76,7 @@
             <template v-if="loading['02'].statu == '03'">
               <a slot="actions" @click="nextStep(item,'02')" :disabled="!isCreater">{{ $t("libraryPreparation") }}</a>
             </template>
-            <a slot="actions" @click="showDetail('2')">{{ $t("detail") }}</a>
+            <a slot="actions" @click="showDetail('2','p2',loading['02'].statu)">{{ $t("detail") }}</a>
             <div>{{ item.samplename + "-" + item.selfnumber }}</div>
           </a-list-item>
         </a-list>
@@ -112,7 +112,7 @@
             <template v-if="loading['03'].statu == '03'">
               <a slot="actions" @click="nextStep(item,'03')" :disabled="!isCreater">{{ $t("uploadConfirm") }}</a>
             </template>
-            <a slot="actions" @click="showDetail('3')">{{ $t("detail") }}</a>
+            <a slot="actions" @click="showDetail('3','p3',loading['03'].statu)">{{ $t("detail") }}</a>
             <div>{{ item.samplename + "-" + item.selfnumber }}</div>
           </a-list-item>
         </a-list>
@@ -152,7 +152,7 @@
             <template v-if="loading['04'].statu == '03'">
               <a slot="actions" @click="nextStep(item,'04')" :disabled="!isCreater">{{ $t("dismountData") }}</a>
             </template>
-            <a slot="actions" @click="showDetail('4')">{{ $t("detail") }}</a>
+            <a slot="actions" @click="showDetail('4','p4',loading['04'].statu)">{{ $t("detail") }}</a>
             <div>{{ item.samplename + "-" + item.sampleindex }}</div>
           </a-list-item>
         </a-list>
@@ -194,7 +194,7 @@
             <template v-if="loading['05'].statu == '03'">
               <a slot="actions" @click="nextStep(item,'05')" :disabled="!isCreater">{{ $t("bioinformaticsAnalysis") }}</a>
             </template>
-            <a slot="actions" @click="showDetail('5')">{{ $t("detail") }}</a>
+            <a slot="actions" @click="showDetail('5','p5',loading['05'].statu)">{{ $t("detail") }}</a>
             <div>{{ item.samplename + "-" + item.sampleindex }}</div>
           </a-list-item>
         </a-list>
@@ -236,7 +236,7 @@
 <!--            <template v-if="loading['06'].statu == '03'">-->
 <!--              <a slot="actions">{{ $t("bioinformaticsAnalysis") }}</a>-->
 <!--            </template>-->
-            <a slot="actions" @click="showDetail('6')">{{ $t("detail") }}</a>
+            <a slot="actions" @click="showDetail('6','p6',loading['06'].statu)">{{ $t("detail") }}</a>
             <div>{{ item.samplename + "-" + item.sampleindex }}</div>
           </a-list-item>
         </a-list>
@@ -251,11 +251,13 @@
 import Submitting from "@/components/publib/submitting";
 import util from "@/components/publib/util";
 import RefuseAlert from "@/components/publib/refuseAlert";
+
 export default {
   name: "processAllConfirm",
   components: {RefuseAlert, Submitting},
   props:{
-    process:Object
+    process:Object,
+    flag : String
   },
   data : function (){
     return {
@@ -388,8 +390,8 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    showDetail : function (val){
-      this.$emit("changeTab",val);
+    showDetail : function (tabVal,val,statu){
+      this.$emit("changeTab",tabVal,val,statu);
     },
     changeAnalysises : function (val){
       this.initPage("06",val);
@@ -466,6 +468,9 @@ export default {
       },
       deep: true
     },
+    flag(newVal){
+      this.initPage(newVal,this.loading[newVal].statu);
+    }
   },
   computed : {
     isCreater : function (){

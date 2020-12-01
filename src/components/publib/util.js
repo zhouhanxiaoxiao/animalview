@@ -4,7 +4,7 @@ import $ from "jquery";
 import {message as $message} from "ant-design-vue";
 
 var util = {
-    alicdnIcon: "//at.alicdn.com/t/font_2031063_tft0zte232a.js",
+    alicdnIcon: "//at.alicdn.com/t/font_2031063_xlgpx2a3k.js",
     isNull: function (obj) {
         if (obj == null) {
             return true;
@@ -148,6 +148,22 @@ var util = {
     },
     commonUploadUrl: function () {
         return $axios.defaults.baseURL + '/file/import/uploadFile';
+    },
+    commonPost : function (url,postData,callBak,submitting){
+        $(submitting).modal("show");
+        $axios.post(url,postData).then(function (res){
+            $(submitting).modal("hide");
+            if (res.data.code != "200"){
+                $message.error(i18n.t(res.data.code));
+            }else {
+                $message.success(i18n.t("commitSucc"));
+                callBak();
+            }
+        }).catch(function (res){
+            $(submitting).modal("hide");
+            console.log(res);
+            $message.error(i18n.t("systemErr"));
+        });
     },
     commonHandleUploadChange: function (ret) {
         if (ret.file.status == "uploading") {

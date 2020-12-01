@@ -43,7 +43,6 @@ Vue.prototype.$systemFlag = "local";
 // Vue.prototype.$systemFlag = "animal";
 // Vue.prototype.$systemFlag = "seqpro";
 
-
 /*
 * axios 全局设置
 * */
@@ -62,6 +61,7 @@ axios.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 
+import {message as $message} from "ant-design-vue";
 axios.interceptors.response.use(response =>{
   return response;
 },error => {
@@ -74,6 +74,7 @@ axios.interceptors.response.use(response =>{
           path : "/login",
           query : {redirect : router.currentRoute.fullPath}
         });
+        $message.error("请重新登录！")
         return Promise.reject("转到登录啦！");
       default:
         break;

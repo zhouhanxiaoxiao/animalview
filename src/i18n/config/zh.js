@@ -200,6 +200,7 @@ const zh={
     pass : "通过",
     unPass : "不通过",
     submitted : "已提交",
+    handler : "处理人",
 
     derivativeindex : "样本衍生编号",
     initSample:"初始样本",
@@ -233,6 +234,7 @@ const zh={
     createContainerTime:"建管日期",
     projectDetail : "项目详情",
     userManager : "用户管理",
+    departmentManager : "部门管理",
     department : "部门",
     newDepartment : "新增部门",
     departmentName : "部门名称",

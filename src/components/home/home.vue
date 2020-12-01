@@ -4,7 +4,7 @@
     <div class="main-page">
       <div class="summary-container">
         <div style="width: 100%;padding: 20px 20px;min-height: 150px" >
-          <template v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
+          <template v-if="this.$systemFlag == 'animal'" style="width: 100%;text-align: center">
             <a-statistic
                 title="最近一个月新增扩繁品系"
                 :value="oneMonthStockNumber"
@@ -52,21 +52,87 @@
               <template #prefix>
               </template>
             </a-statistic>
+            <a-statistic
+                title="进行中的任务"
+                :value="selfTaskNumber"
+                :precision="0"
+                :value-style="{ color: '#3f8600' }"
+                style="margin: 0px 25px;display: inline-block"
+                @click.native="myTask"
+            >
+              <template #prefix>
+                <a-icon type="arrow-up" />
+              </template>
+            </a-statistic>
           </template>
+          <div  v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'"
+                     style="width: 100%;text-align: center;">
+<!--            <a-statistic-->
+<!--                title="进行中的任务"-->
+<!--                :value="selfTaskNumber"-->
+<!--                :precision="0"-->
+<!--                :value-style="{ color: '#3f8600' }"-->
+<!--                style="margin: 0px 25px;display: inline-block;float: left;margin-left: 100px"-->
+<!--                @click.native="myTask"-->
+<!--            >-->
+<!--              <template #prefix>-->
+<!--                <a-icon type="arrow-up" />-->
+<!--              </template>-->
+<!--            </a-statistic>-->
+            <div style="display: inline-block;margin-left: 50px">
+              <a-statistic
+                  :title="$t('sampleInput')"
+                  :value="parseInt(checkNum.inputNum) + parseInt(todoNum.inputNum)"
+                  :precision="0"
+                  :value-style="{ color: '#3f8600' }"
+                  style="margin: 0px 20px;display: inline-block"
+              >
+              </a-statistic>
+              <a-statistic
+                  :title="$t('samplePreparation')"
+                  :value="parseInt(checkNum.makeNum) + parseInt(todoNum.makeNum)"
+                  :precision="0"
+                  :value-style="{ color: '#3f8600' }"
+                  style="margin: 0px 20px;display: inline-block"
+              >
+              </a-statistic>
+              <a-statistic
+                  :title="$t('libraryPreparation')"
+                  :value="parseInt(checkNum.libNum) + parseInt(todoNum.libNum)"
+                  :precision="0"
+                  :value-style="{ color: '#3f8600' }"
+                  style="margin: 0px 20px;display: inline-block"
+              >
+              </a-statistic>
+              <a-statistic
+                  :title="$t('uploadConfirm')"
+                  :value="parseInt(checkNum.confirmNum) + parseInt(todoNum.confirmNum)"
+                  :precision="0"
+                  :value-style="{ color: '#3f8600' }"
+                  style="margin: 0px 20px;display: inline-block"
+              >
+              </a-statistic>
+              <a-statistic
+                  :title="$t('dismountData')"
+                  :value="parseInt(checkNum.disNum) + parseInt(todoNum.disNum)"
+                  :precision="0"
+                  :value-style="{ color: '#3f8600' }"
+                  style="margin: 0px 20px;display: inline-block"
+              >
+              </a-statistic>
+              <a-statistic
+                  :title="$t('bioinformaticsAnalysis')"
+                  :value="parseInt(checkNum.bioNum) + parseInt(todoNum.bioNum)"
+                  :precision="0"
+                  :value-style="{ color: '#3f8600' }"
+                  style="margin: 0px 20px;display: inline-block"
+              >
+              </a-statistic>
+            </div>
+            <div style="display: inline-block">
 
-          <a-statistic
-              title="进行中的任务"
-              :value="selfTaskNumber"
-              :precision="0"
-              :value-style="{ color: '#3f8600' }"
-              style="margin: 0px 25px;display: inline-block"
-              @click.native="myTask"
-          >
-            <template #prefix>
-              <a-icon type="arrow-up" />
-            </template>
-          </a-statistic>
-
+            </div>
+          </div>
         </div>
 
 <!--        <number-and-name @click.native="myTask" num-name="待处理" :number="selfTaskNumber"></number-and-name>-->
@@ -94,6 +160,22 @@ export default {
       oneMonthStockNumber : 0,
       oneMonthStrainNumber : 0,
       stockNumber : 0,
+      todoNum : {
+        inputNum : 0,
+        makeNum : 0,
+        libNum : 0,
+        confirmNum : 0,
+        disNum : 0,
+        bioNum : 0
+      },
+      checkNum :{
+        inputNum : 0,
+        makeNum : 0,
+        libNum : 0,
+        confirmNum : 0,
+        disNum : 0,
+        bioNum : 0
+      }
     }
   },
   beforeMount() {
@@ -107,11 +189,14 @@ export default {
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
+          console.log(res);
           _this.allStrainNumber = res.data.retMap.allStrainNumber;
           _this.selfTaskNumber = res.data.retMap.selfTaskNumber;
           _this.oneMonthStockNumber = res.data.retMap.oneMonthStockNumber;
           _this.oneMonthStrainNumber = res.data.retMap.oneMonthStrainNumber;
           _this.stockNumber = res.data.retMap.stockNumber;
+          _this.todoNum = res.data.retMap.todoNum;
+          _this.checkNum = res.data.retMap.checkNum;
         }
       }).catch(function (res){
         console.log(res);

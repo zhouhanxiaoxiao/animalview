@@ -64,10 +64,10 @@
       <a-row type="flex">
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
-            {{ $t("allAllow") + "(" + operators.creater.name + ")"}}
+            {{ $t("allAllow") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-            {{ $t("submitted") + "(" + operators.creater.name + ")"}}
+            {{ $t("submitted") + "(" + createrName + ")"}}
           </a-tag>
           <template v-if="isEnd">
             <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
@@ -75,7 +75,7 @@
             </a-tag>
           </template>
           <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
-            {{ $t("init") + "(" + operators.make.name + ")"}}
+            {{ $t("init") + "(" + operatorName + ")"}}
           </a-tag>
           <template slot="title">
             {{$t("process.tagListTip")}}
@@ -433,6 +433,7 @@ export default {
   props: {
     taskId: String,
     process: Object,
+    statu : String,
   },
   data: function () {
     this.cacheData = [];
@@ -454,10 +455,11 @@ export default {
       subProcessName : "",
       remarks : "",
       subId : "00",
-      operators : {},
+      operators : undefined,
     }
   },
   beforeMount() {
+    this.subId = this.statu;
     this.initPage();
   },
   methods: {
@@ -786,6 +788,7 @@ export default {
           }else {
             _this.initPage();
           }
+          _this.$emit("changeStatu","02");
           // window.location.reload();
         }
       }).catch(function (res) {
@@ -1587,6 +1590,18 @@ export default {
       }
       return false;
     },
+    createrName : function (){
+      if (this.operators === undefined){
+        return '';
+      }
+      return this.operators.creater.name;
+    },
+    operatorName : function (){
+      if (this.operators === undefined){
+        return '';
+      }
+      return this.operators.make.name;
+    }
   },
   watch: {
     process: {
@@ -1595,6 +1610,10 @@ export default {
         this.initPage();
       },
       deep: true
+    },
+    statu(newVal){
+      this.subId = newVal;
+      this.initPage();
     }
   }
 }

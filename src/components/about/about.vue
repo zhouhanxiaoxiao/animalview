@@ -100,7 +100,7 @@ export default {
   methods:{
     initPage : function (){
       var _this = this;
-      this.$axios.get("/about/suggest").then(function (res){
+      this.$axios.post("/about/suggest",{flag :"system"}).then(function (res){
         console.log(res);
         if (res.data.code != "200"){
           _this.$message.error(_this.$t(res.data.code));
@@ -127,7 +127,8 @@ export default {
       }
       var postData = {
         comment : com,
-        replayId : this.replayId
+        replayId : this.replayId,
+        flag : "system"
       }
       var _this = this;
       this.$axios.post("/about/suggest/commit",postData).then(function (res){

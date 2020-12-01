@@ -27,6 +27,24 @@
               </a-select>
             </div>
           </div>
+          <div class="form-group row">
+            <label for="userName" class="col-sm-4 col-form-label">{{$t("userName")}}</label>
+            <div class="col-sm-8">
+              <a-input v-model="userName" id="userName" style="width: 100%"/>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="userEmail" class="col-sm-4 col-form-label">{{$t("userEmail")}}</label>
+            <div class="col-sm-8">
+              <a-input v-model="userEmail" id="userEmail" style="width: 100%"/>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="userPwd" class="col-sm-4 col-form-label">{{$t("userPwd")}}</label>
+            <div class="col-sm-8">
+              <a-input v-model="userPwd" id="userPwd" style="width: 100%"/>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">{{$t("cancel")}}</button>
@@ -50,7 +68,10 @@ export default {
       group : {
         name : "",
         groupAdmin : ""
-      }
+      },
+      userName : "",
+      userEmail: "",
+      userPwd : ""
     }
   },
   methods : {
@@ -59,11 +80,14 @@ export default {
         this.$message.error(this.$t("departmentName") + this.$t("not_null"));
         return ;
       }
-      if (util.isNull(this.group.groupAdmin)){
-        this.$message.error(this.$t("principal") + this.$t("not_null"));
-        return ;
+      var postData = {
+        name : this.group.name,
+        groupAdmin : this.group.groupAdmin,
+        userName : this.userName,
+        userEmail : this.userEmail,
+        userPwd : this.$md5(this.userPwd)
       }
-      this.$emit("submitDepart",this.group);
+      this.$emit("submitDepart",postData);
     }
   }
 }

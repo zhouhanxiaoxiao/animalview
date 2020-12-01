@@ -8,24 +8,25 @@
             <a-layout-sider width="20%" style="background: #fff;text-align: center">
               <a-menu
                   mode="inline"
-                  :default-selected-keys="['1']"
                   v-model="menuId"
+                  :multiple="false"
                   style="height: 100%"
               >
-                <a-menu-item key="1" @click="showContent('1')">
+                <a-menu-item key="accountInfo">
                   {{ $t("accountInfo") }}
                 </a-menu-item>
-<!--                <a-menu-item key="2" @click="showContent('2')">-->
-<!--                  {{ $t("messageInfo") }}-->
-<!--                </a-menu-item>-->
-                <a-menu-item key="3" @click="showContent('3')" v-if="$store.getters.isAdmin">
+                <a-menu-item key="userManager" v-if="$store.getters.isAdmin">
                   {{ $t("userManager") }}
+                </a-menu-item>
+                <a-menu-item key="departmentManager" v-if="$store.getters.isAdmin">
+                  {{ $t("departmentManager") }}
                 </a-menu-item>
               </a-menu>
             </a-layout-sider>
             <a-layout-content :style="{ padding: '0 24px', minHeight: '280px' }">
-              <personal-info v-if="this.menuId == '1'"></personal-info>
-              <user-manager v-if="this.menuId == '3'"></user-manager>
+              <personal-info v-if="menuId == 'accountInfo'"></personal-info>
+              <user-manager v-if="menuId == 'userManager'"></user-manager>
+              <department-manager v-if="menuId == 'departmentManager'"></department-manager>
             </a-layout-content>
           </a-layout>
         </a-layout-content>
@@ -38,20 +39,16 @@
 import TopNav from "@/components/publib/TopNav";
 import PersonalInfo from "@/components/personal/personalInfo";
 import UserManager from "@/components/personal/userManager";
+import DepartmentManager from "@/components/personal/DepartmentManager";
 
 export default {
   name: "personalMain",
-  components: {UserManager, PersonalInfo, TopNav},
+  components: {DepartmentManager, UserManager, PersonalInfo, TopNav},
   data() {
     return {
       collapsed: false,
-      menuId: '1',
+      menuId: ['accountInfo'],
     };
-  },
-  methods: {
-    showContent: function (menuId) {
-      this.menuId = menuId;
-    }
   },
   computed: {}
 }

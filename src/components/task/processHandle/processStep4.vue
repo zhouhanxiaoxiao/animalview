@@ -70,16 +70,16 @@
       <a-row type="flex">
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
-            {{ $t("allAllow") + "(" + operators.creater.name + ")"}}
+            {{ $t("allAllow") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-            {{ $t("submitted") + "(" + operators.creater.name + ")"}}
+            {{ $t("submitted") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
             {{ sub.name }}
           </a-tag>
           <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
-            {{ $t("init") + "(" + operators.dis.name + ")"}}
+            {{ $t("init") + "(" + operatorName + ")"}}
           </a-tag>
           <template slot="title">
             {{$t("process.tagListTip")}}
@@ -242,6 +242,7 @@ export default {
   components: {RefuseAlert, SubTaskInfo, Submitting},
   props: {
     process: Object,
+    statu :String,
   },
   data: function () {
     this.cacheData = [];
@@ -262,10 +263,11 @@ export default {
       remarks : "",
       subId : "00",
       bioAnalysis : "",
-      operators : {}
+      operators : undefined
     }
   },
   beforeMount() {
+    this.subId = this.statu;
     this.initPage();
   },
   methods: {
@@ -417,7 +419,7 @@ export default {
         processId: this.process.id,
         disIds : JSON.stringify(this.selectedRowKeys)
       }
-      util.downLoad(postData, "/task/process/downloadDismount", "测序分析.xls");
+      util.downLoad(postData, "/task/process/downloadDismount", "数据交付.xls");
     },
     initPage: function () {
       this.initCols();
@@ -798,6 +800,7 @@ export default {
             _this.initPage();
           }
         }
+        _this.$emit("changeStatu","05");
       }).catch(function (res) {
         // _this.$("#submitting").modal('hide');
         _this.$(_this.$refs.submitting.$el).modal("hide");
@@ -906,6 +909,18 @@ export default {
         return true;
       }
       return false;
+    },
+    createrName : function (){
+      if (this.operators === undefined){
+        return '';
+      }
+      return this.operators.creater.name;
+    },
+    operatorName : function (){
+      if (this.operators === undefined){
+        return '';
+      }
+      return this.operators.dis.name;
     }
   },
   watch: {
@@ -916,6 +931,10 @@ export default {
       },
       deep: true
     },
+    statu(newVal){
+      this.subId = newVal;
+      this.initPage();
+    }
   }
 }
 </script>

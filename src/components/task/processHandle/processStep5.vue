@@ -54,16 +54,16 @@
       <a-row type="flex">
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
-            {{ $t("allAllow") + "(" + operators.creater.name + ")"}}
+            {{ $t("allAllow") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-            {{ $t("submitted") + "(" + operators.creater.name + ")"}}
+            {{ $t("submitted") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
             {{ sub.name }}
           </a-tag>
           <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
-            {{ $t("init") + "(" + operators.bio.name + ")"}}
+            {{ $t("init") + "(" + operatorName + ")"}}
           </a-tag>
           <template slot="title">
             {{$t("process.tagListTip")}}
@@ -195,6 +195,7 @@ export default {
   components: {RefuseAlert, SubTaskInfo, Submitting},
   props: {
     process: Object,
+    statu : String
   },
   data: function () {
     this.cacheData = [];
@@ -213,10 +214,11 @@ export default {
       remarks : "",
       subId : "00",
       subs : [],
-      operators : ""
+      operators : undefined
     }
   },
   beforeMount() {
+    this.subId = this.statu;
     this.initPage();
   },
   methods: {
@@ -469,39 +471,39 @@ export default {
         },
       });
       scorllLength += 150;
-      /**结果主路径*/
-      clom.push({
-        title: this.$t("resultpath"),
-        dataIndex: 'resultpath',
-        width: '300px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'resultpath'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.resultpath)){
-            return false;
-          }
-          return record.resultpath
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 300;
+      // /**结果主路径*/
+      // clom.push({
+      //   title: this.$t("resultpath"),
+      //   dataIndex: 'resultpath',
+      //   width: '300px',
+      //   scopedSlots: {
+      //     filterDropdown: 'filterDropdown',
+      //     filterIcon: 'filterIcon',
+      //     customRender: 'resultpath'
+      //   },
+      //   onFilter: (value, record) =>{
+      //     if (util.isNull(record.resultpath)){
+      //       return false;
+      //     }
+      //     return record.resultpath
+      //         .toString()
+      //         .toLowerCase()
+      //         .includes(value.toLowerCase());
+      //   },
+      //   onFilterDropdownVisibleChange: visible => {
+      //     if (visible) {
+      //       setTimeout(() => {
+      //         this.searchInput.focus();
+      //       }, 0);
+      //     }
+      //   },
+      // });
+      // scorllLength += 300;
       /**报告地址*/
       clom.push({
         title: this.$t("reportpath"),
         dataIndex: 'reportpath',
-        width: '500px',
+        width: '600px',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -524,35 +526,35 @@ export default {
           }
         },
       });
-      scorllLength += 500;
-      /**分析流程/参数*/
-      clom.push({
-        title: this.$t("args"),
-        dataIndex: 'args',
-        width: '300px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'args'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.args)){
-            return false;
-          }
-          return record.args
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 300;
+      scorllLength += 600;
+      // /**分析流程/参数*/
+      // clom.push({
+      //   title: this.$t("args"),
+      //   dataIndex: 'args',
+      //   width: '300px',
+      //   scopedSlots: {
+      //     filterDropdown: 'filterDropdown',
+      //     filterIcon: 'filterIcon',
+      //     customRender: 'args'
+      //   },
+      //   onFilter: (value, record) =>{
+      //     if (util.isNull(record.args)){
+      //       return false;
+      //     }
+      //     return record.args
+      //         .toString()
+      //         .toLowerCase()
+      //         .includes(value.toLowerCase());
+      //   },
+      //   onFilterDropdownVisibleChange: visible => {
+      //     if (visible) {
+      //       setTimeout(() => {
+      //         this.searchInput.focus();
+      //       }, 0);
+      //     }
+      //   },
+      // });
+      // scorllLength += 300;
       /**分析人*/
       clom.push({
         title: this.$t("analyst"),
@@ -691,6 +693,7 @@ export default {
           _this.$message.success(_this.$t("commitSucc"));
           _this.initPage();
         }
+        _this.$emit("changeStatu","06");
       }).catch(function (res) {
         // _this.$("#submitting").modal("hide");
         _this.$(_this.$refs.submitting.$el).modal("hide");
@@ -768,6 +771,18 @@ export default {
       }
       return false;
     },
+    createrName : function (){
+      if (this.operators === undefined){
+        return '';
+      }
+      return this.operators.creater.name;
+    },
+    operatorName : function (){
+      if (this.operators === undefined){
+        return '';
+      }
+      return this.operators.bio.name;
+    }
   },
   watch: {
     process: {
@@ -776,6 +791,10 @@ export default {
         this.initPage();
       },
       deep: true
+    },
+    statu(newVal){
+      this.subId = newVal;
+      this.initPage();
     }
   },
 }

@@ -78,10 +78,10 @@
       <a-row type="flex">
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
-            {{ $t("allAllow") + "(" + operators.creater.name + ")"}}
+            {{ $t("allAllow") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-            {{ $t("submitted") + "(" + operators.make.name + ")"}}
+            {{ $t("submitted") + "(" + operatorName + ")"}}
           </a-tag>
           <template  v-if="canEdit">
             <a-tag class="pointer" color="#2db7f5" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
@@ -89,7 +89,7 @@
             </a-tag>
           </template>
           <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
-            {{ $t("init") + "(" + operators.creater.name + ")"}}
+            {{ $t("init") + "(" + createrName + ")"}}
           </a-tag>
           <template slot="title">
             {{$t("process.tagListTip")}}
@@ -581,7 +581,8 @@ export default {
   name: "processStep1New",
   components: {RefuseAlert, SubTaskInfo, Submitting,IconFont},
   props: {
-    process: Object
+    process: Object,
+    statu : String,
   },
   data() {
     this.cacheData = [];
@@ -596,10 +597,12 @@ export default {
       selectedRows: [],
       scroll: {x: 1500},
       editingKey: '',
+      todoNum: {},
+      checkNum: {},
       subs: [],
       curFlag: "01",
       subId: "00",
-      operators : {},
+      operators : undefined,
       editObj: {
         arrindex: "",
         initsample: "",
@@ -620,6 +623,7 @@ export default {
     };
   },
   beforeMount() {
+    this.subId = this.statu;
     this.initPage();
   },
   methods: {
@@ -910,6 +914,7 @@ export default {
           //   _this.initPage();
           // }
         }
+        _this.$emit("changeStatu","01");
       }).catch(function (res) {
         console.log(res);
         _this.$(_this.$refs.submitting.$el).modal("hide");
@@ -957,10 +962,10 @@ export default {
           this.$message.error(this.$t("initSample") + this.$t("not_null"));
           return false;
         }
-        if (this.isNull(rowData.sampleindex)) {
-          this.$message.error(this.$t("sampleIndex") + this.$t("not_null"));
-          return false;
-        }
+        // if (this.isNull(rowData.sampleindex)) {
+        //   this.$message.error(this.$t("sampleIndex") + this.$t("not_null"));
+        //   return false;
+        // }
         if (this.isNull(rowData.samplename)) {
           this.$message.error(this.$t("sampleName") + this.$t("not_null"));
           return false;
@@ -1034,6 +1039,8 @@ export default {
           }
           _this.subs = res.data.retMap.subs;
           _this.operators = res.data.retMap.operators;
+          _this.todoNum = res.data.retMap.todoNum;
+          _this.checkNum = res.data.retMap.checkNum;
           _this.selectedRows = [];
           _this.selectedRowKeys = [];
           // _this.$notification.warning({
@@ -1556,6 +1563,19 @@ export default {
       }
       return false;
     },
+    createrName : function (){
+      if (this.operators === undefined){
+        return '';
+      }
+      return this.operators.creater.name;
+    },
+    operatorName : function (){
+      if (this.operators === undefined){
+        return '';
+      }
+      return this.operators.make.name;
+    },
+
   },
   watch: {
     process: {
@@ -1564,6 +1584,10 @@ export default {
         this.initPage();
       },
       deep: true
+    },
+    statu(newVal){
+      this.subId = newVal;
+      this.initPage();
     }
   }
 }

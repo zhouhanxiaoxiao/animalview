@@ -5,6 +5,37 @@
              :loading="tableLoad"
              size="middle"
              :columns="columns">
+      <div
+          slot="filterDropdown"
+          slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+          style="padding: 8px"
+      >
+        <a-input
+            v-ant-ref="c => (searchInput = c)"
+            :value="selectedKeys[0]"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+            @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          {{ $t("search") }}
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+          {{ $t("reset") }}
+        </a-button>
+      </div>
+      <a-icon
+          slot="filterIcon"
+          slot-scope="filtered"
+          type="search"
+          :style="{ color: filtered ? '#108ee9' : undefined }"
+      />
       <template
           v-for="col in this.columnNames"
           :slot="col"
@@ -19,6 +50,11 @@
               {{record.process.projectname}}
             </a-tag>
             {{ record.taskdesc }}
+          </div>
+          <div v-else-if="col == 'handler'">
+            <a-tag v-for="item in record.handler" :key="item.id">
+              {{item.name}}
+            </a-tag>
           </div>
           <div v-else-if="col == 'detail'">
             <a-button type="primary" @click="showDetail(record)" size="small">
@@ -55,6 +91,7 @@
 <script>
 import {formatDate} from "@/components/publib/date";
 import Submitting from "@/components/publib/submitting";
+import util from "@/components/publib/util";
 
 export default {
   name: "taskTableNew",
@@ -70,13 +107,24 @@ export default {
       selectedRowKeys : [],
       selectedRows : [],
       columnNames : [],
-      users : []
+      users : [],
+      searchInput : ""
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods : {
+    handleSearch(selectedKeys, confirm, dataIndex) {
+      confirm();
+      this.searchText = selectedKeys[0];
+      this.searchedColumn = dataIndex;
+    },
+
+    handleReset(clearFilters) {
+      clearFilters();
+      this.searchText = '';
+    },
     confirmDelete : function (taskId){
       var postData = {
         taskId : taskId
@@ -156,20 +204,23 @@ export default {
         }
       }
     },
+    showTaskType : function (text){
+      var ret = "";
+      if (text == "01") {
+        ret = "账号申请";
+      } else if (text == "02") {
+        ret = "使用申请";
+      } else if (text == "03"){
+        ret = "流程管理" + "";
+      }else if (text == "04"){
+        ret = "协助申请";
+      }
+      return ret;
+    },
     showText(text,column,record){
       // console.log(text,column,record);
       if (column == "tasktype"){
-        var ret = "";
-        if (text == "01") {
-          ret = "账号申请";
-        } else if (text == "02") {
-          ret = "使用申请";
-        } else if (text == "03"){
-          ret = "流程管理" + "";
-        }else if (text == "04"){
-          ret = "协助申请";
-        }
-        return ret;
+        return this.showTaskType(text);
       }else if(column == "createtime"){
         return  formatDate(new Date(record.createtime),"yyyy-MM-dd");
       }else if(column == "createuser"){
@@ -211,7 +262,21 @@ export default {
         title: this.$t("tasktype"),
         dataIndex: 'tasktype',
         scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
           customRender: 'tasktype',
+        },
+        onFilter: (value, record) =>
+            this.showTaskType(record.tasktype)
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
         },
       });
 
@@ -227,7 +292,59 @@ export default {
         title: this.$t("creater"),
         dataIndex: 'createuser',
         scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
           customRender: 'createuser',
+        },
+        onFilter: (value, record) =>{
+          var user = undefined;
+          for (var i = 0;i<this.users.length;i++){
+            if (this.users[i].id == record.createuser){
+              user = this.users[i].name;
+            }
+          }
+          if (util.isNull(record.createuser)){
+            return false;
+          }
+          return user
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
+      });
+
+      cols.push({
+        title: this.$t("handler"),
+        dataIndex: 'handler',
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'handler',
+        },
+        onFilter: (value, record) =>{
+          for (var i = 0;i<record.handler;i++){
+            var usr = record.handler[i];
+            if (usr.name.toString()
+                .toLowerCase()
+                .includes(value.toLowerCase())){
+              return true;
+            }
+          }
+          return false;
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
         },
       });
 
@@ -235,7 +352,25 @@ export default {
         title: this.$t("createTime"),
         dataIndex: 'createtime',
         scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
           customRender: 'createtime',
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.createtime)){
+            return false;
+          }
+          return formatDate(new Date(record.createtime),"yyyy-MM-dd")
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
         },
       });
 
@@ -243,7 +378,25 @@ export default {
         title: this.$t("remarks"),
         dataIndex: 'taskdesc',
         scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
           customRender: 'taskdesc',
+        },
+        onFilter: (value, record) =>{
+          if (util.isNull(record.taskdesc)){
+            return false;
+          }
+          return record.taskdesc
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
+        },
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
         },
       });
 
