@@ -72,8 +72,7 @@ export default {
       var list = new Array();
       for (var i = 0; i<this.roles.length;i++){
         var role = this.roles[i];
-        if (role.roletype == '20'
-            || role.roletype == '40'){
+        if (role.roletype == '20'){
           list.push(role);
         }
       }

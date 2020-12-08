@@ -14,11 +14,18 @@
       <InputwhitName ref="registerPwd2" :inp-data="registerPwd2Data" @updateData="updateRegister"></InputwhitName>
 
       <div class="form-row ">
-        <a-select style="width: 95%" :placeholder='$t("selectGroup")' v-model="usergroup">
-          <a-select-option  v-for="group in groups" :key="group.id" :value="group.id">
-            {{ group.groupname }}
-          </a-select-option>
-        </a-select>
+        <a-tooltip placement="topLeft" :title="$t('groupTip')">
+          <a-select style="width: 95%"
+                    :placeholder="$t('selectGroup')"
+                    v-model="usergroup">
+            <a-select-option value="">
+              {{ $t('selectGroup') }}
+            </a-select-option>
+            <a-select-option v-for="group in groups" :key="group.id" :value="group.id">
+              {{ group.groupname }}
+            </a-select-option>
+          </a-select>
+        </a-tooltip>
       </div>
 
       <div class="form-row input-group mb-3" style="margin-top: 20px">
@@ -62,7 +69,7 @@ export default {
       codeShowClass: "",
       codeStatu: "",
       registerNameData: {
-        inputLabel: this.$t('userName'),
+        inputLabel: this.$t('realName'),
         inputType: "text",
         inputName: "registerName",
         checkMsg: "",
@@ -93,23 +100,23 @@ export default {
       registerEmail: '',
       registerPwd: '',
       registerPwd2: '',
-      usergroup : "",
-      groups : []
+      usergroup: "",
+      groups: []
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods: {
-    initPage : function (){
+    initPage: function () {
       var _this = this;
-      this.$axios.post("/register/getGroups").then(function (res){
+      this.$axios.post("/register/getGroups").then(function (res) {
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.groups = res.data.retMap.groups;
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       })
@@ -124,11 +131,15 @@ export default {
     getVerification: function () {
       var _this = this;
       var reg = /^\w{3,}@cibr\.ac\.cn$/;
+      var regnibs = /^\w{3,}@nibs\.ac\.cn$/;
       if (!reg.test(this.registerEmail)) {
-        this.registerEmailData.isValid = "2";
-        this.registerEmailData.checkMsg = this.$t('userEmailErr');
-        return;
+        if (!regnibs.test(this.registerEmail)) {
+          this.registerEmailData.isValid = "2";
+          this.registerEmailData.checkMsg = this.$t('userEmailErr');
+          return;
+        }
       }
+
       this.$("#submitting").modal("show");
       this.$axios({
         method: "post",
@@ -186,9 +197,9 @@ export default {
         this.codeShowClass = "invalid-feedback";
         this.codeStatu = this.$t("verificationStatuErr");
       }
-      if (this.usergroup == ""){
+      if (this.usergroup == "") {
         this.$message.error(this.$t("selectGroup"));
-        return ;
+        return;
       }
       var _this = this;
       this.$("#submitting").modal("show");
@@ -200,7 +211,7 @@ export default {
           "registerEmail": this.registerEmail,
           "registerPwd": this.$md5(this.registerPwd),
           "verificationCode": this.verificationCode,
-          "usergroup" : this.usergroup
+          "usergroup": this.usergroup
         }
       }).then(function (res) {
         _this.$("#submitting").modal("hide");
@@ -241,10 +252,13 @@ export default {
         this.registerEmailData.checkMsg = this.$t('userEmailNull');
       } else if (newValue != "") {
         var reg = /^\w{3,}@cibr\.ac\.cn$/;
+        var nibs = /^\w{3,}@nibs\.ac\.cn$/;
         if (!reg.test(newValue)) {
-          this.registerEmailData.isValid = "2";
-          this.registerEmailData.checkMsg = this.$t('userEmailErr');
-          return;
+          if (!nibs.test(newValue)) {
+            this.registerEmailData.isValid = "2";
+            this.registerEmailData.checkMsg = this.$t('userEmailErr');
+            return;
+          }
         }
         this.registerEmailData.isValid = "1";
         this.registerEmailData.checkMsg = '';

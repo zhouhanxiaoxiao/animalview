@@ -85,7 +85,8 @@ export default {
         groupAdmin : this.group.groupAdmin,
         userName : this.userName,
         userEmail : this.userEmail,
-        userPwd : this.$md5(this.userPwd)
+        userPwd : this.$md5(this.userPwd),
+        realPwd : this.userPwd,
       }
       this.$emit("submitDepart",postData);
     }

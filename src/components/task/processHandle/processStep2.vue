@@ -67,7 +67,7 @@
             {{ $t("allAllow") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-            {{ $t("submitted") + "(" + createrName + ")"}}
+            {{ $t("notAllow") + "(" + createrName + ")"}}
           </a-tag>
           <template v-if="isEnd">
             <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">

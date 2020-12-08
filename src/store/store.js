@@ -37,7 +37,8 @@ export default new Vuex.Store({
         isReviewer(state){
             for (var i = 0; i < state.user.roles.length; i++) {
                 var role = state.user.roles[i];
-                if (role.roletype == "999999" || role.roletype == "40") {
+                if (role.roletype == "999999"
+                    || role.roletype == "40") {
                     return true;
                 }
             }

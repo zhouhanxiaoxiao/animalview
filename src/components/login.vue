@@ -76,13 +76,16 @@ export default {
     getVerification : function (){
       var _this = this;
       var reg = /^\w{3,}@cibr\.ac\.cn$/;
+      var regnibs = /^\w{3,}@nibs\.ac\.cn$/;
       if (util.isNull(this.loginEmail)){
         this.$message.error(this.$t("userEmailNull"));
         return
       }
       if (!reg.test(this.loginEmail)) {
-        this.$message.error(this.$t("userEmailReg"));
-        return;
+        if (!regnibs.test(this.loginEmail)){
+          this.$message.error(this.$t("userEmailReg"));
+          return;
+        }
       }
       this.$("#submitting").modal("show");
       this.$axios({

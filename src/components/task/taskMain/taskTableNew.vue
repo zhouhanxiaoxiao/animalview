@@ -43,13 +43,21 @@
       >
         <div :key="col" style="font-size: 12px !important;">
           <div v-if="col == 'taskstatu'">
-            <a-progress :showInfo="false" :percent="taskPro(record)" size="small" :status="taskstatu(record)" />
+            <div v-if="record.tasktype == '03'">
+              <a-tag v-if="record.process.taskstatu == '10'" color="orange">等待部门负责人审批</a-tag>
+              <a-tag v-if="record.process.taskstatu == '21'" color="orange">等待基因组学中心审批</a-tag>
+              <a-tag v-if="record.process.taskstatu == '20'" color="cyan">进行中</a-tag>
+              <a-tag v-if="record.process.taskstatu == '72'" color="red">部门负责人拒绝</a-tag>
+              <a-tag v-if="record.process.taskstatu == '71'" color="red">基因组学中心拒绝</a-tag>
+              <a-tag v-if="record.process.taskstatu == '70'" color="#87d068">已完成</a-tag>
+            </div>
+            <a-progress v-else :showInfo="false" :percent="taskPro(record)" size="small" :status="taskstatu(record)"/>
           </div>
           <div v-else-if="col == 'taskdesc'">
             <a-tag color="green" v-if="record.tasktype == '03'">
               {{record.process.projectname}}
             </a-tag>
-            {{ record.taskdesc }}
+            <div style="width: 300px">{{ record.taskdesc }}</div>
           </div>
           <div v-else-if="col == 'handler'">
             <a-tag v-for="item in record.handler" :key="item.id">
@@ -72,6 +80,31 @@
               </template>
               <a-button type="danger" size="small">{{$t("delete")}}</a-button>
             </a-popconfirm>
+            &nbsp;
+            <a-popconfirm placement="topLeft"
+                          v-if="allowShare(record)"
+                          ok-text="Yes"
+                          cancel-text="No"
+                          @confirm="submitShareUsers(record.id)">
+              <template slot="title">
+                <p>{{ $t("selectShareUser") }}</p>
+                <p>
+                  <a-select style="width: 100%" mode="tags" v-model="shareUser" >
+                    <a-select-option v-for="item in users" :key="item.id" :value="item.id">
+                      {{item.name}}
+                    </a-select-option>
+                  </a-select>
+                </p>
+                <p>
+                  已分享：
+                  <a-tag v-for="share in taskShare(record.id)" :key="share.id">
+                    {{share.name}}
+                  </a-tag>
+                </p>
+              </template>
+              <a-button size="small" shape="circle" icon="share-alt" />
+            </a-popconfirm>
+
 <!--            <button type="button" style="font-size: 12px" class="btn btn-primary btn-sm stock-action"-->
 <!--                    @click="showDetail(record)">{{ $t("detail") }}-->
 <!--            </button>-->
@@ -108,13 +141,49 @@ export default {
       selectedRows : [],
       columnNames : [],
       users : [],
-      searchInput : ""
+      searchInput : "",
+      shareUser : [],
+      shares : []
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods : {
+    allowShare : function (record){
+      if (record.tasktype == "03"){
+        if (this.$store.getters.isCurrentUser(record.process.creater)){
+          return  true;
+        }
+      }
+      return false;
+    },
+    taskShare :function(taskId){
+      var sharers = new Array();
+      for (var i=0;i<this.shares.length;i++){
+        var share = this.shares[i];
+        if (share.taskid == taskId){
+          for (var j = 0; j < this.users.length; j++){
+            var curuser = this.users[j];
+            if (share.shareuser == curuser.id){
+              sharers.push(curuser);
+            }
+          }
+        }
+      }
+      return sharers;
+    },
+    submitShareUsers : function (taskId){
+      if (this.shareUser.length == 0){
+        this.$message.error(this.$t("请选择能够查看此项目的用户"));
+        return;
+      }
+      var postData = {
+        taskId : taskId,
+        shares : JSON.stringify(this.shareUser)
+      }
+      util.commonPost("/task/submitShare",postData,this.initPage,this.$refs.submitting.$el)
+    },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
       this.searchText = selectedKeys[0];
@@ -249,6 +318,7 @@ export default {
           _this.taskList = res.data.retMap.alltask;
           _this.taskList.map(task => task.key=task.id);
           _this.users = res.data.retMap.users;
+          _this.shares = res.data.retMap.shares;
         }
       }).catch(function (res) {
         console.log(res);

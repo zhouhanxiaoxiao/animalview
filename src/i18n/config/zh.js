@@ -1,4 +1,5 @@
 const zh={
+    realName : "真实姓名",
     userName : '用户名',
     userEmail : '邮箱',
     userPwd : '密码',
@@ -12,7 +13,7 @@ const zh={
     userPwdNull : "密码不能为空！",
     userPwd2Null : "请再次填写密码！",
     userEmailReg : "邮箱格式有误！",
-    userEmailErr : "请使用脑中心邮箱注册！",
+    userEmailErr : "请使用cibr或nibs邮箱注册！",
     userNameErr : "2到16位（中文，字母，数字）",
     userPwdRegErr : "必须有数字和字母组合",
     userPwd2NotSame : "两次输入的密码不一致！",
@@ -20,6 +21,7 @@ const zh={
     verificationStatuOK : "验证通过",
     registerSucc : "注册成功，请等待管理员审核！",
     workReservation : "工作预约",
+    groupTip : "若没有您所在实验室或平台，请联系计算中心周晗(zhouhan@cibr.ac.cn)",
     edit:"编辑",
     delete:"删除",
     save:"保存",
@@ -223,7 +225,7 @@ const zh={
     showAll : "展示全部",
     subTask : "子任务",
     search: "搜索",
-    selectGroup : "请选择实验室",
+    selectGroup : "请选择实验室或平台",
     areyousureDelete : "您确定要删除吗？",
     batchUpdate : "批量编辑",
     addNewStock : "新增库存",
@@ -246,9 +248,7 @@ const zh={
     other : "其他",
     projectDesc : "项目描述",
     processAllConfirm : "总览",
-
     support : "供应商",
-
     processSelectPre : "1.如果预期负责人不在列表中，请先注册之后再选择！\n2.\n3.邮箱可以从下拉中选择或手动填写",
     processStep1Tip :"操作说明：1.点击‘新增’增加一行数据，填写内容后，点击‘暂存’保存页面数据。" +
         "2.也可通过选中数据导出Excel模板，按照模板内容编写数据再进行导入。3.样本编号一栏无需填写，选择‘初始样本’、‘建库类型’之后点击" +
@@ -258,6 +258,8 @@ const zh={
     repeat : "重复",
     history : "历史记录",
     overDate : "过期时间",
+    selectShareUser : "请选择能够查看此项目的用户",
+    logintimeover : "登录已过期，请重新登录！",
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",

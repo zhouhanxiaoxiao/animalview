@@ -73,7 +73,7 @@
             {{ $t("allAllow") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-            {{ $t("submitted") + "(" + createrName + ")"}}
+            {{ $t("notAllow") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
             {{ sub.name }}
@@ -169,7 +169,11 @@
                          format="YYYY-MM-DD"
                          :disabled="isDisabled(col,record)"
                          v-model="record.lasttime"/>
-
+          <div v-else-if="col == 'datepath' && record.currentstatu != '01'">
+            <a-tag @click="gotoDatapath(record.datepath)">
+              {{ record.datepath }}
+            </a-tag>
+          </div>
           <!-- 序号 -->
           <a-input
               v-else-if="col != 'index'"
@@ -271,6 +275,9 @@ export default {
     this.initPage();
   },
   methods: {
+    gotoDatapath : function (url){
+      window.open(url);
+    },
     showReason : function (makeId){
       var _this = this;
       this.$axios.post("/task/process/showStopReason",{detailId : makeId}).then(function (res){
@@ -636,7 +643,7 @@ export default {
       clom.push({
         title: this.$t("datepath"),
         dataIndex: 'datepath',
-        width: '300px',
+        width: '400px',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -659,7 +666,7 @@ export default {
           }
         },
       });
-      scorllLength += 300;
+      scorllLength += 400;
       /**测序平台*/
       clom.push({
         title: this.$t("SequencingPlatform"),

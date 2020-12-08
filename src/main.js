@@ -74,7 +74,7 @@ axios.interceptors.response.use(response =>{
           path : "/login",
           query : {redirect : router.currentRoute.fullPath}
         });
-        $message.error("请重新登录！")
+        $message.error(i18n.t("logintimeover"));
         return Promise.reject("转到登录啦！");
       default:
         break;

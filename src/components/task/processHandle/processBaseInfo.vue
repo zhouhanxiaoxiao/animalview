@@ -323,6 +323,7 @@ export default {
       if (
           (this.process.taskstatu == "21")
           && this.$store.getters.isReviewer
+          && this.jyzxGroup.id == this.$store.getters.getUser.roleid
       ){
         return false;
       }
@@ -333,7 +334,7 @@ export default {
         var reviewer = this.groupReviewer[i];
         if (
             (this.process.taskstatu == "10")
-            && reviewer.id == this.$store.getters.getUser.id
+            && this.$store.getters.isCurrentUser(reviewer.id)
         ){
           return false;
         }

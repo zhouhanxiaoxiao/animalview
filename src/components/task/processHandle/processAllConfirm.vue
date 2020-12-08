@@ -268,19 +268,19 @@ export default {
       disList : [],
       analyses : [],
       loading :{
-        "01" : {load : false,statu:"00"},
-        "02" : {load : false,statu:"00"},
-        "03" : {load : false,statu:"00"},
-        "04" : {load : false,statu:"00"},
-        "05" : {load : false,statu:"00"},
-        "06" : {load : false,statu:"00"},
+        "01" : {load : false,statu:"03"},
+        "02" : {load : false,statu:"03"},
+        "03" : {load : false,statu:"03"},
+        "04" : {load : false,statu:"03"},
+        "05" : {load : false,statu:"03"},
+        "06" : {load : false,statu:"03"},
       },
       tempItem : {},
       tempFlag : ""
     }
   },
   mounted() {
-    this.initPage("all","00");
+    this.initPage("all","03");
   },
   methods :{
     nextStep : function (item,flag){
@@ -464,7 +464,7 @@ export default {
     process: {
       handler: function () {
         // console.log(newVal)
-        this.initPage("all","00");
+        this.initPage("all","03");
       },
       deep: true
     },

@@ -72,7 +72,7 @@
             {{ $t("allAllow") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-            {{ $t("submitted") + "(" + createrName + ")"}}
+            {{ $t("notAllow") + "(" + createrName + ")"}}
           </a-tag>
           <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
             {{ sub.name }}
@@ -905,6 +905,35 @@ export default {
         },
       });
       scorllLength += 150;
+
+      // /**组织来源*/
+      // clom.push({
+      //   title: this.$t("tissue") + this.$t("animal_stock_resource"),
+      //   dataIndex: 'tissue',
+      //   width: '150px',
+      //   scopedSlots: {
+      //     filterDropdown: 'filterDropdown',
+      //     filterIcon: 'filterIcon',
+      //     customRender: 'tissue'
+      //   },
+      //   onFilter: (value, record) =>{
+      //     if (util.isNull(record.tissue)){
+      //       return false;
+      //     }
+      //     return record.tissue
+      //         .toString()
+      //         .toLowerCase()
+      //         .includes(value.toLowerCase());
+      //   },
+      //   onFilterDropdownVisibleChange: visible => {
+      //     if (visible) {
+      //       setTimeout(() => {
+      //         this.searchInput.focus();
+      //       }, 0);
+      //     }
+      //   },
+      // });
+
       /** 浓度(ng/ul)/（细胞个数/μl) */
       clom.push({
         title: "浓度",

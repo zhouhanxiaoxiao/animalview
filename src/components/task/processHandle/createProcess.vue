@@ -105,7 +105,7 @@
             <icon-font style="font-size: 20px" type="icon-bitian" />
           </label>
           <div id="sampleInput">
-            <a-select  style="width: 100%" v-model="sampleInput">
+            <a-select  style="width: 100%" v-model="sampleInput" disabled="true">
               <a-select-option v-for="user in users" :key="user.id">
                 {{ user.name }}
               </a-select-option>
