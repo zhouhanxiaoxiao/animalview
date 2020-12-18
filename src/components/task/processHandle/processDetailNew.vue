@@ -62,6 +62,9 @@
         <a-tab-pane key="8" :tab="$t('process.processTip')">
           <process-tip></process-tip>
         </a-tab-pane>
+<!--        <a-tab-pane key="10" :tab="$t('summary')">-->
+<!--          <process-all-data :process="process"></process-all-data>-->
+<!--        </a-tab-pane>-->
         <div slot="tabBarExtraContent">
           <a-tag class="pointer" color="#f50" v-if="this.process.taskstatu == '71'">
             {{ "基因组学中心已拒绝：" + this.fail.reason }}
@@ -85,9 +88,6 @@
             {{ $t("allcomplete") }}
           </a-tag>
         </div>
-        <!--        <a-tag color="purple" slot="tabBarExtraContent">-->
-        <!--          {{process.projectname}}-->
-        <!--        </a-tag>-->
       </a-tabs>
     </div>
   </div>
@@ -103,10 +103,12 @@ import ProcessBaseInfo from "@/components/task/processHandle/processBaseInfo";
 import ProcessStep6 from "@/components/task/processHandle/processStep6";
 import ProcessTip from "@/components/task/processHandle/processTip";
 import ProcessAllConfirm from "@/components/task/processHandle/processAllConfirm";
+// import ProcessAllData from "@/components/task/processHandle/processAllData";
 
 export default {
   name: "processDetailNew",
   components: {
+    // ProcessAllData,
     ProcessAllConfirm,
     ProcessTip,
     ProcessStep6,

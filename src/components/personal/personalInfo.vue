@@ -22,7 +22,8 @@
       </a-form-item>
 
       <a-form-item :label="$t('userName')">
-        <a-input id="userName" v-model="user.name"/>
+        <a-input id="userName" v-model="user.name" disabled/>
+
       </a-form-item>
       <a-form-item :label="$t('userPwd')">
         <a-input-password id="userPwd" v-model="user.password" :disabled="!isEditPwd"/>

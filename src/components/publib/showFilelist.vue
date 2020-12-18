@@ -47,6 +47,9 @@ export default {
   beforeMount() {
     this.initPage();
   },
+  activated() {
+    this.initPage();
+  },
   methods : {
     downLoadFile : function (fileId,realname){
       console.log(fileId,realname);

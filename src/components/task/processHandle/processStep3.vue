@@ -6,6 +6,21 @@
         :sub-title="process.projectname"
     >
       <template slot="extra">
+        <a-upload
+            name="file"
+            v-if="isEnd"
+            :action="uploadAllUrl"
+            :multiple="true"
+            :headers="allUploadHeader"
+            :showUploadList="false"
+            @change="handleUploadChange"
+            :disabled="disabledUpload"
+        >
+          <a-button :disabled="disabledUpload">
+            <a-icon type="upload"/>
+            {{ $t("upload") }}
+          </a-button>
+        </a-upload>
         <a-button type="danger" @click="batchUnPass()" v-if="canPase" :disabled="disabledPass">
           {{ $t("unPass") }}
         </a-button>
@@ -142,7 +157,7 @@
 
       <template slot="qbitTitle">
         <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{$t("qbit")}}
+        {{$t("qbit") + "(ng/ul)"}}
       </template>
 
       <template slot="libsizeTitle">
@@ -264,15 +279,15 @@
               :min="0"
               @change="e => handleChange(e.target.value, record.key, col)"
           />
-          <!-- 片段大小（bp） -->
-          <a-input-number
-              v-else-if="col == 'partsize'"
-              :disabled="isStop(record)|| isDisabled(col,record)"
-              style="width: 100%"
-              v-model="record.partsize"
-              :min="0"
-              @change="e => handleChange(e.target.value, record.key, col)"
-          />
+<!--          &lt;!&ndash; 片段大小（bp） &ndash;&gt;-->
+<!--          <a-input-number-->
+<!--              v-else-if="col == 'partsize'"-->
+<!--              :disabled="isStop(record)|| isDisabled(col,record)"-->
+<!--              style="width: 100%"-->
+<!--              v-model="record.partsize"-->
+<!--              :min="0"-->
+<!--              @change="e => handleChange(e.target.value, record.key, col)"-->
+<!--          />-->
           <!-- 常规PCR循环数 -->
           <a-input-number
               v-else-if="col == 'cyclenumber'"
@@ -396,8 +411,17 @@
           </span>
           <a @click="() => showReason(record.id)" v-if="isStop(record)">{{ $t("showReason") }}</a>
           <a @click="() => showStopAlert(record.id)" v-if="!isStop(record) && !isDisabled('operator',record)">{{ $t("stop") }}</a>
-          &nbsp;<a @click="() => showFileList(record.id)">{{ "附件" }}</a>
-
+          &nbsp;
+          <a-badge
+              :count="showFileCount(record.id)"
+              :number-style="{
+                  backgroundColor: '#fff',
+                  color: '#999',
+                  boxShadow: '0 0 0 1px #d9d9d9 inset',
+                }"
+          >
+            <a @click="() => showFileList(record.id)">{{ "附件" }}</a>
+          </a-badge>
         </div>
       </template>
     </a-table>
@@ -438,7 +462,7 @@ export default {
       data: [],
       columns: [],
       columnNames: [],
-      scroll: {x: 1500},
+      scroll: {x: 1500, y: 600},
       editingKey: '',
       allUsers: [],
       selectedRowKeys: [],
@@ -451,7 +475,8 @@ export default {
       subId: "00",
       subProcessName: "",
       remarks: "",
-      operators : undefined
+      operators : undefined,
+      fileCounts : {}
     }
   },
   beforeMount() {
@@ -459,6 +484,20 @@ export default {
     this.initPage();
   },
   methods: {
+    getFileCount: function (ids) {
+      var postData = {
+        idsStr: JSON.stringify(ids)
+      }
+      var _this = this;
+      this.$axios.post("/file/getFileCount", postData).then(function (res) {
+        if (res.data.code == "200") {
+          _this.fileCounts = res.data.retMap.fileCounts;
+        }
+      });
+    },
+    showFileCount :function (id){
+      return this.fileCounts[id];
+    },
     submitItem: function (record,flag) {
       this.selectedRows = new Array();
       this.selectedRows.push(record);
@@ -589,7 +628,16 @@ export default {
       this.$router.push({name: "processInit", query: {taskId: this.process.taskid}});
     },
     handleUploadChange: function (ret) {
-      util.commonHandleUploadChange(ret);
+      if (ret.file.status == "uploading") {
+        this.$(this.$refs.submitting.$el).modal("show");
+      } else {
+        this.$(this.$refs.submitting.$el).modal("hide");
+        if (ret.file.status == "error") {
+          this.$message.error(this.$t("systemErr"));
+        } else if (ret.file.status == "done") {
+          this.initPage();
+        }
+      }
     },
     uploadHeader: function (record) {
       return {token: this.$cookies.get('token'), detailId: record.id}
@@ -730,14 +778,17 @@ export default {
         } else {
           _this.data = new Array();
           if (res.data.retMap.libs.length != 0) {
+            var ids = new Array();
             for (var ind in res.data.retMap.libs) {
               var lib = res.data.retMap.libs[ind];
               if (!util.isNull(lib.createdbtime)) {
                 lib.createdbtime = formatDate(new Date(lib.createdbtime), "yyyy-MM-dd");
               }
               lib.key = lib.id;
+              ids.push(lib.id);
               _this.data.push(lib);
             }
+            _this.getFileCount(ids);
           }
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;
@@ -753,412 +804,9 @@ export default {
       });
     },
     initColumns: function () {
-      var scorllLength = 0;
-      var clom = new Array();
-      /**序号*/
-      clom.push({
-        title: this.$t("index"),
-        dataIndex: 'index',
-        width: '50px',
-        fixed: 'left',
-        scopedSlots: {customRender: 'index'},
-      });
-      scorllLength += 50;
-      /**建库时间*/
-      clom.push({
-        // title: this.$t("createdbtime"),
-        slots : {title : "createdbtimeTitle"},
-        dataIndex: 'createdbtime',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'createdbtime'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.createdbtime)) {
-            return false;
-          }
-          return record.createdbtime
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**样本编号*/
-      clom.push({
-        title: this.$t("sampleIndex"),
-        dataIndex: 'selfnumber',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'selfnumber'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.selfnumber)) {
-            return false;
-          }
-          return record.selfnumber
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**中间产物编号*/
-      clom.push({
-        title: this.$t("middleIndex"),
-        dataIndex: 'middleindex',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'middleindex'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.middleindex)) {
-            return false;
-          }
-          return record.middleindex
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**样本名称*/
-      clom.push({
-        title: this.$t("sampleName"),
-        dataIndex: 'samplename',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'samplename'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.samplename)) {
-            return false;
-          }
-          return record.samplename
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**物种*/
-      clom.push({
-        title: this.$t("species"),
-        dataIndex: 'species',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'species'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.species)) {
-            return false;
-          }
-          return record.species
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-
-      // /**组织来源*/
-      // clom.push({
-      //   title: this.$t("tissue") + this.$t("animal_stock_resource"),
-      //   dataIndex: 'tissue',
-      //   width: '150px',
-      //   scopedSlots: {
-      //     filterDropdown: 'filterDropdown',
-      //     filterIcon: 'filterIcon',
-      //     customRender: 'tissue'
-      //   },
-      //   onFilter: (value, record) =>{
-      //     if (util.isNull(record.tissue)){
-      //       return false;
-      //     }
-      //     return record.tissue
-      //         .toString()
-      //         .toLowerCase()
-      //         .includes(value.toLowerCase());
-      //   },
-      //   onFilterDropdownVisibleChange: visible => {
-      //     if (visible) {
-      //       setTimeout(() => {
-      //         this.searchInput.focus();
-      //       }, 0);
-      //     }
-      //   },
-      // });
-
-      /** 浓度(ng/ul)/（细胞个数/μl) */
-      clom.push({
-        title: "浓度",
-        dataIndex: 'concentration',
-        width: '250px',
-        scopedSlots: {customRender: 'concentration'},
-      });
-      scorllLength += 250;
-      /** 核酸/细胞总量（ug/细胞个数） */
-      clom.push({
-        title: "核酸/细胞总量（ug/细胞个数）",
-        dataIndex: 'totalnumber',
-        width: '150px',
-        scopedSlots: {customRender: 'totalnumber'},
-      });
-      scorllLength += 150;
-      /** 细胞活性 */
-      clom.push({
-        title: this.$t("cellLife"),
-        dataIndex: 'celllife',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'celllife'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.celllife)) {
-            return false;
-          }
-          return record.celllife
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /** 样本使用量(ug)/细胞使用量（细胞个数） */
-      clom.push({
-        // title: this.$t("useNumber"),
-        slots : {title : "useNumberTitle"},
-        dataIndex: 'usenumber',
-        width: '200px',
-        scopedSlots: {customRender: 'usenumber'},
-      });
-      scorllLength += 200;
-      /** 片段大小（bp） */
-      clom.push({
-        // title: this.$t("partsize"),
-        slots : {title : "partsizeTitle"},
-        dataIndex: 'partsize',
-        width: '150px',
-        scopedSlots: {customRender: 'partsize'},
-
-      });
-      scorllLength += 150;
-      /** index */
-      clom.push({
-        // title: "index",
-        slots : {title : "indexTitle"},
-        dataIndex: 'libindex',
-        width: '150px',
-        scopedSlots: {customRender: 'libindex'},
-      });
-      scorllLength += 150;
-      /** barcode */
-      clom.push({
-        title: "barcode",
-        dataIndex: 'libbarcode',
-        width: '150px',
-        scopedSlots: {customRender: 'libbarcode'},
-      });
-      scorllLength += 150;
-      /** 常规PCR循环数 */
-      clom.push({
-        // title: this.$t("cyclenumber"),
-        slots : {title : "cyclenumberTitle"},
-        dataIndex: 'cyclenumber',
-        width: '150px',
-        scopedSlots: {customRender: 'cyclenumber'},
-      });
-      scorllLength += 150;
-      /** 文库类型 */
-      clom.push({
-        // title: this.$t("databasetype2"),
-        slots : {title : "databasetype2Title"},
-        dataIndex: 'databasetype',
-        width: '200px',
-        scopedSlots: {customRender: 'databasetype'},
-      });
-      scorllLength += 200;
-      /** 文库编号 */
-      clom.push({
-        // title: this.$t("databaseindex"),
-        slots : {title : "databaseindexTitle"},
-        dataIndex: 'databaseindex',
-        width: '200px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'databaseindex'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.databaseindex)) {
-            return false;
-          }
-          return record.databaseindex
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 200;
-      /** 建库人 */
-      clom.push({
-        // title: this.$t("createdbuser"),
-        slots : {title : "createdbuserTitle"},
-        dataIndex: 'createdbuser',
-        width: '150px',
-        scopedSlots: {customRender: 'createdbuser'},
-      });
-      scorllLength += 150;
-      /** 审核人 */
-      clom.push({
-        // title: this.$t("reviewer"),
-        slots : {title : "reviewerTitle"},
-        dataIndex: 'reviewer',
-        width: '150px',
-        scopedSlots: {customRender: 'reviewer'},
-      });
-      scorllLength += 150;
-      /** Qubit浓度 */
-      clom.push({
-        // title: this.$t("qbit"),
-        slots : {title : "qbitTitle"},
-        dataIndex: 'qbit',
-        width: '150px',
-        scopedSlots: {customRender: 'qbit'},
-      });
-      scorllLength += 150;
-      /** 文库体积（ul） */
-      clom.push({
-        // title: this.$t("libsize"),
-        slots : {title : "libsizeTitle"},
-        dataIndex: 'libsize',
-        width: '150px',
-        scopedSlots: {customRender: 'libsize'},
-      });
-      scorllLength += 150;
-      /** 文库体积（ul） */
-      clom.push({
-        // title: this.$t("seqmethods"),
-        slots : {title : "seqmethodsTitle"},
-        dataIndex: 'seqmethods',
-        width: '150px',
-        scopedSlots: {customRender: 'seqmethods'},
-      });
-      scorllLength += 150;
-      /** 上机数据量 */
-      clom.push({
-        // title: this.$t("uploadsize"),
-        slots : {title : "uploadsizeTitle"},
-        dataIndex: 'uploadsize',
-        width: '150px',
-        scopedSlots: {customRender: 'uploadsize'},
-      });
-      scorllLength += 150;
-      /** 数据量单位 */
-      clom.push({
-        // title: this.$t("databaseunit"),
-        slots : {title : "databaseunitTitle"},
-        dataIndex: 'databaseunit',
-        width: '150px',
-        scopedSlots: {customRender: 'databaseunit'},
-      });
-      scorllLength += 150;
-      /** 上机备注 */
-      clom.push({
-        title: this.$t("uploadremark"),
-        dataIndex: 'uploadremark',
-        width: '150px',
-        scopedSlots: {customRender: 'uploadremark'},
-      });
-      scorllLength += 150;
-      /** 建库备注 */
-      clom.push({
-        title: this.$t("libremark"),
-        dataIndex: 'libremark',
-        width: '150px',
-        scopedSlots: {customRender: 'libremark'},
-      });
-      scorllLength += 150;
-      /**上传*/
-      clom.push({
-        title: this.$t("upload"),
-        dataIndex: 'upload',
-        width: '200px',
-        scopedSlots: {customRender: 'upload'},
-      });
-      scorllLength += 200;
-      /**操作*/
-      clom.push({
-        slots : {title : "operationTitle"},
-        // title: this.$t("operation"),
-        dataIndex: 'operation',
-        width: '150px',
-        fixed: 'right',
-        scopedSlots: {customRender: 'operation'},
-      });
-      scorllLength += 150;
-      this.scroll.x = scorllLength;
+      var initLibsClom = util.initLibsClom();
+      this.scroll.x = initLibsClom.scorllLength;
+      var clom = initLibsClom.clom;
       this.columns = clom;
       this.columnNames = new Array();
       for (var item in clom) {
@@ -1460,7 +1108,24 @@ export default {
         return '';
       }
       return this.operators.lib.name;
-    }
+    },
+    disabledUpload() {
+      if (this.selectedRowKeys.length == 0) {
+        return true;
+      }
+      for (var item in this.selectedRows) {
+        if (this.selectedRows[item].currentstatu != '01') {
+          return true;
+        }
+      }
+      return false;
+    },
+    allUploadHeader : function (){
+      return {token: this.$cookies.get('token'), idsStr: JSON.stringify(this.selectedRowKeys)}
+    },
+    uploadAllUrl: function () {
+      return this.$axios.defaults.baseURL + 'file/import/uploadAll';
+    },
   },
   watch: {
     process: {

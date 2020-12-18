@@ -7,7 +7,7 @@
     <a-modal :visible="visible" :footer="null" @cancel="onClose">
       <img alt="example" style="width: 100%" :src="talkUrl" />
     </a-modal>
-    <div class="wx-two" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local' ">
+    <div class="wx-two" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'">
 <!--      <a-icon type="team" @click="showDrawer" />-->
       <icon-font @click="showDrawer"
                  style="font-size: 40px;position: absolute;bottom: 10px;left: 10px;"
@@ -119,10 +119,10 @@ input {
 
 .main-container {
   background-color: white;
-  margin-top: 100px;
+  margin-top: 120px;
   width: 90%;
   margin-left: 5%;
-  min-height: 500px;
+  min-height: 60vh;
   border-radius: 5px;
   padding: 10px 10px;
   text-align: left;

@@ -21,7 +21,12 @@
                 placeholder="例：果蝇">
             </div>
             <div class="form-group col-md-3 mb-3">
-              <label for="stockID">{{$t("animal_stock_stockID")}}</label>
+              <label for="selfnum">{{$t("编号")}}</label>
+              <input type="text" class="form-control" id="selfnum" v-model="selfnum" required
+                     placeholder="例：CG00023">
+            </div>
+            <div class="form-group col-md-3 mb-3">
+              <label for="stockID">{{$t("stock id")}}</label>
               <input type="text" class="form-control" id="stockID" v-model="stockID" required
                 placeholder="例：bc4f93">
             </div>
@@ -104,6 +109,7 @@ export default {
     return {
       animalName : "",
       stockID : "",
+      selfnum : "",
       genotype : "",
       resource : "",
       environment : [],
@@ -188,6 +194,7 @@ export default {
       var postData = {
         animalName : this.animalName,
         stockID : this.stockID,
+        selfnum : this.selfnum,
         genotype : this.genotype,
         resource : this.resource,
         rows : this.rows

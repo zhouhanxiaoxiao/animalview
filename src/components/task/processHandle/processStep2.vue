@@ -6,6 +6,21 @@
         :sub-title="process.projectname"
     >
       <template slot="extra">
+        <a-upload
+            name="file"
+            v-if="isEnd"
+            :action="uploadAllUrl"
+            :multiple="true"
+            :headers="allUploadHeader"
+            :showUploadList="false"
+            @change="handleUploadChange"
+            :disabled="disabledUpload"
+        >
+          <a-button :disabled="disabledUpload">
+            <a-icon type="upload"/>
+            {{ $t("upload") }}
+          </a-button>
+        </a-upload>
         <a-button type="danger" @click="batchUnPass()" v-if="canPase" :disabled="disabledPass">
           {{ $t("unPass") }}
         </a-button>
@@ -23,13 +38,13 @@
             <p>{{ $t("areyousureDelete") }}</p>
           </template>
           <a-button :disabled="canComplete" type="danger">
-            {{$t("delete")}}
+            {{ $t("delete") }}
           </a-button>
         </a-popconfirm>
 
         <a-button @click="subTaskInfo"
                   :disabled="canDivide" type="primary" v-if="isEnd">
-          {{$t("divide")}}
+          {{ $t("divide") }}
         </a-button>
 
         <a-button type="primary" @click="submitData('complete')"
@@ -58,16 +73,19 @@
             @change="handUploadChange"
             :action="this.$axios.defaults.baseURL + '/file/import/makeInput'"
         >
-          <a-button><a-icon type="upload" />{{ $t("input") }}</a-button>
+          <a-button>
+            <a-icon type="upload"/>
+            {{ $t("input") }}
+          </a-button>
         </a-upload>
       </template>
       <a-row type="flex">
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
-            {{ $t("allAllow") + "(" + createrName + ")"}}
+            {{ $t("allAllow") + "(" + createrName + ")" }}
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-            {{ $t("notAllow") + "(" + createrName + ")"}}
+            {{ $t("notAllow") + "(" + createrName + ")" }}
           </a-tag>
           <template v-if="isEnd">
             <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
@@ -75,10 +93,10 @@
             </a-tag>
           </template>
           <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
-            {{ $t("init") + "(" + operatorName + ")"}}
+            {{ $t("init") + "(" + operatorName + ")" }}
           </a-tag>
           <template slot="title">
-            {{$t("process.tagListTip")}}
+            {{ $t("process.tagListTip") }}
           </template>
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
@@ -96,9 +114,9 @@
       <template slot="transformSampleTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.transformTip")}}
+            {{ $t("process.transformTip") }}
           </template>
-          {{$t("transformSample")}}
+          {{ $t("transformSample") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
@@ -106,64 +124,64 @@
       <template slot="derivativeindexTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.derivativeindexTip")}}
+            {{ $t("process.derivativeindexTip") }}
           </template>
-          {{$t("derivativeindex")}}
+          {{ $t("derivativeindex") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
 
       <template slot="testDateTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{$t("testDate")}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ $t("testDate") }}
       </template>
 
       <template slot="concentrationTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{"浓度(ng/ul)/（细胞个数/μl)"}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ "浓度(ng/ul)/（细胞个数/μl)" }}
       </template>
 
       <template slot="sampleVolumeTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{this.$t("sampleVolume") + "(ul)"}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ this.$t("sampleVolume") + "(ul)" }}
       </template>
 
       <template slot="totalNumberTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{"核酸/细胞总量（ug/细胞个数）"}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ "核酸/细胞总量（ug/细胞个数）" }}
       </template>
 
       <template slot="cellLifeTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{$t("cellLife")}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ $t("cellLife") }}
       </template>
 
       <template slot="checkResultTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{$t("checkResult")}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ $t("checkResult") }}
       </template>
 
       <template slot="checkUserTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{$t("checkUser")}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ $t("checkUser") }}
       </template>
 
       <template slot="reviewerTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{$t("reviewer")}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ $t("reviewer") }}
       </template>
 
       <template slot="databaseTypeTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{$t("databaseType")}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ $t("databaseType") }}
       </template>
 
       <template slot="operationTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.operationTip")}}
+            {{ $t("process.operationTip") }}
           </template>
-          {{$t("operation")}}
+          {{ $t("operation") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
@@ -218,22 +236,22 @@
             </a-select-option>
           </a-select>
           <!-- initSample -->
-          <a-select  style="width: 100%" v-else-if="col == 'initsample'"
-                     v-model="record.initsample"
-                     disabled
+          <a-select style="width: 100%" v-else-if="col == 'initsample'"
+                    v-model="record.initsample"
+                    disabled
           >
             <a-select-option v-for="item in sampleInits" :key="item.key" :value="item.key">
-              {{item.val}}
+              {{ item.val }}
             </a-select-option>
           </a-select>
           <!-- 转化样本 -->
-          <a-select  style="width: 100%" v-else-if="col == 'transform'"
-                     v-model="record.transform"
-                     :disabled="isStop(record) || !isTissu(record) || isDisabled(record)"
-                     @change="sampleInitChange(record)"
+          <a-select style="width: 100%" v-else-if="col == 'transform'"
+                    v-model="record.transform"
+                    :disabled="isStop(record) || !isTissu(record) || isDisabled(record)"
+                    @change="sampleInitChange(record)"
           >
             <a-select-option v-for="item in transformSamples" :key="item.key" :value="item.key">
-              {{item.val}}
+              {{ item.val }}
             </a-select-option>
           </a-select>
           <!-- 检测结果 -->
@@ -288,7 +306,8 @@
                     :disabled="isStop(record) || isDisabled(record)"
                     @change="e => handleChange(e.target.value, record.key, col)"
           >
-            <a-select-option v-for="item in databaseTypes(record.initsample,record.transform)" :key="item.key" :value="item.key">
+            <a-select-option v-for="item in databaseTypes(record.initsample,record.transform)" :key="item.key"
+                             :value="item.key">
               {{ item.val }}
             </a-select-option>
           </a-select>
@@ -328,14 +347,14 @@
             </a-select>
           </a-input>
 
-<!--          <a-input-number-->
-<!--              v-else-if="col == 'concentration'"-->
-<!--              style="width: 100%"-->
-<!--              v-model="record.concentration"-->
-<!--              :disabled="isStop(record)|| isDisabled(record)"-->
-<!--              :min="0"-->
-<!--              @change="e => handleChange(e.target.value, record.key, col)"-->
-<!--          />-->
+          <!--          <a-input-number-->
+          <!--              v-else-if="col == 'concentration'"-->
+          <!--              style="width: 100%"-->
+          <!--              v-model="record.concentration"-->
+          <!--              :disabled="isStop(record)|| isDisabled(record)"-->
+          <!--              :min="0"-->
+          <!--              @change="e => handleChange(e.target.value, record.key, col)"-->
+          <!--          />-->
           <a-input-number
               v-else-if="col == 'totalnumber'"
               style="width: 100%"
@@ -354,7 +373,10 @@
                 :showUploadList="false"
                 @change="handleUploadChange"
             >
-              <a-button :disabled="isStop(record) || isDisabled(record)"> <a-icon type="upload" />{{ $t("upload") }} </a-button>
+              <a-button :disabled="isStop(record) || isDisabled(record)">
+                <a-icon type="upload"/>
+                {{ $t("upload") }}
+              </a-button>
             </a-upload>
           </div>
           <a-input
@@ -399,7 +421,16 @@
             &nbsp;
             <a @click="showStopAlert(record.id)" v-if="!isStop(record) && !isDisabled(record)">{{ $t("stop") }}</a>
             &nbsp;
-            <a @click="showFileList(record.id)" >{{ "附件" }}</a>
+            <a-badge
+                :count="showFileCount(record.id)"
+                :number-style="{
+                  backgroundColor: '#fff',
+                  color: '#999',
+                  boxShadow: '0 0 0 1px #d9d9d9 inset',
+                }"
+            >
+                          <a @click="showFileList(record.id)">{{ "附件" }}</a>
+            </a-badge>
             &nbsp;
           </span>
 
@@ -429,11 +460,11 @@ const IconFont = Icon.createFromIconfontCN({
 
 export default {
   name: "processStep2",
-  components: {SubTaskInfo, ShowFilelist, RefuseAlert, Submitting,IconFont},
+  components: {SubTaskInfo, ShowFilelist, RefuseAlert, Submitting, IconFont},
   props: {
     taskId: String,
     process: Object,
-    statu : String,
+    statu: String,
   },
   data: function () {
     this.cacheData = [];
@@ -442,20 +473,21 @@ export default {
       data: [],
       columns: [],
       columnNames: [],
-      scroll: {x: 1500},
+      scroll: {x: 1500, y: 600},
       editingKey: '',
       allUsers: [],
-      subs : [],
-      selectedRowKeys : [],
-      selectedRows : [],
-      stopId : "",
-      detailId : "",
-      subTask : {},
-      curFlag : "01",
-      subProcessName : "",
-      remarks : "",
-      subId : "00",
-      operators : undefined,
+      subs: [],
+      selectedRowKeys: [],
+      selectedRows: [],
+      stopId: "",
+      detailId: "",
+      subTask: {},
+      curFlag: "01",
+      subProcessName: "",
+      remarks: "",
+      subId: "00",
+      operators: undefined,
+      fileCounts: {}
     }
   },
   beforeMount() {
@@ -463,42 +495,45 @@ export default {
     this.initPage();
   },
   methods: {
-    sampleInitChange : function (record){
+    showFileCount :function (id){
+      return this.fileCounts[id];
+    },
+    sampleInitChange: function (record) {
       record.databasetype = "";
     },
-    submitItem: function (record,flag) {
+    submitItem: function (record, flag) {
       this.selectedRows = new Array();
       this.selectedRows.push(record);
       this.selectedRowKeys = new Array();
       this.selectedRowKeys.push(record.id);
       this.submitData(flag);
     },
-    passItem : function (record,flag){
+    passItem: function (record, flag) {
       this.selectedRows = new Array();
       this.selectedRows.push(record);
       this.selectedRowKeys = new Array();
       this.selectedRowKeys.push(record.id);
-      if (flag){
+      if (flag) {
         this.submitData("pass");
-      }else {
+      } else {
         this.$(this.$refs.unPassReason.$el).modal("show");
       }
     },
-    batchUnPass : function (){
+    batchUnPass: function () {
       this.$(this.$refs.unPassReason.$el).modal("show");
     },
-    unPassReason : function (reason,remark){
+    unPassReason: function (reason, remark) {
       this.$(this.$refs.unPassReason.$el).modal("hide");
-      console.log(reason,remark);
+      console.log(reason, remark);
       var postData = {
-        subId : this.subId,
+        subId: this.subId,
         processId: this.process.id,
         data: JSON.stringify(this.selectedRows),
         flag: "unPass",
-        subProcessName : this.subProcessName,
-        remarks : this.remarks,
-        reason : reason,
-        remark : remark
+        subProcessName: this.subProcessName,
+        remarks: this.remarks,
+        reason: reason,
+        remark: remark
       }
       var _this = this;
       // this.$("#submitting").modal("show");
@@ -522,14 +557,14 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       })
     },
-    deleteByIds : function (){
+    deleteByIds: function () {
       var _this = this;
       var postData = {
-        ids : this.selectedRowKeys,
-        type : "02"
+        ids: this.selectedRowKeys,
+        type: "02"
       };
       this.$(this.$refs.submitting.$el).modal("show");
-      this.$axios.post("/task/process/deleteByIds",postData).then(function (res){
+      this.$axios.post("/task/process/deleteByIds", postData).then(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
@@ -537,21 +572,21 @@ export default {
           _this.$message.success(_this.$t("commitSucc"));
           _this.initPage();
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    isDisabled : function (record){
-      if (!this.isEnd){
+    isDisabled: function (record) {
+      if (!this.isEnd) {
         return true;
       }
       if (record.currentstatu == "02"
           || record.currentstatu == "03"
           || record.currentstatu == "09"
           || record.currentstatu == "07"
-      ){
+      ) {
         return true;
       }
       return false;
@@ -565,86 +600,86 @@ export default {
       this.searchText = selectedKeys[0];
       this.searchedColumn = dataIndex;
     },
-    startProcess : function (subProcessName,remarks){
+    startProcess: function (subProcessName, remarks) {
       this.$(this.$refs.thisSubTaskInfo.$el).modal("hide");
       this.subProcessName = subProcessName;
       this.remarks = remarks;
       this.submitData("divide");
     },
-    subTaskInfo : function (){
+    subTaskInfo: function () {
       this.$(this.$refs.thisSubTaskInfo.$el).modal("show");
     },
-    showSubTask : function (subId){
+    showSubTask: function (subId) {
       // this.$router.push({name:"processDetail",query:{subId : subId}});
       this.subId = subId;
       this.initPage();
     },
-    backToTotal : function (){
-      this.$router.push({name:"processInit",query:{taskId:this.process.taskid}});
+    backToTotal: function () {
+      this.$router.push({name: "processInit", query: {taskId: this.process.taskid}});
     },
-    isTissu : function (record){
-      if (record.initsample == "02"){
+    isTissu: function (record) {
+      if (record.initsample == "02") {
         return true;
       }
       return false;
     },
-    handUploadChange : function (ret){
+    handUploadChange: function (ret) {
       console.log(ret);
-      if (ret.file.status == "uploading"){
+      if (ret.file.status == "uploading") {
         this.$(this.$refs.submitting.$el).modal("show");
-      }else {
+      } else {
         this.$(this.$refs.submitting.$el).modal("hide");
-        if (ret.file.status == "error"){
+        if (ret.file.status == "error") {
           this.$message.error(this.$t("systemErr"));
-        }else if (ret.file.status == "done"){
+        } else if (ret.file.status == "done") {
           this.$message.success(this.$t("commitSucc"));
           this.initPage();
         }
       }
     },
-    downLoad : function (){
+    downLoad: function () {
       var postData = {
-        processId : this.process.id,
-        makeIds : JSON.stringify(this.selectedRowKeys)
+        processId: this.process.id,
+        makeIds: JSON.stringify(this.selectedRowKeys)
       }
-      util.downLoad(postData,"/task/process/downloadMakes","样本制备.xls");
+      util.downLoad(postData, "/task/process/downloadMakes", "样本制备.xls");
     },
-    showFileList : function (detailId){
+    showFileList: function (detailId) {
       console.log(detailId);
       this.detailId = detailId;
       this.$(this.$refs.showFilelist.$el).modal("show");
     },
-    showReason : function (makeId){
+    showReason: function (makeId) {
       var _this = this;
-      this.$axios.post("/task/process/showStopReason",{detailId : makeId}).then(function (res){
+      this.$axios.post("/task/process/showStopReason", {detailId: makeId}).then(function (res) {
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.$error({
             title: _this.$t("reason"),
-            content : res.data.retMap.reason
+            content: res.data.retMap.reason
           });
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    showStopAlert : function (makeId){
+    showStopAlert: function (makeId) {
       this.stopId = makeId;
       this.$(this.$refs.refuseAlert.$el).modal("show");
     },
-    stopProcess : function (reason,remark){
+    stopProcess: function (reason, remark) {
       // this.$("#refuseAlert").modal("hide");
       this.$(this.$refs.refuseAlert.$el).modal("hide");
       var postData = {
-        makeId : this.stopId,
-        reason : reason,
-        remark : remark
+        makeId: this.stopId,
+        reason: reason,
+        remark: remark
       }
       var _this = this;
       this.$(this.$refs.submitting.$el).modal("show");
-      this.$axios.post("/task/process/stopMake",postData).then(function (res){
+      this.$axios.post("/task/process/stopMake", postData).then(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
@@ -652,23 +687,24 @@ export default {
           _this.$message.success(_this.$t("commitSucc"));
           _this.initPage();
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       })
     },
-    handleUploadChange : function (ret){
-      if (ret.file.status == "done"){
+    handleUploadChange: function (ret) {
+      if (ret.file.status == "done") {
         this.$message.success(this.$t("upload") + this.$t("save_success"));
-      }else if (ret.file.status == "error"){
-        this.$message.success(this.$t("systemErr"));
+        this.initPage();
+      } else if (ret.file.status == "error") {
+        this.$message.error(this.$t("systemErr"));
       }
     },
-    colIsDisabed : function (record,col){
+    colIsDisabed: function (record, col) {
       var sampleType = record.initsample;
       var trans = record.transform;
-      if (col == "selfnumber"){
+      if (col == "selfnumber") {
         return true;
       }
       if (
@@ -677,67 +713,67 @@ export default {
               || col == "remaining"
           )
           && sampleType != "02"
-      ){
+      ) {
         return true;
-      }else if (
+      } else if (
           (
               col == "cellsort"
               || col == "celllife"
           )
           && sampleType != "03" && trans != '03'
-      ){
+      ) {
         return true;
-      }else if (
+      } else if (
           col == "samplename"
           || col == "selfnumber"
           || col == "species"
           || col == "tissue"
-      ){
+      ) {
         return true;
       }
       return false;
     },
-    checkNull : function (list){
-      for (var i=0;i<list.length;i++){
+    checkNull: function (list) {
+      for (var i = 0; i < list.length; i++) {
         var item = list[i];
-        if (util.isNull(item.testdate)){
-          this.$message.error(this.$t("testDate") +this.$t("not_null"));
+        if (util.isNull(item.testdate)) {
+          this.$message.error(this.$t("testDate") + this.$t("not_null"));
           return false;
         }
-        if (util.isNull(item.concentration)){
-          this.$message.error("浓度(ng/ul)/（细胞个数/μl)" +this.$t("not_null"));
+        if (util.isNull(item.concentration)) {
+          this.$message.error("浓度(ng/ul)/（细胞个数/μl)" + this.$t("not_null"));
           return false;
         }
-        if (util.isNull(item.concentrationunit)){
-          this.$message.error("浓度单位" +this.$t("not_null"));
+        if (util.isNull(item.concentrationunit)) {
+          this.$message.error("浓度单位" + this.$t("not_null"));
           return false;
         }
-        if (util.isNull(item.samplevolume)){
-          this.$message.error(this.$t("sampleVolume") + "(ul)" +this.$t("not_null"));
+        if (util.isNull(item.samplevolume)) {
+          this.$message.error(this.$t("sampleVolume") + "(ul)" + this.$t("not_null"));
           return false;
         }
-        if (util.isNull(item.totalnumber)){
-          this.$message.error("核酸/细胞总量（ug/细胞个数）" +this.$t("not_null"));
+        if (util.isNull(item.totalnumber)) {
+          this.$message.error("核酸/细胞总量（ug/细胞个数）" + this.$t("not_null"));
           return false;
         }
-        if ((item.initsample == "03" || item.transform == "03") && util.isNull(item.celllife)){
-          this.$message.error(this.$t("cellLife") +this.$t("not_null"));
+        if ((item.initsample == "03" || item.transform == "03") && util.isNull(item.celllife)) {
+          this.$message.error(this.$t("cellLife") + this.$t("not_null"));
           return false;
         }
-        if (util.isNull(item.checkresult)){
-          this.$message.error(this.$t("checkResult") +this.$t("not_null"));
+        if (util.isNull(item.checkresult)) {
+          this.$message.error(this.$t("checkResult") + this.$t("not_null"));
           return false;
         }
-        if (util.isNull(item.checkuser)){
-          this.$message.error(this.$t("checkUser") +this.$t("not_null"));
+        if (util.isNull(item.checkuser)) {
+          this.$message.error(this.$t("checkUser") + this.$t("not_null"));
           return false;
         }
-        if (util.isNull(item.reviewer)){
-          this.$message.error(this.$t("reviewer") +this.$t("not_null"));
+        if (util.isNull(item.reviewer)) {
+          this.$message.error(this.$t("reviewer") + this.$t("not_null"));
           return false;
         }
-        if (util.isNull(item.databasetype)){
-          this.$message.error(this.$t("databaseType") +this.$t("not_null"));
+        if (util.isNull(item.databasetype)) {
+          this.$message.error(this.$t("databaseType") + this.$t("not_null"));
           return false;
         }
       }
@@ -745,22 +781,22 @@ export default {
     },
     submitData: function (flag) {
       var postData = {
-        subId : this.subId,
+        subId: this.subId,
         processId: this.process.id,
         data: JSON.stringify(this.data),
         flag: flag,
-        subProcessName : this.subProcessName,
-        remarks : this.remarks
+        subProcessName: this.subProcessName,
+        remarks: this.remarks
       }
-      if (flag != "tmp"){
+      if (flag != "tmp") {
         postData.data = JSON.stringify(this.selectedRows);
       }
       var _this = this;
       // this.$("#submitting").modal("show");
 
-      if (flag == "complete"){
-        if (!this.checkNull(this.selectedRows)){
-          return ;
+      if (flag == "complete") {
+        if (!this.checkNull(this.selectedRows)) {
+          return;
         }
       }
       this.$(this.$refs.submitting.$el).modal("show");
@@ -773,7 +809,7 @@ export default {
         } else {
           _this.$message.success(_this.$t("commitSucc"));
           _this.value = "";
-          if (flag == "pass"){
+          if (flag == "pass") {
             _this.$confirm({
               title: _this.$t("process.passTip") + _this.$t("libraryPreparation") + "?",
               content: _this.$t("process.passContextTip") + _this.$t("libraryPreparation"),
@@ -785,10 +821,10 @@ export default {
               },
               class: 'test',
             });
-          }else {
+          } else {
             _this.initPage();
           }
-          _this.$emit("changeStatu","02");
+          _this.$emit("changeStatu", "02");
           // window.location.reload();
         }
       }).catch(function (res) {
@@ -797,6 +833,17 @@ export default {
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       })
+    },
+    getFileCount: function (ids) {
+      var postData = {
+        idsStr: JSON.stringify(ids)
+      }
+      var _this = this;
+      this.$axios.post("/file/getFileCount", postData).then(function (res) {
+        if (res.data.code == "200") {
+          _this.fileCounts = res.data.retMap.fileCounts;
+        }
+      });
     },
     initPage: function () {
       this.initColumns(this.process.sampletype);
@@ -807,7 +854,7 @@ export default {
       var postData = {
         processId: this.process.id,
         subId: this.subId,
-        curFlag : this.curFlag
+        curFlag: this.curFlag
       }
       this.tableLoad = true;
       this.$axios.post("/task/process/makeInit", postData).then(function (res) {
@@ -818,12 +865,15 @@ export default {
         } else {
           _this.data = new Array();
           if (res.data.retMap.makes.length != 0) {
+            var ids = new Array();
             for (var ind in res.data.retMap.makes) {
               var make = res.data.retMap.makes[ind];
-              make.testdate = formatDate(new Date(make.testdate),"yyyy-MM-dd");
+              make.testdate = formatDate(new Date(make.testdate), "yyyy-MM-dd");
               make.key = make.id;
               _this.data.push(make);
+              ids.push(make.id);
             }
+            _this.getFileCount(ids);
           }
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;
@@ -841,391 +891,9 @@ export default {
     },
     initColumns: function (type) {
       console.log(type);
-      var scorllLength = 0;
-      var clom = new Array();
-      /**序号*/
-      clom.push({
-        title: this.$t("index"),
-        dataIndex: 'index',
-        width: '50px',
-        fixed: 'left',
-        scopedSlots: {customRender: 'index'},
-      });
-      scorllLength += 50;
-      /**初始样本*/
-      clom.push({
-        title: this.$t("initSample"),
-        dataIndex: 'initsample',
-        width: '150px',
-        scopedSlots: { customRender: 'initsample' },
-      });
-      scorllLength +=150;
-      /**转化样本*/
-      clom.push({
-        // title: this.$t("transformSample"),
-        slots : {title : "transformSampleTitle"},
-        dataIndex: 'transform',
-        width: '150px',
-        scopedSlots: { customRender: 'transform' },
-      });
-      scorllLength +=150;
-      /**样本名称*/
-      clom.push({
-        title: this.$t("sampleName"),
-        dataIndex: 'samplename',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'samplename'
-        },
-        onFilter: (value, record) =>
-            record.samplename
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**样本编号*/
-      clom.push({
-        title: this.$t("sampleIndex"),
-        dataIndex: 'selfnumber',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'selfnumber'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.selfnumber)){
-            return false;
-          }
-          return record.selfnumber
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**样本衍生编号*/
-      clom.push({
-        dataIndex: 'derivativeindex',
-        width: '150px',
-        slots : {title : "derivativeindexTitle"},
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'derivativeindex'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.derivativeindex)){
-            return false;
-          }
-          return record.derivativeindex
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**物种*/
-      clom.push({
-        title: this.$t("species"),
-        dataIndex: 'species',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'species'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.species)){
-            return false;
-          }
-          return record.species
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**组织来源*/
-      clom.push({
-        title: this.$t("tissue") + this.$t("animal_stock_resource"),
-        dataIndex: 'tissue',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'tissue'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.tissue)){
-            return false;
-          }
-          return record.tissue
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**检测日期*/
-      clom.push({
-        slots : {title : "testDateTitle"},
-        dataIndex: 'testdate',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'testdate'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.testdate)){
-            return false;
-          }
-          return record.testdate
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /** 浓度(ng/ul)/（细胞个数/μl) */
-      clom.push({
-        // title: this.concentrationName,
-        slots : {title : "concentrationTitle"},
-        dataIndex: 'concentration',
-        width: '250px',
-        scopedSlots: {customRender: 'concentration'},
-      });
-      scorllLength += 250;
-      /** 样本体积(ul) */
-      clom.push({
-        // title: this.$t("sampleVolume") + "(ul)",
-        slots : {title : "sampleVolumeTitle"},
-        dataIndex: 'samplevolume',
-        width: '150px',
-        scopedSlots: {customRender: 'samplevolume'},
-      });
-      scorllLength += 150;
-      /** 核酸/细胞总量（ug/细胞个数） */
-      clom.push({
-        // title: this.totalNumberTitle,
-        slots : {title : "totalNumberTitle"},
-        dataIndex: 'totalnumber',
-        width: '150px',
-        scopedSlots: {customRender: 'totalnumber'},
-      });
-      scorllLength += 150;
-
-      /** 260/280 */
-      clom.push({
-        title: "260/280",
-        dataIndex: 'm260280',
-        width: '150px',
-        scopedSlots: {customRender: 'm260280'},
-      });
-      scorllLength += 150;
-      /** 260/230 */
-      clom.push({
-        title: "260/230",
-        dataIndex: 'm260230',
-        width: '150px',
-        scopedSlots: {customRender: 'm260230'},
-      });
-      scorllLength += 150;
-      /** RQN */
-      clom.push({
-        title: "RQN",
-        dataIndex: 'rqn',
-        width: '150px',
-        scopedSlots: {customRender: 'rqn'},
-      });
-      scorllLength += 150;
-
-      // if (type == "03") {
-        /** 细胞活性 */
-        clom.push({
-          // title: this.$t("cellLife"),
-          slots : {title : "cellLifeTitle"},
-          dataIndex: 'celllife',
-          width: '200px',
-          scopedSlots: {
-            filterDropdown: 'filterDropdown',
-            filterIcon: 'filterIcon',
-            customRender: 'celllife'
-          },
-          onFilter: (value, record) =>{
-            if (util.isNull(record.celllife)){
-              return false;
-            }
-            return record.celllife
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase());
-          },
-          onFilterDropdownVisibleChange: visible => {
-            if (visible) {
-              setTimeout(() => {
-                this.searchInput.focus();
-              }, 0);
-            }
-          },
-        });
-        scorllLength += 200;
-      // }
-      // if (type == "03") {
-        /** 细胞分选法 */
-        clom.push({
-          title: this.$t("cellSort"),
-          dataIndex: 'cellsort',
-          width: '200px',
-          scopedSlots: {customRender: 'cellsort'},
-        });
-        scorllLength += 200;
-      // }
-      // if (type == "02") {
-        /** 提取方法 */
-        clom.push({
-          title: this.$t("extractMethod"),
-          dataIndex: 'extractmethod',
-          width: '150px',
-          scopedSlots: {customRender: 'extractmethod'},
-        });
-      // }
-      scorllLength += 150;
-      /** 检测结果 */
-      clom.push({
-        // title: this.$t("checkResult"),
-        slots : {title : "checkResultTitle"},
-        dataIndex: 'checkresult',
-        width: '150px',
-        scopedSlots: {customRender: 'checkresult'},
-      });
-      scorllLength += 150;
-      /** 检测备注 */
-      clom.push({
-        title: this.$t("checkRemarks"),
-        dataIndex: 'checkremarks',
-        width: '200px',
-        scopedSlots: {customRender: 'checkremarks'},
-      });
-      scorllLength += 200;
-      /** 检测员 */
-      clom.push({
-        // title: this.$t("checkUser"),
-        slots : {title : "checkUserTitle"},
-        dataIndex: 'checkuser',
-        width: '150px',
-        scopedSlots: {customRender: 'checkuser'},
-      });
-      scorllLength += 150;
-      /** 审核人 */
-      clom.push({
-        // title: this.$t("reviewer"),
-        slots : {title : "reviewerTitle"},
-        dataIndex: 'reviewer',
-        width: '150px',
-        scopedSlots: {customRender: 'reviewer'},
-      });
-      scorllLength += 150;
-      /**建库类型*/
-      clom.push({
-        // title: this.$t("databaseType"),
-        slots : {title : "databaseTypeTitle"},
-        dataIndex: 'databasetype',
-        width: '200px',
-        scopedSlots: {customRender: 'databasetype'},
-      });
-      scorllLength += 200;
-      /**测序平台*/
-      clom.push({
-        title: this.$t("SequencingPlatform"),
-        dataIndex: 'sequencingplatform',
-        width: '200px',
-        scopedSlots: {customRender: 'sequencingplatform'},
-      });
-      scorllLength += 200;
-      /**剩余量*/
-      clom.push({
-        title: this.$t("remaining"),
-        dataIndex: 'remaining',
-        width: '200px',
-        scopedSlots: {customRender: 'remaining'},
-      });
-      scorllLength += 200;
-      /**备注*/
-      clom.push({
-        title: this.$t("remarks"),
-        dataIndex: 'remarks',
-        width: '200px',
-        scopedSlots: {customRender: 'remarks'},
-      });
-      scorllLength += 200;
-      /**上传*/
-      clom.push({
-        title: this.$t("upload"),
-        dataIndex: 'upload',
-        width: '200px',
-        scopedSlots: {customRender: 'upload'},
-      });
-      scorllLength += 200;
-
-      /**操作*/
-      clom.push({
-        // title: this.$t("operation"),
-        slots : {title : "operationTitle"},
-        dataIndex: 'operation',
-        width: '150px',
-        fixed: 'right',
-        scopedSlots: {customRender: 'operation'},
-      });
-      scorllLength += 150;
-
-      this.scroll.x = scorllLength;
+      var initMakesCols = util.initMakesCols();
+      this.scroll.x = initMakesCols.scorllLength;
+      var clom = initMakesCols.clom;
       this.columns = clom;
       this.columnNames = new Array();
       for (var item in clom) {
@@ -1340,17 +1008,17 @@ export default {
       }
       return true;
     },
-    databaseTypes: function (type,trans) {
-      if (util.isNull(trans)){
+    databaseTypes: function (type, trans) {
+      if (util.isNull(trans)) {
         return util.databaseTypes(type);
-      }else {
+      } else {
         return util.databaseTypes(trans);
       }
     },
-    isStop : function (record){
+    isStop: function (record) {
       if (record.currentstatu == "09"
           || record.currentstatu == "07"
-      ){
+      ) {
         return true;
       }
       return false;
@@ -1440,16 +1108,20 @@ export default {
       }
       return text;
     },
-    uploadHeader : function (record){
-      return {token:this.$cookies.get('token'),make:record.id}
+
+    uploadHeader: function (record) {
+      return {token: this.$cookies.get('token'), make: record.id}
     },
   },
   computed: {
+    allUploadHeader : function (){
+      return {token: this.$cookies.get('token'), idsStr: JSON.stringify(this.selectedRowKeys)}
+    },
     rowSelection() {
-      const { selectedRowKeys,selectedRows } = this;
+      const {selectedRowKeys, selectedRows} = this;
       return {
-        selectedRowKeys : selectedRowKeys,
-        selectedRows : selectedRows,
+        selectedRowKeys: selectedRowKeys,
+        selectedRows: selectedRows,
         onChange: (selectedRowKeys, selectedRows) => {
           console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
           this.selectedRowKeys = selectedRowKeys;
@@ -1490,12 +1162,12 @@ export default {
     checkresults: function () {
       return util.checkresults();
     },
-    sampleInits : function (){
+    sampleInits: function () {
       return util.sampleInits();
     },
-    transformSamples : function (){
+    transformSamples: function () {
       var arr = new Array();
-      for (var i=0;i<this.sampleInits.length;i++){
+      for (var i = 0; i < this.sampleInits.length; i++) {
         // if (this.sampleInits[i].key != "02"){
         //   arr.push(this.sampleInits[i]);
         // }
@@ -1521,83 +1193,97 @@ export default {
       }
       return true;
     },
-    cansubmit(){
-      if (this.selectedRowKeys.length == 0){
+    cansubmit() {
+      if (this.selectedRowKeys.length == 0) {
         return true;
       }
-      for (var item in this.selectedRows){
-        if (this.selectedRows[item].currentstatu != '03'){
+      for (var item in this.selectedRows) {
+        if (this.selectedRows[item].currentstatu != '03') {
           return true;
         }
       }
       return false;
     },
-    canDivide(){
-      if (this.selectedRowKeys.length == 0){
+    canDivide() {
+      if (this.selectedRowKeys.length == 0) {
         return true;
       }
-      for (var item in this.selectedRows){
+      for (var item in this.selectedRows) {
         if (!util.isNull(this.selectedRows[item].subid)
-            || this.selectedRows[item].currentstatu == "02"|| this.selectedRows[item].currentstatu == '03'
-        ){
+            || this.selectedRows[item].currentstatu == "02" || this.selectedRows[item].currentstatu == '03'
+        ) {
           return true;
         }
       }
       return false;
     },
-    canComplete(){
-      if (this.selectedRowKeys.length == 0){
+    canComplete() {
+      if (this.selectedRowKeys.length == 0) {
         return true;
       }
-      for (var item in this.selectedRows){
+      for (var item in this.selectedRows) {
         if (this.selectedRows[item].currentstatu == '02'
             || this.selectedRows[item].currentstatu == '03'
             || this.selectedRows[item].currentstatu == '09'
             || this.selectedRows[item].currentstatu == '07'
-        ){
+        ) {
           return true;
         }
       }
       return false;
     },
-    uploadUrl : function (){
-      return this.$axios.defaults.baseURL + '/file/import/makeUpload';
+    uploadAllUrl: function () {
+      return this.$axios.defaults.baseURL + 'file/import/uploadAll';
     },
-    isEnd : function (){
+    uploadUrl: function () {
+      return this.$axios.defaults.baseURL + 'file/import/makeUpload';
+    },
+    isEnd: function () {
       if (!this.process.taskstatu.startsWith("7")
           && this.$store.getters.isCurrentUser(this.process.samplepreparation)
-      ){
+      ) {
         return true;
       }
       return false;
     },
-    canPase : function (){
+    canPase: function () {
       if (!this.process.taskstatu.startsWith("7")
           && this.$store.getters.isCurrentUser(this.process.creater)
-      ){
+      ) {
         return true
       }
       return false;
     },
-    disabledPass(){
-      if (this.selectedRowKeys.length == 0){
+    disabledPass() {
+      if (this.selectedRowKeys.length == 0) {
         return true;
       }
-      for (var item in this.selectedRows){
-        if (this.selectedRows[item].currentstatu != '02'){
+      for (var item in this.selectedRows) {
+        if (this.selectedRows[item].currentstatu != '02') {
           return true;
         }
       }
       return false;
     },
-    createrName : function (){
-      if (this.operators === undefined){
+    disabledUpload() {
+      if (this.selectedRowKeys.length == 0) {
+        return true;
+      }
+      for (var item in this.selectedRows) {
+        if (this.selectedRows[item].currentstatu != '01') {
+          return true;
+        }
+      }
+      return false;
+    },
+    createrName: function () {
+      if (this.operators === undefined) {
         return '';
       }
       return this.operators.creater.name;
     },
-    operatorName : function (){
-      if (this.operators === undefined){
+    operatorName: function () {
+      if (this.operators === undefined) {
         return '';
       }
       return this.operators.make.name;
@@ -1611,7 +1297,7 @@ export default {
       },
       deep: true
     },
-    statu(newVal){
+    statu(newVal) {
       this.subId = newVal;
       this.initPage();
     }

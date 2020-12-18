@@ -1,6 +1,6 @@
 <template>
   <div class="nav-container">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav style="height: 100%" class="navbar navbar-expand-lg navbar-light bg-light">
       <router-link to="/home">
         <a class="navbar-brand" href="#">
           <img src="../../assets/login.png" width="250px">
@@ -10,7 +10,7 @@
               aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav" style="font-size: 20px">
+      <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item active">
             <router-link to="/home"><a class="nav-link" href="#">{{ $t("nav_home") }}</a></router-link>
@@ -127,6 +127,7 @@ export default {
 <style scoped>
 .nav-container {
   position: fixed;
+  font-size: 20px !important;
   width: 100%;
   top: 0px;
   z-index: 99;

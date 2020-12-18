@@ -255,7 +255,7 @@ export default {
       data: [],
       columns: [],
       columnNames: [],
-      scroll: {x: 1500},
+      scroll: {x: 1500, y: 600},
       editingKey: '',
       allUsers: [],
       selectedRowKeys : [],
@@ -407,7 +407,8 @@ export default {
       if (!this.isEnd){
         return true;
       }
-      if (col == "sampleindex" || col == "samplename") {
+      if (col == "sampleindex" || col == "samplename"
+          || col == "species"|| col == "tissue") {
         return true;
       }
       if (record == null){
@@ -468,245 +469,9 @@ export default {
       });
     },
     initCols: function () {
-      var scorllLength = 0;
-      var clom = new Array();
-      /**序号*/
-      clom.push({
-        title: this.$t("index"),
-        dataIndex: 'index',
-        width: '50px',
-        fixed: 'left',
-        scopedSlots: {customRender: 'index'},
-      });
-      scorllLength += 50;
-      /**样本编号*/
-      clom.push({
-        title: this.$t("sampleIndex"),
-        dataIndex: 'sampleindex',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'sampleindex'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.sampleindex)){
-            return false;
-          }
-          return record.sampleindex
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**样本名称*/
-      clom.push({
-        title: this.$t("sampleName"),
-        dataIndex: 'samplename',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'samplename'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.samplename)){
-            return false;
-          }
-          return record.samplename
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-
-      // if (this.isJYZXZZ){
-      //   /**供应商数据账号*/
-      //   clom.push({
-      //     title: this.$t("support") + this.$t("dateaccount"),
-      //     dataIndex: 'superaccount',
-      //     width: '150px',
-      //     scopedSlots: {
-      //       filterDropdown: 'filterDropdown',
-      //       filterIcon: 'filterIcon',
-      //       customRender: 'superaccount'
-      //     },
-      //     onFilter: (value, record) =>{
-      //       if (util.isNull(record.superaccount)){
-      //         return false;
-      //       }
-      //       return record.superaccount
-      //           .toString()
-      //           .toLowerCase()
-      //           .includes(value.toLowerCase());
-      //     },
-      //     onFilterDropdownVisibleChange: visible => {
-      //       if (visible) {
-      //         setTimeout(() => {
-      //           this.searchInput.focus();
-      //         }, 0);
-      //       }
-      //     },
-      //   });
-      //   scorllLength += 150;
-      //   /**供应商数据密码*/
-      //   clom.push({
-      //     title:this.$t("support") + this.$t("datepassword"),
-      //     dataIndex: 'superpwd',
-      //     width: '150px',
-      //     scopedSlots: {customRender: 'superpwd'},
-      //   });
-      //   scorllLength += 150;
-      //   /**供应商数据目录*/
-      //   clom.push({
-      //     title: this.$t("support") +this.$t("datepath"),
-      //     dataIndex: 'superpath',
-      //     width: '300px',
-      //     scopedSlots: {
-      //       filterDropdown: 'filterDropdown',
-      //       filterIcon: 'filterIcon',
-      //       customRender: 'superpath'
-      //     },
-      //     onFilter: (value, record) =>{
-      //       if (util.isNull(record.superpath)){
-      //         return false;
-      //       }
-      //       return record.superpath
-      //           .toString()
-      //           .toLowerCase()
-      //           .includes(value.toLowerCase());
-      //     },
-      //     onFilterDropdownVisibleChange: visible => {
-      //       if (visible) {
-      //         setTimeout(() => {
-      //           this.searchInput.focus();
-      //         }, 0);
-      //       }
-      //     },
-      //   });
-      //   scorllLength += 300;
-      // }
-
-      /**数据账号*/
-      clom.push({
-        title: this.$t("dateaccount"),
-        dataIndex: 'dateaccount',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'dateaccount'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.dateaccount)){
-            return false;
-          }
-          return record.dateaccount
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**数据密码*/
-      clom.push({
-        title: this.$t("datepassword"),
-        dataIndex: 'datepassword',
-        width: '150px',
-        scopedSlots: {customRender: 'datepassword'},
-      });
-      scorllLength += 150;
-      /**数据目录*/
-      clom.push({
-        title: this.$t("datepath"),
-        dataIndex: 'datepath',
-        width: '400px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'datepath'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.datepath)){
-            return false;
-          }
-          return record.datepath
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 400;
-      /**测序平台*/
-      clom.push({
-        title: this.$t("SequencingPlatform"),
-        dataIndex: 'sequencingplatform',
-        width: '200px',
-        scopedSlots: {customRender: 'sequencingplatform'},
-      });
-      scorllLength += 200;
-
-      /**备注*/
-      clom.push({
-        // title: this.$t("overDate"),
-        slots : {title : "overDateTip"},
-        dataIndex: 'lasttime',
-        width: '200px',
-        scopedSlots: {customRender: 'lasttime'},
-      });
-      scorllLength += 200;
-
-      /**备注*/
-      clom.push({
-        title: this.$t("remarks"),
-        dataIndex: 'remarks',
-        width: '200px',
-        scopedSlots: {customRender: 'remarks'},
-      });
-      scorllLength += 200;
-
-      /**操作*/
-      clom.push({
-        // title: this.$t("operation"),
-        slots : {title : "operationTitle"},
-        dataIndex: 'operation',
-        width: '150px',
-        fixed: 'right',
-        scopedSlots: {customRender: 'operation'},
-      });
-      scorllLength += 150;
-
-      this.scroll.x = scorllLength;
+      var initDisClom = util.initDisClom();
+      this.scroll.x = initDisClom.scorllLength;
+      var clom = initDisClom.clom;
       this.columns = clom;
       this.columnNames = new Array();
       for (var item in clom) {

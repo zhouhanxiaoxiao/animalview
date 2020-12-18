@@ -55,30 +55,42 @@
           </div>
           <div v-else-if="col == 'taskdesc'">
             <a-tag color="green" v-if="record.tasktype == '03'">
-              {{record.process.projectname}}
+              {{ record.process.projectname }}
             </a-tag>
             <div style="width: 300px">{{ record.taskdesc }}</div>
           </div>
           <div v-else-if="col == 'handler'">
             <a-tag v-for="item in record.handler" :key="item.id">
-              {{item.name}}
+              {{ item.name }}
             </a-tag>
           </div>
           <div v-else-if="col == 'detail'">
-            <a-button type="primary" @click="showDetail(record)" size="small">
-              {{ $t("detail") }}
-            </a-button>
+            <a-badge
+                :count="showTodoCount(record)"
+                style="z-index: 3"
+                :number-style="{
+                  backgroundColor: '#fff',
+                  color: '#999',
+                  boxShadow: '0 0 0 1px #d9d9d9 inset',
+                }"
+            >
+              <a-button type="primary" @click="showDetail(record)" size="small">
+                {{ $t("detail") }}
+              </a-button>
+            </a-badge>
             &nbsp;
             <a-popconfirm placement="top"
                           v-if="isAdmin"
                           :ok-text="$t('yes')"
                           :cancel-text="$t('no')"
                           :auto-adjust-overflow="true"
-                          @confirm="confirmDelete(record.id)">
+                          @confirm="confirmDelete(record.id)"
+                          style="z-index: 1"
+            >
               <template slot="title">
                 <p>{{ $t("confirmDelete") }}</p>
               </template>
-              <a-button type="danger" size="small">{{$t("delete")}}</a-button>
+              <a-button type="danger" size="small">{{ $t("delete") }}</a-button>
             </a-popconfirm>
             &nbsp;
             <a-popconfirm placement="topLeft"
@@ -89,29 +101,29 @@
               <template slot="title">
                 <p>{{ $t("selectShareUser") }}</p>
                 <p>
-                  <a-select style="width: 100%" mode="tags" v-model="shareUser" >
+                  <a-select style="width: 100%" mode="tags" v-model="shareUser">
                     <a-select-option v-for="item in users" :key="item.id" :value="item.id">
-                      {{item.name}}
+                      {{ item.name }}
                     </a-select-option>
                   </a-select>
                 </p>
                 <p>
                   已分享：
                   <a-tag v-for="share in taskShare(record.id)" :key="share.id">
-                    {{share.name}}
+                    {{ share.name }}
                   </a-tag>
                 </p>
               </template>
-              <a-button size="small" shape="circle" icon="share-alt" />
+              <a-button size="small" shape="circle" icon="share-alt"/>
             </a-popconfirm>
 
-<!--            <button type="button" style="font-size: 12px" class="btn btn-primary btn-sm stock-action"-->
-<!--                    @click="showDetail(record)">{{ $t("detail") }}-->
-<!--            </button>-->
+            <!--            <button type="button" style="font-size: 12px" class="btn btn-primary btn-sm stock-action"-->
+            <!--                    @click="showDetail(record)">{{ $t("detail") }}-->
+            <!--            </button>-->
           </div>
           <template v-else>
             <a-tooltip placement="topLeft" :title="showText(text,col,record)">
-              {{ showText(text,col,record) }}
+              {{ showText(text, col, record) }}
             </a-tooltip>
           </template>
         </div>
@@ -129,43 +141,51 @@ import util from "@/components/publib/util";
 export default {
   name: "taskTableNew",
   components: {Submitting},
-  props :{
-    pageLocation : String
+  props: {
+    pageLocation: String
   },
-  data : function (){
+  data: function () {
     return {
-      taskList : [],
-      columns : [],
-      tableLoad : false,
-      selectedRowKeys : [],
-      selectedRows : [],
-      columnNames : [],
-      users : [],
-      searchInput : "",
-      shareUser : [],
-      shares : []
+      taskList: [],
+      columns: [],
+      tableLoad: false,
+      selectedRowKeys: [],
+      selectedRows: [],
+      columnNames: [],
+      users: [],
+      searchInput: "",
+      shareUser: [],
+      shares: [],
+      todoCount : {}
     }
   },
   beforeMount() {
     this.initPage();
   },
-  methods : {
-    allowShare : function (record){
+  methods: {
+    showTodoCount : function (record){
       if (record.tasktype == "03"){
-        if (this.$store.getters.isCurrentUser(record.process.creater)){
-          return  true;
+        console.log(this.todoCount[record.process.id]);
+        return this.todoCount[record.process.id];
+      }
+      return 0;
+    },
+    allowShare: function (record) {
+      if (record.tasktype == "03") {
+        if (this.$store.getters.isCurrentUser(record.process.creater)) {
+          return true;
         }
       }
       return false;
     },
-    taskShare :function(taskId){
+    taskShare: function (taskId) {
       var sharers = new Array();
-      for (var i=0;i<this.shares.length;i++){
+      for (var i = 0; i < this.shares.length; i++) {
         var share = this.shares[i];
-        if (share.taskid == taskId){
-          for (var j = 0; j < this.users.length; j++){
+        if (share.taskid == taskId) {
+          for (var j = 0; j < this.users.length; j++) {
             var curuser = this.users[j];
-            if (share.shareuser == curuser.id){
+            if (share.shareuser == curuser.id) {
               sharers.push(curuser);
             }
           }
@@ -173,16 +193,16 @@ export default {
       }
       return sharers;
     },
-    submitShareUsers : function (taskId){
-      if (this.shareUser.length == 0){
+    submitShareUsers: function (taskId) {
+      if (this.shareUser.length == 0) {
         this.$message.error(this.$t("请选择能够查看此项目的用户"));
         return;
       }
       var postData = {
-        taskId : taskId,
-        shares : JSON.stringify(this.shareUser)
+        taskId: taskId,
+        shares: JSON.stringify(this.shareUser)
       }
-      util.commonPost("/task/submitShare",postData,this.initPage,this.$refs.submitting.$el)
+      util.commonPost("/task/submitShare", postData, this.initPage, this.$refs.submitting.$el)
     },
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm();
@@ -194,40 +214,40 @@ export default {
       clearFilters();
       this.searchText = '';
     },
-    confirmDelete : function (taskId){
+    confirmDelete: function (taskId) {
       var postData = {
-        taskId : taskId
+        taskId: taskId
       }
       this.$(this.$refs.submitting.$el).modal("show");
       var _this = this;
-      this.$axios.post("/task/deleteTask",postData).then(function (res){
+      this.$axios.post("/task/deleteTask", postData).then(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.initPage();
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       });
     },
     showDetail: function (task) {
-      if (task.tasktype == "02"){
+      if (task.tasktype == "02") {
         // this.$router.push({name:"askDetail",query:{taskId:task.id}});
-        this.$router.push({name:"askTaskMain",query:{taskId:task.id}});
-      }else if (task.tasktype == "01"){
-        this.$router.push({name:"userAllow",query:{taskId:task.id}});
-      }else if (task.tasktype == "03"){
+        this.$router.push({name: "askTaskMain", query: {taskId: task.id}});
+      } else if (task.tasktype == "01") {
+        this.$router.push({name: "userAllow", query: {taskId: task.id}});
+      } else if (task.tasktype == "03") {
         // this.$router.push({name:"processDetail",query:{taskId:task.task.id}});
         // this.$router.push({name:"processInit",query:{taskId:task.task.id}});
-        this.$router.push({name:"processDetailNew",query:{taskId:task.id}});
-      }else if (task.tasktype == "04"){
-        this.$router.push({name:"partnerDetail",query:{taskId:task.id}});
+        this.$router.push({name: "processDetailNew", query: {taskId: task.id}});
+      } else if (task.tasktype == "04") {
+        this.$router.push({name: "partnerDetail", query: {taskId: task.id}});
       }
     },
-    taskstatu : function(task){
+    taskstatu: function (task) {
       if (task.taskstatu == "01") {
         return "active";
       } else if (task.taskstatu == "02") {
@@ -238,13 +258,13 @@ export default {
     },
     taskPro: function (task) {
       console.log(task);
-      if (task.tasktype == "01"){
-        if (task.taskstatu == "01"){
+      if (task.tasktype == "01") {
+        if (task.taskstatu == "01") {
           return 50;
-        }else {
+        } else {
           return 100;
         }
-      }else if (task.tasktype == "02"){
+      } else if (task.tasktype == "02") {
         var ask = task.ask;
         if (ask.currentstatu == "00") {
           return 10;
@@ -257,57 +277,68 @@ export default {
         }
         if (ask.currentstatu == "04") {
           return 75;
-        }else {
+        } else {
           return 100;
         }
-      }else if (task.tasktype == "03"){
+      } else if (task.tasktype == "03") {
         return 100;
-      }else if (task.tasktype == "04"){
+      } else if (task.tasktype == "04") {
         var partner = task.partner;
-        if (partner.taskstatu == "00"){
+        if (partner.taskstatu == "00") {
           return 50;
-        }else if (partner.taskstatu == "01"){
+        } else if (partner.taskstatu == "01") {
           return 100;
-        }else {
+        } else {
           return 100;
         }
       }
     },
-    showTaskType : function (text){
+    showTaskType: function (text) {
       var ret = "";
       if (text == "01") {
         ret = "账号申请";
       } else if (text == "02") {
         ret = "使用申请";
-      } else if (text == "03"){
+      } else if (text == "03") {
         ret = "流程管理" + "";
-      }else if (text == "04"){
+      } else if (text == "04") {
         ret = "协助申请";
       }
       return ret;
     },
-    showText(text,column,record){
+    showText(text, column, record) {
       // console.log(text,column,record);
-      if (column == "tasktype"){
+      if (column == "tasktype") {
         return this.showTaskType(text);
-      }else if(column == "createtime"){
-        return  formatDate(new Date(record.createtime),"yyyy-MM-dd");
-      }else if(column == "createuser"){
-        for (var i = 0;i<this.users.length;i++){
-          if (this.users[i].id == text){
+      } else if (column == "createtime") {
+        return formatDate(new Date(record.createtime), "yyyy-MM-dd");
+      } else if (column == "createuser") {
+        for (var i = 0; i < this.users.length; i++) {
+          if (this.users[i].id == text) {
             return this.users[i].name;
           }
         }
       }
       return text;
     },
-    initPage : function (){
+    getTodoCount: function (ids) {
+      var postData = {
+        idsStr: JSON.stringify(ids)
+      }
+      var _this = this;
+      this.$axios.post("/task/getTodoCount", postData).then(function (res) {
+        if (res.data.code == "200") {
+          _this.todoCount = res.data.retMap.todoCount;
+        }
+      })
+    },
+    initPage: function () {
       this.initColumns();
       var _this = this;
       var postData = {
         currentPage: _this.currentPage - 1,
         pageSize: _this.pageSize,
-        pageLocation : this.pageLocation,
+        pageLocation: this.pageLocation,
       }
       _this.$axios.post("/task/gatAllTask", postData).then(function (res) {
         // console.log(res);
@@ -316,7 +347,16 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.taskList = res.data.retMap.alltask;
-          _this.taskList.map(task => task.key=task.id);
+          var ids = new Array();
+          _this.taskList.map(task => {
+            task.key = task.id
+            if (task.tasktype == "03") {
+              ids.push(task.process.id);
+            }
+          });
+          if (ids.length > 0) {
+            _this.getTodoCount(ids);
+          }
           _this.users = res.data.retMap.users;
           _this.shares = res.data.retMap.shares;
         }
@@ -325,7 +365,7 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       })
     },
-    initColumns : function (){
+    initColumns: function () {
       var cols = new Array();
 
       cols.push({
@@ -366,14 +406,14 @@ export default {
           filterIcon: 'filterIcon',
           customRender: 'createuser',
         },
-        onFilter: (value, record) =>{
+        onFilter: (value, record) => {
           var user = undefined;
-          for (var i = 0;i<this.users.length;i++){
-            if (this.users[i].id == record.createuser){
+          for (var i = 0; i < this.users.length; i++) {
+            if (this.users[i].id == record.createuser) {
               user = this.users[i].name;
             }
           }
-          if (util.isNull(record.createuser)){
+          if (util.isNull(record.createuser)) {
             return false;
           }
           return user
@@ -398,12 +438,12 @@ export default {
           filterIcon: 'filterIcon',
           customRender: 'handler',
         },
-        onFilter: (value, record) =>{
-          for (var i = 0;i<record.handler;i++){
+        onFilter: (value, record) => {
+          for (var i = 0; i < record.handler; i++) {
             var usr = record.handler[i];
             if (usr.name.toString()
                 .toLowerCase()
-                .includes(value.toLowerCase())){
+                .includes(value.toLowerCase())) {
               return true;
             }
           }
@@ -426,11 +466,11 @@ export default {
           filterIcon: 'filterIcon',
           customRender: 'createtime',
         },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.createtime)){
+        onFilter: (value, record) => {
+          if (util.isNull(record.createtime)) {
             return false;
           }
-          return formatDate(new Date(record.createtime),"yyyy-MM-dd")
+          return formatDate(new Date(record.createtime), "yyyy-MM-dd")
               .toString()
               .toLowerCase()
               .includes(value.toLowerCase());
@@ -452,8 +492,8 @@ export default {
           filterIcon: 'filterIcon',
           customRender: 'taskdesc',
         },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.taskdesc)){
+        onFilter: (value, record) => {
+          if (util.isNull(record.taskdesc)) {
             return false;
           }
           return record.taskdesc
@@ -479,32 +519,32 @@ export default {
       });
       this.columns = cols;
       this.columnNames = new Array();
-      for (var item in cols){
+      for (var item in cols) {
         this.columnNames.push(cols[item].dataIndex);
       }
     }
   },
-  watch : {
-    userName(){
+  watch: {
+    userName() {
       this.initPage();
     },
   },
-  computed : {
-    pagina(){
-      return{
-        showSizeChanger : true,
-        showQuickJumper : true,
-        pageSizeOptions:['10','20','50','100'],
-        total : this.taskList.length,
-        showTotal : function (total){
+  computed: {
+    pagina() {
+      return {
+        showSizeChanger: true,
+        showQuickJumper: true,
+        pageSizeOptions: ['10', '20', '50', '100'],
+        total: this.taskList.length,
+        showTotal: function (total) {
           return `共 ${total} 条`
         }
       }
     },
-    userName:function () {
+    userName: function () {
       return this.$store.getters.getUser.name;
     },
-    isAdmin: function (){
+    isAdmin: function () {
       return this.$store.getters.isAdmin;
     }
   }

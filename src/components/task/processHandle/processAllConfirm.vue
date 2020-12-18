@@ -491,10 +491,9 @@ export default {
 }
 .listClass::-webkit-scrollbar { width: 0 !important }
 .listClass {
-  height: 165px;
+  height: 25vh;
   overflow: -moz-scrollbars-none;
   -ms-overflow-style: none;
-
   overflow-y: auto;
 }
 </style>

@@ -260,6 +260,7 @@ const zh={
     overDate : "过期时间",
     selectShareUser : "请选择能够查看此项目的用户",
     logintimeover : "登录已过期，请重新登录！",
+    summary : "汇总",
 
     numberErr : "必须大于1",
     systemErr : "系统异常！",

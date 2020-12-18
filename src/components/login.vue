@@ -129,16 +129,13 @@ export default {
     },
     submitLogin: function () {
       var _this = this;
-      this.$axios({
-        method: "post",
-        url: "/login",
-        params: {
+      this.$axios.post("/login",{
           "loginEmail": this.loginEmail,
           "password": this.$md5(this.loginPwd),
           "verification" : this.verificationCode,
           "loginFlag" : this.loginflag
         }
-      }).then(function (res) {
+      ).then(function (res) {
         console.log(res);
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));

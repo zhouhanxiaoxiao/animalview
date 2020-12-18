@@ -124,13 +124,13 @@
     </div>
     <div class="modal-footer" style="margin-top: 20px">
       <a-button type="primary" v-if="!isNotConfirm" @click="updateProcess('confirm')">
-        {{$t("confirm")}}
+        {{"基因组学中心" + $t("confirm")}}
       </a-button>
       <a-button type="danger" v-if="!isNotConfirm" @click="showRefuseAlert('admin')">
         {{$t("refuse")}}
       </a-button>
       <a-button type="primary" v-if="!isPInotConfirm" @click="updateProcessByPi('confirm')">
-        {{$t("confirm")}}
+        {{"部门负责人" + $t("confirm")}}
       </a-button>
       <a-button type="danger" v-if="!isPInotConfirm" @click="showRefuseAlert('pi')">
         {{$t("refuse")}}

@@ -29,6 +29,7 @@
               :show-upload-list="false"
               :action="this.$axios.defaults.baseURL + 'file/import/initDrop'"
               :headers="{token:this.$cookies.get('token')}"
+              @change="afterUpload"
           >
             <a-button>
               <a-icon type="upload"/>
@@ -81,7 +82,7 @@
           <div :key="col">
             <div v-if="col == 'operation'">
               <a-popconfirm
-                  v-if = "record.curstatu != '09'"
+                  v-if = "record.curstatu != '09' && isFeeder"
                   :title="$t('areyousureDelete')"
                   @confirm="() => delStrainById(record.key)"
               >
@@ -89,11 +90,15 @@
                   {{$t("delete")}}
                 </a-button>
               </a-popconfirm>
-
               <a-button type="primary" size="small" style="margin: 2px 2px"
                         @click="showEditStrain(record.key)"
-                        v-if="record.curstatu != '09'">
+                        v-if="record.curstatu != '09' && isFeeder">
                 {{$t("edit")}}
+              </a-button>
+              <a-button size="small" style="margin: 2px 2px"
+                        @click="showFileList(record.key)"
+                        v-if="record.curstatu != '09'">
+                {{$t("附件")}}
               </a-button>
             </div>
             <template v-else>
@@ -108,6 +113,7 @@
     <add-new-strain @submitData="submitData"></add-new-strain>
     <submitting :title="$t('submitting')"></submitting>
     <edit-strain :strain-id="strainId" @updateStrain="updateStrain"></edit-strain>
+    <strain-file-list :detail-id="detailId" ref="strainFileList"></strain-file-list>
   </div>
 </template>
 
@@ -117,10 +123,11 @@ import Submitting from "@/components/publib/submitting";
 import AddNewStrain from "@/components/stockcenter/addNewStrain";
 import {formatDate} from "@/components/publib/date";
 import EditStrain from "@/components/stockcenter/editStrain";
+import StrainFileList from "@/components/stockcenter/StrainFileList";
 
 export default {
   name: "currentStrainNew",
-  components: {EditStrain, AddNewStrain, Submitting, TopNav},
+  components: {StrainFileList, EditStrain, AddNewStrain, Submitting, TopNav},
   data : function (){
     return {
       data : [],
@@ -133,13 +140,23 @@ export default {
       selectedRows : [],
       pageSize: 10,
       total: 0,
-      currentPage: 0
+      currentPage: 0,
+      detailId : ""
     }
   },
   beforeMount() {
     this.initPage();
   },
   methods : {
+    afterUpload : function (evnt){
+      if (evnt.file.status=="done"){
+        this.initPage();
+      }
+    },
+    showFileList :function (id){
+      this.detailId = id;
+      this.$(this.$refs.strainFileList.$el).modal("show");
+    },
     updateStrain : function (subData){
       var post = {
         subData : subData
@@ -361,13 +378,11 @@ export default {
           }
         },
       });
-      if (this.$store.getters.isFeeder){
-        cols.push({
-          title: "操作",
-          dataIndex: 'operation',
-          scopedSlots: { customRender: 'operation' },
-        });
-      }
+      cols.push({
+        title: "操作",
+        dataIndex: 'operation',
+        scopedSlots: { customRender: 'operation' },
+      });
       this.columns = cols;
       this.columnNames = new Array();
       for (var item in cols){
@@ -389,6 +404,7 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.$message.success(_this.$t("save_success"));
+          _this.initPage();
         }
       }).catch(function (res) {
         _this.$("#submitting").modal("hide");
@@ -398,6 +414,9 @@ export default {
     },
   },
   computed : {
+    isFeeder : function (){
+      return this.$store.getters.isFeeder;
+    },
     pagina(){
       return{
         showSizeChanger : true,

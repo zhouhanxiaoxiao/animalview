@@ -206,7 +206,7 @@ export default {
       selectedRowKeys : [],
       selectedRows : [],
       columnNames: [],
-      scroll: {x: 1500},
+      scroll: {x: 1500, y: 600},
       editingKey: '',
       allUsers: [],
       subtask: {},
@@ -359,7 +359,8 @@ export default {
       if (!this.isEnd){
         return true;
       }
-      if (col == "sampleindex" || col == "samplename") {
+      if (col == "sampleindex" || col == "samplename"
+          || col == "species"|| col == "tissue") {
         return true;
       }
       if (record.currentstatu == "02"
@@ -404,205 +405,9 @@ export default {
       });
     },
     initCols: function () {
-      var scorllLength = 0;
-      var clom = new Array();
-      /**序号*/
-      clom.push({
-        title: this.$t("index"),
-        dataIndex: 'index',
-        width: '50px',
-        fixed: 'left',
-        scopedSlots: {customRender: 'index'},
-      });
-      scorllLength += 50;
-      /**样本编号*/
-      clom.push({
-        title: this.$t("sampleIndex"),
-        dataIndex: 'sampleindex',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'sampleindex'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.sampleindex)){
-            return false;
-          }
-          return record.sampleindex
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /**样本名称*/
-      clom.push({
-        title: this.$t("sampleName"),
-        dataIndex: 'samplename',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'samplename'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.samplename)){
-            return false;
-          }
-          return record.samplename
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      // /**结果主路径*/
-      // clom.push({
-      //   title: this.$t("resultpath"),
-      //   dataIndex: 'resultpath',
-      //   width: '300px',
-      //   scopedSlots: {
-      //     filterDropdown: 'filterDropdown',
-      //     filterIcon: 'filterIcon',
-      //     customRender: 'resultpath'
-      //   },
-      //   onFilter: (value, record) =>{
-      //     if (util.isNull(record.resultpath)){
-      //       return false;
-      //     }
-      //     return record.resultpath
-      //         .toString()
-      //         .toLowerCase()
-      //         .includes(value.toLowerCase());
-      //   },
-      //   onFilterDropdownVisibleChange: visible => {
-      //     if (visible) {
-      //       setTimeout(() => {
-      //         this.searchInput.focus();
-      //       }, 0);
-      //     }
-      //   },
-      // });
-      // scorllLength += 300;
-      /**报告地址*/
-      clom.push({
-        title: this.$t("reportpath"),
-        dataIndex: 'reportpath',
-        width: '600px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'reportpath'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.reportpath)){
-            return false;
-          }
-          return record.reportpath
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 600;
-      // /**分析流程/参数*/
-      // clom.push({
-      //   title: this.$t("args"),
-      //   dataIndex: 'args',
-      //   width: '300px',
-      //   scopedSlots: {
-      //     filterDropdown: 'filterDropdown',
-      //     filterIcon: 'filterIcon',
-      //     customRender: 'args'
-      //   },
-      //   onFilter: (value, record) =>{
-      //     if (util.isNull(record.args)){
-      //       return false;
-      //     }
-      //     return record.args
-      //         .toString()
-      //         .toLowerCase()
-      //         .includes(value.toLowerCase());
-      //   },
-      //   onFilterDropdownVisibleChange: visible => {
-      //     if (visible) {
-      //       setTimeout(() => {
-      //         this.searchInput.focus();
-      //       }, 0);
-      //     }
-      //   },
-      // });
-      // scorllLength += 300;
-      /**分析人*/
-      clom.push({
-        title: this.$t("analyst"),
-        dataIndex: 'analyst',
-        width: '150px',
-        scopedSlots: {customRender: 'analyst'},
-      });
-      scorllLength += 150;
-      /**备注*/
-      clom.push({
-        title: this.$t("remarks"),
-        dataIndex: 'remarks',
-        width: '200px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'remarks'
-        },
-        onFilter: (value, record) =>{
-          if (util.isNull(record.remarks)){
-            return false;
-          }
-          return record.remarks
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 200;
-
-      /**操作*/
-      clom.push({
-        title: this.$t("operation"),
-        dataIndex: 'operation',
-        width: '150px',
-        fixed: 'right',
-        scopedSlots: {customRender: 'operation'},
-      });
-      scorllLength += 150;
-
-      this.scroll.x = scorllLength;
+      var initBioClom = util.initBioClom();
+      this.scroll.x = initBioClom.scorllLength;
+      var clom = initBioClom.clom;
       this.columns = clom;
       this.columnNames = new Array();
       for (var item in clom) {

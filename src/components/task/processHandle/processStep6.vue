@@ -8,6 +8,21 @@
           {{$t('uploadConfirm')}}
       </template>
       <template slot="extra">
+        <a-upload
+            name="file"
+            v-if="isEnd"
+            :action="uploadAllUrl"
+            :multiple="true"
+            :headers="allUploadHeader"
+            :showUploadList="false"
+            @change="handleUploadChange"
+            :disabled="disabledUpload"
+        >
+          <a-button :disabled="disabledUpload">
+            <a-icon type="upload"/>
+            {{ $t("upload") }}
+          </a-button>
+        </a-upload>
         <a-button type="danger" @click="batchUnPass()" v-if="canPase" :disabled="disabledPass">
           {{ $t("unPass") }}
         </a-button>
@@ -192,6 +207,23 @@
               {{ item.val }}
             </a-select-option>
           </a-select>
+
+          <div v-else-if="col == 'upload'">
+            <a-upload
+                name="file"
+                :multiple="true"
+                :disabled="isDisabled(col,record)"
+                :headers="uploadHeader(record)"
+                :action="uploadUrl"
+                :showUploadList="false"
+                @change="handleUploadChange"
+            >
+              <a-button :disabled="isDisabled(col,record)">
+                <a-icon type="upload"/>
+                {{ $t("upload") }}
+              </a-button>
+            </a-upload>
+          </div>
           <!-- 序号 -->
           <a-input
               v-else-if="col != 'index'"
@@ -242,12 +274,24 @@
             </a-badge>
             &nbsp;
           </span>
+          &nbsp;
+          <a-badge
+              :count="showFileCount(record.id)"
+              :number-style="{
+                  backgroundColor: '#fff',
+                  color: '#999',
+                  boxShadow: '0 0 0 1px #d9d9d9 inset',
+                }"
+          >
+            <a @click="() => showFileList(record.id)">{{ "附件" }}</a>
+          </a-badge>
         </div>
       </template>
     </a-table>
     <submitting :title="$t('submitting')" ref="submitting"></submitting>
     <refuse-alert :modal-title="$t('unPass')" ref="unPassAlert" @confirmFun="confirmFun"></refuse-alert>
     <sub-task-info @subTaskInfo="startProcess" ref="subTask"></sub-task-info>
+    <show-filelist :detail-id="detailId" ref="showFilelist"></show-filelist>
   </div>
 </template>
 
@@ -264,6 +308,7 @@ import RefuseAlert from "@/components/publib/refuseAlert";
 import {formatDate} from "@/components/publib/date";
 import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
 import {Icon} from "ant-design-vue";
+import ShowFilelist from "@/components/publib/showFilelist";
 
 const IconFont = Icon.createFromIconfontCN({
   scriptUrl: util.alicdnIcon,
@@ -271,7 +316,7 @@ const IconFont = Icon.createFromIconfontCN({
 
 export default {
   name: "processStep6",
-  components: {SubTaskInfo, RefuseAlert, Submitting,IconFont},
+  components: {ShowFilelist, SubTaskInfo, RefuseAlert, Submitting,IconFont},
   props: {
     process: Object,
     statu : String,
@@ -282,7 +327,7 @@ export default {
       data: [],
       columns: [],
       columnNames: [],
-      scroll: {x: 1500},
+      scroll: {x: 1500, y: 600},
       selectedRowKeys : [],
       selectedRows :[],
       subId : "00",
@@ -290,7 +335,9 @@ export default {
       subs : [],
       subProcessName : "",
       remarks : "",
-      operators : undefined
+      operators : undefined,
+      detailId : "",
+      fileCounts : {}
     };
   },
   beforeMount() {
@@ -298,9 +345,29 @@ export default {
     this.initPage();
   },
   methods : {
+    getFileCount: function (ids) {
+      var postData = {
+        idsStr: JSON.stringify(ids)
+      }
+      var _this = this;
+      this.$axios.post("/file/getFileCount", postData).then(function (res) {
+        if (res.data.code == "200") {
+          _this.fileCounts = res.data.retMap.fileCounts;
+        }
+      });
+    },
+    showFileCount :function (id){
+      return this.fileCounts[id];
+    },
+    showFileList: function (detailId) {
+      this.detailId = detailId;
+      // this.$("#showFileList").modal("show");
+      this.$(this.$refs.showFilelist.$el).modal("show");
+    },
     handleUploadChange : function (ret){
       if (ret.file.status == "done"){
         this.$message.success(this.$t("upload") + this.$t("save_success"));
+        this.initPage();
       }else if (ret.file.status == "error"){
         this.$message.success(this.$t("systemErr"));
       }
@@ -407,8 +474,9 @@ export default {
       if (!this.isEnd){
         return true;
       }
-      if (col == "sampleindex" || col == "samplename" || col == "libindex"
-      ||col == "seqmethod" || col== "uploadsize"|| col== "uploadunit"
+      if (col == "sampleindex" || col == "samplename"
+          || col == "libindex"|| col == "species"|| col == "tissue"
+          ||col == "seqmethod" || col== "uploadsize"|| col== "uploadunit"
           || col == "uploadremark") {
         return true;
       }
@@ -419,6 +487,9 @@ export default {
         return true;
       }
       return false;
+    },
+    uploadHeader: function (record) {
+      return {token: this.$cookies.get('token'), detailId: record.id}
     },
     subTaskInfo: function () {
       this.$(this.$refs.subTask.$el).modal("show");
@@ -580,14 +651,17 @@ export default {
         } else {
           _this.data = new Array();
           if (res.data.retMap.datas.length != 0) {
+            var ids = new Array();
             for (var ind in res.data.retMap.datas) {
               var d = res.data.retMap.datas[ind];
               d.key = d.id;
               if (!util.isNull(d.createdbtime)) {
                 d.createdbtime = formatDate(new Date(d.createdbtime), "yyyy-MM-dd");
               }
+              ids.push(d.id);
               _this.data.push(d);
             }
+            _this.getFileCount(ids);
           }
           _this.operators = res.data.retMap.operators;
           _this.allUsers = res.data.retMap.allUsers;
@@ -602,211 +676,9 @@ export default {
       });
     },
     initCols : function (){
-      var scorllLength = 0;
-      var clom = new Array();
-      /**序号*/
-      clom.push({
-        title: this.$t("index"),
-        dataIndex: 'index',
-        width: '50px',
-        fixed: 'left',
-        scopedSlots: {customRender: 'index'},
-      });
-      scorllLength += 50;
-
-      /**建库时间*/
-      clom.push({
-        title: this.$t("createdbtime"),
-        dataIndex: 'createdbtime',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'createdbtime'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.createdbtime)) {
-            return false;
-          }
-          return record.createdbtime
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-
-      /**样本编号*/
-      clom.push({
-        title: this.$t("sampleIndex"),
-        dataIndex: 'sampleindex',
-        width: '150px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'sampleindex'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.sampleindex)) {
-            return false;
-          }
-          return record.sampleindex
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 150;
-      /** 文库编号 */
-      clom.push({
-        title: this.$t("databaseindex"),
-        dataIndex: 'libindex',
-        width: '200px',
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'libindex'
-        },
-        onFilter: (value, record) => {
-          if (util.isNull(record.libindex)) {
-            return false;
-          }
-          return record.libindex
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
-        },
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus();
-            }, 0);
-          }
-        },
-      });
-      scorllLength += 200;
-
-      /** 文库类型 */
-      clom.push({
-        title: this.$t("databasetype2"),
-        dataIndex: 'libtype',
-        width: '200px',
-        scopedSlots: {customRender: 'libtype'},
-      });
-      scorllLength += 200;
-
-      /** Index序列 */
-      clom.push({
-        title: "index序列",
-        dataIndex: 'confirmindex',
-        width: '200px',
-        scopedSlots: {customRender: 'confirmindex'},
-      });
-      scorllLength += 200;
-
-      /** Peak size(bp) */
-      clom.push({
-        title: "Peak size(bp)",
-        dataIndex: 'peaksize',
-        width: '200px',
-        scopedSlots: {customRender: 'peaksize'},
-      });
-      scorllLength += 200;
-
-      /** QPCR摩尔浓度(nmol/L) */
-      clom.push({
-        // title: "QPCR摩尔浓度(nmol/L)",
-        slots : {title : "qpcrTitle"},
-        dataIndex: 'qpcr',
-        width: '200px',
-        scopedSlots: {customRender: 'qpcr'},
-      });
-      scorllLength += 200;
-
-      /** 峰图描述 */
-      clom.push({
-        // title: "峰图描述",
-        slots : {title : "peakDescTitle"},
-        dataIndex: 'peakdesc',
-        width: '200px',
-        scopedSlots: {customRender: 'peakdesc'},
-      });
-      scorllLength += 200;
-
-      /** 库检综合结果 */
-      clom.push({
-        // title: "库检综合结果",
-        slots : {title : "checkResultTitle"},
-        dataIndex: 'libcheckresult',
-        width: '200px',
-        scopedSlots: {customRender: 'libcheckresult'},
-      });
-      scorllLength += 200;
-
-      /** 测序策略 */
-      clom.push({
-        // title: this.$t("seqmethods"),
-        slots : {title : "seqmethodsTitle"},
-        dataIndex: 'seqmethod',
-        width: '200px',
-        scopedSlots: {customRender: 'seqmethod'},
-      });
-      scorllLength += 200;
-
-      /** 上机数据量 */
-      clom.push({
-        // title: this.$t("uploadsize"),
-        slots : {title : "uploadsizeTitle"},
-        dataIndex: 'uploadsize',
-        width: '150px',
-        scopedSlots: {customRender: 'uploadsize'},
-      });
-      scorllLength += 150;
-      /** 数据量单位 */
-      clom.push({
-        // title: this.$t("databaseunit"),
-        slots : {title : "databaseunitTitle"},
-        dataIndex: 'uploadunit',
-        width: '150px',
-        scopedSlots: {customRender: 'uploadunit'},
-      });
-      scorllLength += 150;
-
-      /** 上机备注 */
-      clom.push({
-        title: this.$t("uploadremark"),
-        dataIndex: 'uploadremark',
-        width: '150px',
-        scopedSlots: {customRender: 'uploadremark'},
-      });
-      scorllLength += 150;
-
-      /**操作*/
-      clom.push({
-        // title: this.$t("operation"),
-        slots : {title : "operationTitle"},
-        dataIndex: 'operation',
-        width: '150px',
-        fixed: 'right',
-        scopedSlots: {customRender: 'operation'},
-      });
-      scorllLength += 150;
-
-      this.scroll.x = scorllLength;
+      var initConfrimClom = util.initConfrimClom();
+      this.scroll.x = initConfrimClom.scorllLength;
+      var clom = initConfrimClom.clom;
       this.columns = clom;
       this.columnNames = new Array();
       for (var item in clom) {
@@ -926,7 +798,27 @@ export default {
         return '';
       }
       return this.operators.lib.name;
-    }
+    },
+    uploadUrl: function () {
+      return util.commonUploadUrl();
+    },
+    allUploadHeader : function (){
+      return {token: this.$cookies.get('token'), idsStr: JSON.stringify(this.selectedRowKeys)}
+    },
+    uploadAllUrl: function () {
+      return this.$axios.defaults.baseURL + 'file/import/uploadAll';
+    },
+    disabledUpload() {
+      if (this.selectedRowKeys.length == 0) {
+        return true;
+      }
+      for (var item in this.selectedRows) {
+        if (this.selectedRows[item].currentstatu != '01') {
+          return true;
+        }
+      }
+      return false;
+    },
   }
 }
 </script>
