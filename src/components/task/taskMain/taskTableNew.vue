@@ -1,5 +1,10 @@
 <template>
-  <div style="width: 90%;margin-left: 5%">
+  <div style="width: 100%">
+    <a-page-header
+        style="border: 1px solid rgb(235, 237, 240)"
+        :title="'项目列表'"
+    >
+    </a-page-header>
     <a-table :data-source="taskList"
              :pagination="pagina"
              :loading="tableLoad"
@@ -54,9 +59,14 @@
             <a-progress v-else :showInfo="false" :percent="taskPro(record)" size="small" :status="taskstatu(record)"/>
           </div>
           <div v-else-if="col == 'taskdesc'">
-            <a-tag color="green" v-if="record.tasktype == '03'">
-              {{ record.process.projectname }}
-            </a-tag>
+            <div  v-if="record.tasktype == '03'">
+              <a-tag color="purple" v-if="record.process.isonlybio">
+                {{ record.process.projectname }}
+              </a-tag>
+              <a-tag v-else color="green">
+                {{ record.process.projectname }}
+              </a-tag>
+            </div>
             <div style="width: 300px">{{ record.taskdesc }}</div>
           </div>
           <div v-else-if="col == 'handler'">
@@ -340,7 +350,9 @@ export default {
         pageSize: _this.pageSize,
         pageLocation: this.pageLocation,
       }
+      this.tableLoad = true;
       _this.$axios.post("/task/gatAllTask", postData).then(function (res) {
+        _this.tableLoad = false;
         // console.log(res);
         if (res.data.code != "200") {
           // console.log(res);
@@ -361,6 +373,7 @@ export default {
           _this.shares = res.data.retMap.shares;
         }
       }).catch(function (res) {
+        _this.tableLoad = false;
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       })
@@ -427,6 +440,19 @@ export default {
               this.searchInput.focus();
             }, 0);
           }
+        },
+        sorter: (a, b) => {
+          var auser = undefined;
+          var buser = undefined;
+          for (var i = 0; i < this.users.length; i++) {
+            if (this.users[i].id == a.createuser) {
+              auser = this.users[i].name;
+            }
+            if (this.users[i].id == b.createuser) {
+              buser = this.users[i].name;
+            }
+          }
+          return util.sorter(auser,buser);
         },
       });
 
@@ -508,6 +534,13 @@ export default {
             }, 0);
           }
         },
+        sorter: (a, b) => {
+          if (a.tasktype == "03" && b.tasktype == "03"){
+            return util.sorter(a.process.projectname,b.process.projectname);
+          }else {
+            return a.taskdesc.length - b.taskdesc.length;
+          }
+        }
       });
 
       cols.push({

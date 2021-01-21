@@ -1,145 +1,27 @@
 <template>
   <div>
     <top-nav></top-nav>
-    <div class="main-page">
-      <div class="summary-container">
-        <div style="width: 100%;padding: 20px 20px;min-height: 150px" >
-          <template v-if="this.$systemFlag == 'animal'" style="width: 100%;text-align: center">
-            <a-statistic
-                title="最近一个月新增扩繁品系"
-                :value="oneMonthStockNumber"
-                :precision="0"
-                :value-style="{ color: '#3f8600' }"
-                style="margin: 0px 25px;display: inline-block"
-            >
-              <template #prefix>
-                <a-icon type="arrow-up" />
-              </template>
-            </a-statistic>
-            <a-statistic
-                title="最近一个月新增保种品系"
-                :value="oneMonthStrainNumber"
-                :precision="0"
-                :value-style="{ color: '#3f8600' }"
-                style="margin: 0px 25px;display: inline-block"
-
-            >
-              <template #prefix>
-                <a-icon type="arrow-up" />
-              </template>
-            </a-statistic>
-
-            <a-statistic
-                :title="'现有' + $t('current_strain')"
-                :value="allStrainNumber"
-                :precision="0"
-                :value-style="{ color: '#3f8600' }"
-                style="margin: 0px 25px;display: inline-block"
-                @click.native="currentStrain"
-            >
-              <template #prefix>
-              </template>
-            </a-statistic>
-
-            <a-statistic
-                :title="'现有' + $t('current_stock')"
-                :value="stockNumber"
-                :precision="0"
-                :value-style="{ color: '#3f8600' }"
-                style="margin: 0px 25px;display: inline-block"
-                @click.native="currentStock"
-            >
-              <template #prefix>
-              </template>
-            </a-statistic>
-            <a-statistic
-                title="进行中的任务"
-                :value="selfTaskNumber"
-                :precision="0"
-                :value-style="{ color: '#3f8600' }"
-                style="margin: 0px 25px;display: inline-block"
-                @click.native="myTask"
-            >
-              <template #prefix>
-                <a-icon type="arrow-up" />
-              </template>
-            </a-statistic>
-          </template>
-          <div  v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'"
-                     style="width: 100%;text-align: center;">
-<!--            <a-statistic-->
-<!--                title="进行中的任务"-->
-<!--                :value="selfTaskNumber"-->
-<!--                :precision="0"-->
-<!--                :value-style="{ color: '#3f8600' }"-->
-<!--                style="margin: 0px 25px;display: inline-block;float: left;margin-left: 100px"-->
-<!--                @click.native="myTask"-->
-<!--            >-->
-<!--              <template #prefix>-->
-<!--                <a-icon type="arrow-up" />-->
-<!--              </template>-->
-<!--            </a-statistic>-->
-            <div style="display: inline-block;margin-left: 50px">
-              <a-statistic
-                  :title="$t('sampleInput')"
-                  :value="parseInt(checkNum.inputNum) + parseInt(todoNum.inputNum)"
-                  :precision="0"
-                  :value-style="{ color: '#3f8600' }"
-                  style="margin: 0px 20px;display: inline-block"
-              >
-              </a-statistic>
-              <a-statistic
-                  :title="$t('samplePreparation')"
-                  :value="parseInt(checkNum.makeNum) + parseInt(todoNum.makeNum)"
-                  :precision="0"
-                  :value-style="{ color: '#3f8600' }"
-                  style="margin: 0px 20px;display: inline-block"
-              >
-              </a-statistic>
-              <a-statistic
-                  :title="$t('libraryPreparation')"
-                  :value="parseInt(checkNum.libNum) + parseInt(todoNum.libNum)"
-                  :precision="0"
-                  :value-style="{ color: '#3f8600' }"
-                  style="margin: 0px 20px;display: inline-block"
-              >
-              </a-statistic>
-              <a-statistic
-                  :title="$t('uploadConfirm')"
-                  :value="parseInt(checkNum.confirmNum) + parseInt(todoNum.confirmNum)"
-                  :precision="0"
-                  :value-style="{ color: '#3f8600' }"
-                  style="margin: 0px 20px;display: inline-block"
-              >
-              </a-statistic>
-              <a-statistic
-                  :title="$t('dismountData')"
-                  :value="parseInt(checkNum.disNum) + parseInt(todoNum.disNum)"
-                  :precision="0"
-                  :value-style="{ color: '#3f8600' }"
-                  style="margin: 0px 20px;display: inline-block"
-              >
-              </a-statistic>
-              <a-statistic
-                  :title="$t('bioinformaticsAnalysis')"
-                  :value="parseInt(checkNum.bioNum) + parseInt(todoNum.bioNum)"
-                  :precision="0"
-                  :value-style="{ color: '#3f8600' }"
-                  style="margin: 0px 20px;display: inline-block"
-              >
-              </a-statistic>
-            </div>
-            <div style="display: inline-block">
-
-            </div>
-          </div>
-        </div>
-
-<!--        <number-and-name @click.native="myTask" num-name="待处理" :number="selfTaskNumber"></number-and-name>-->
-<!--        <number-and-name @click.native="myTask" num-name="流转中" :number="selfTaskNumber"></number-and-name>-->
-<!--        <number-and-name @click.native="currentStrain" :num-name="$t('current_strain')" :number="allStrainNumber"></number-and-name>-->
+    <div style="width: 100%;text-align: left">
+      <div class="my-task-num" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'">
+        <histogram style="height: 100%;width: 100%" :title="$t('myTodoSample')"
+                   :data-list="seqDataList" :title-list="seqTitleList"></histogram>
       </div>
-<!--      <task-table :page-location="'home'"></task-table>-->
+
+      <div class="my-task-num" v-else-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
+        <histogram style="height: 100%;width: 100%" :title="$t('果蝇品系')"
+                   :data-list="animalDataList" :title-list="animalTitleList"></histogram>
+      </div>
+
+      <div class="people-task" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'">
+<!--        <active-histogram style="height: 100%;width: 100%" :map-list="userTaskCount" :title="'用户数量'" :sub-title="''"></active-histogram>-->
+        <histogram style="height: 100%;width: 100%" :title="$t('ongoingProjects')"
+                   :data-list="topDataList" :title-list="topTitleList"></histogram>
+      </div>
+      <div class="people-task" v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
+        <Pie style="width: 100%;height: 100%" :title="$t('taskCount')" :data="animalTaskCount"></Pie>
+      </div>
+    </div>
+    <div class="main-page" >
       <task-table-new page-location="home"></task-table-new>
     </div>
   </div>
@@ -147,49 +29,57 @@
 
 <script>
 import TopNav from "@/components/publib/TopNav";
-// import NumberAndName from "@/components/home/NumberAndName";
 import TaskTableNew from "@/components/task/taskMain/taskTableNew";
+import Histogram from "@/components/publib/chart/Histogram";
+import Pie from "@/components/publib/chart/Pie";
 
 export default {
   name: "home",
-  components: {TaskTableNew, TopNav},
-  data : function (){
+  components: {Pie, Histogram, TaskTableNew, TopNav},
+  data: function () {
     return {
-      allStrainNumber : 0,
-      selfTaskNumber : 0,
-      oneMonthStockNumber : 0,
-      oneMonthStrainNumber : 0,
-      stockNumber : 0,
-      todoNum : {
-        inputNum : 0,
-        makeNum : 0,
-        libNum : 0,
-        confirmNum : 0,
-        disNum : 0,
-        bioNum : 0
+      allStrainNumber: 0,
+      selfTaskNumber: 0,
+      oneMonthStockNumber: 0,
+      oneMonthStrainNumber: 0,
+      stockNumber: 0,
+      todoNum: {
+        inputNum: 0,
+        makeNum: 0,
+        libNum: 0,
+        confirmNum: 0,
+        disNum: 0,
+        bioNum: 0
       },
-      checkNum :{
-        inputNum : 0,
-        makeNum : 0,
-        libNum : 0,
-        confirmNum : 0,
-        disNum : 0,
-        bioNum : 0
-      }
+      checkNum: {
+        inputNum: 0,
+        makeNum: 0,
+        libNum: 0,
+        confirmNum: 0,
+        disNum: 0,
+        bioNum: 0
+      },
+      animalTaskCount :[],
+      userTaskCount : new Array(),
+      animalDataList : [],
+      animalTitleList : ["新增扩繁品系","新增保种品系",'现有' + this.$t('current_strain'),
+        '现有' + this.$t('current_stock'),"进行中的任务"],
+      seqDataList: [],
+      seqTitleList: [this.$t('sampleInput'), this.$t('samplePreparation'), this.$t('libraryPreparation')
+        , this.$t('uploadConfirm'), this.$t('dismountData'), this.$t('bioinformaticsAnalysis')]
     }
   },
   beforeMount() {
     this.initPage();
   },
-  methods : {
-    initPage : function (){
+  methods: {
+    initPage: function () {
       var _this = this;
-      this.$axios.post("/home/preview").then(function (res){
+      this.$axios.post("/home/preview").then(function (res) {
         console.log(res);
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
         } else {
-          console.log(res);
           _this.allStrainNumber = res.data.retMap.allStrainNumber;
           _this.selfTaskNumber = res.data.retMap.selfTaskNumber;
           _this.oneMonthStockNumber = res.data.retMap.oneMonthStockNumber;
@@ -197,38 +87,88 @@ export default {
           _this.stockNumber = res.data.retMap.stockNumber;
           _this.todoNum = res.data.retMap.todoNum;
           _this.checkNum = res.data.retMap.checkNum;
+          _this.userTaskCount = res.data.retMap.userTaskCount;
+          _this.animalTaskCount = res.data.retMap.animalTaskCount;
+
+          _this.seqDataList = new Array();
+          _this.seqDataList.push(parseInt(_this.checkNum.inputNum) + parseInt(_this.todoNum.inputNum));
+          _this.seqDataList.push(parseInt(_this.checkNum.makeNum) + parseInt(_this.todoNum.makeNum));
+          _this.seqDataList.push(parseInt(_this.checkNum.libNum) + parseInt(_this.todoNum.libNum));
+          _this.seqDataList.push(parseInt(_this.checkNum.confirmNum) + parseInt(_this.todoNum.confirmNum));
+          _this.seqDataList.push(parseInt(_this.checkNum.disNum) + parseInt(_this.todoNum.disNum));
+          _this.seqDataList.push(parseInt(_this.checkNum.bioNum) + parseInt(_this.todoNum.bioNum));
+
+          _this.animalDataList = new Array();
+          _this.animalDataList.push(_this.oneMonthStockNumber)
+          _this.animalDataList.push(_this.oneMonthStrainNumber)
+          _this.animalDataList.push(_this.allStrainNumber)
+          _this.animalDataList.push(_this.stockNumber)
+          _this.animalDataList.push(_this.selfTaskNumber)
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
       })
     },
-    currentStrain : function (){
+    currentStrain: function () {
       this.$router.push("/stock/currentStrain");
     },
-    currentStock : function (){
+    currentStock: function () {
       this.$router.push("/stock/currentStock");
     },
-    myTask : function (){
+    myTask: function () {
       this.$router.push("/task");
     }
   },
-  watch : {
-    getUserId(){
+  watch: {
+    getUserId() {
       this.initPage()
     }
   },
-  computed : {
-    getUserId : function (){
+  computed: {
+    getUserId: function () {
       return this.$store.getters.getUser.id;
+    },
+    topDataList : function (){
+      var list = new Array();
+      this.userTaskCount.map(item =>{list.push(item.count)});
+      return list;
+    },
+    topTitleList : function (){
+      var list = new Array();
+      this.userTaskCount.map(item =>{list.push(item.name)});
+      return list;
     }
   }
 }
 </script>
 
 <style scoped>
+.my-task-num {
+  margin-top: 50px;
+  margin-bottom: 10px;
+  background-color: white;
+  width: 44%;
+  margin-left: 5%;
+  border-radius: 5px;
+  display: inline-block;
+  height: 55vh;
+}
+.people-task{
+  margin-top: 50px;
+  margin-bottom: 10px;
+  background-color: white;
+  margin-left: 1%;
+  width: 45%;
+  border-radius: 5px;
+  display: inline-block;
+  height: 55vh;
+}
+
 .main-page {
-  margin-top: 100px;
+  padding-top: 10px;
+  padding-bottom: 50px;
+  margin-top: 10px;
   margin-bottom: 50px;
   background-color: white;
   width: 90%;
@@ -239,6 +179,7 @@ export default {
 
 .summary-container {
   width: 90%;
+  height: 100%;
 }
 
 </style>

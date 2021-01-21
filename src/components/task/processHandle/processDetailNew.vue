@@ -3,14 +3,21 @@
     <top-nav></top-nav>
     <div class="main-container process-detailAll">
       <a-tabs type="card" @change="callback" v-model="tabVal">
-        <a-tab-pane key="9" :tab="$t('processAllConfirm')">
+        <a-tab-pane key="10" :tab="$t('summary')" v-if="!process.isonlybio">
+          <process-all-data :process="process"></process-all-data>
+        </a-tab-pane>
+        <a-tab-pane
+            v-if="!process.isonlybio"
+            key="9" :tab="$t('processAllConfirm')">
           <process-all-confirm :process="process" :flag="initFlag" @changeTab="changeTab"></process-all-confirm>
         </a-tab-pane>
         <a-tab-pane key="7" :tab="$t('baseInfo')">
           <process-base-info :process="process"></process-base-info>
         </a-tab-pane>
-        <template v-if="process.taskstatu != 10 && process.taskstatu != 21 && process.taskstatu != 22">
-          <a-tab-pane key="1">
+        <template v-if="process.taskstatu != 10
+        && process.taskstatu != 21
+        && process.taskstatu != 22">
+          <a-tab-pane key="1" v-if="!process.isonlybio">
             <template slot="tab">
               <a-badge :count="inputNum">
                 {{$t('sampleInput')}}
@@ -18,7 +25,7 @@
             </template>
             <process-step1-new :process="process" :statu="statu.p1" @changeStatu="changeStatu"></process-step1-new>
           </a-tab-pane>
-          <a-tab-pane key="2">
+          <a-tab-pane key="2" v-if="!process.isonlybio">
             <template slot="tab">
               <a-badge :count="makeNum">
                 {{$t('samplePreparation')}}
@@ -26,7 +33,7 @@
             </template>
             <process-step2 :process="process" :statu="statu.p2" :task-id="taskId" @changeStatu="changeStatu"></process-step2>
           </a-tab-pane>
-          <a-tab-pane key="3">
+          <a-tab-pane key="3" v-if="!process.isonlybio">
             <template slot="tab">
               <a-badge :count="libNum">
                 {{$t('libraryPreparation')}}
@@ -34,7 +41,7 @@
             </template>
             <process-step3 :process="process" :statu="statu.p3" @changeStatu="changeStatu"></process-step3>
           </a-tab-pane>
-          <a-tab-pane key="4">
+          <a-tab-pane key="4" v-if="!process.isonlybio">
             <template slot="tab">
               <a-badge :count="confirmNum">
                 {{$t('uploadConfirm')}}
@@ -62,9 +69,7 @@
         <a-tab-pane key="8" :tab="$t('process.processTip')">
           <process-tip></process-tip>
         </a-tab-pane>
-<!--        <a-tab-pane key="10" :tab="$t('summary')">-->
-<!--          <process-all-data :process="process"></process-all-data>-->
-<!--        </a-tab-pane>-->
+
         <div slot="tabBarExtraContent">
           <a-tag class="pointer" color="#f50" v-if="this.process.taskstatu == '71'">
             {{ "基因组学中心已拒绝：" + this.fail.reason }}
@@ -103,12 +108,12 @@ import ProcessBaseInfo from "@/components/task/processHandle/processBaseInfo";
 import ProcessStep6 from "@/components/task/processHandle/processStep6";
 import ProcessTip from "@/components/task/processHandle/processTip";
 import ProcessAllConfirm from "@/components/task/processHandle/processAllConfirm";
-// import ProcessAllData from "@/components/task/processHandle/processAllData";
+import ProcessAllData from "@/components/task/processHandle/processAllData";
 
 export default {
   name: "processDetailNew",
   components: {
-    // ProcessAllData,
+    ProcessAllData,
     ProcessAllConfirm,
     ProcessTip,
     ProcessStep6,
@@ -118,7 +123,7 @@ export default {
     ProcessStep3,
     ProcessStep2,
     ProcessStep1New,
-    TopNav
+    TopNav,
   },
   data: function () {
     return {
@@ -137,7 +142,8 @@ export default {
         "p4" : "00",
         "p5" : "00",
         "p6" : "00",
-      }
+      },
+      unCommitNext : {}
     }
   },
   beforeMount() {
@@ -210,8 +216,47 @@ export default {
           _this.group = res.data.retMap.group;
           _this.todoNum = res.data.retMap.todoNum;
           _this.checkNum = res.data.retMap.checkNum;
+          _this.unCommitNext = res.data.retMap.unCommitNext;
           if (_this.process.taskstatu == 20) {
-            _this.tabVal = "9";
+            if (_this.process.isonlybio){
+              _this.tabVal = "7";
+            }else {
+              _this.tabVal = "9";
+            }
+          }
+
+          if (_this.$store.getters.isCurrentUser(_this.process.creater)){
+            const h = _this.$createElement;
+            var list = new Array();
+            for (var item in _this.unCommitNext){
+              var curNum = _this.unCommitNext[item];
+              if (parseFloat(curNum)>0){
+                switch (item){
+                  case "inputNum":
+                    list.push(h("p",_this.$t("sampleInput") + "有【" + curNum + "】条" + _this.$t("process.unCommitNext") + _this.$t("samplePreparation") + ";"))
+                    break;
+                  case "makeNum":
+                    list.push(h("p",_this.$t("samplePreparation") + "有【" + curNum + "】条" + _this.$t("process.unCommitNext") + _this.$t("libraryPreparation") + ";"))
+                    break;
+                  case "libNum":
+                    list.push(h("p",_this.$t("libraryPreparation") + "有【" + curNum + "】条" + _this.$t("process.unCommitNext") + _this.$t("uploadConfirm") + ";"))
+                    break;
+                  case "confirmNum":
+                    list.push(h("p",_this.$t("uploadConfirm") + "有【" + curNum + "】条" + _this.$t("process.unCommitNext") + _this.$t("dismountData") + ";"))
+                    break;
+                  case "disNum":
+                    list.push(h("p",_this.$t("dismountData") + "有【" + curNum + "】条" + _this.$t("process.unCommitNext") + _this.$t("bioinformaticsAnalysis") + ";"))
+                    break;
+                }
+              }
+            }
+            if (list.length>0){
+              list.push(h("p",_this.$t("process.ifNotNeedCommit")));
+              _this.$warning({
+                title : _this.$t("process.processTip"),
+                content : h("div",{},list)
+              })
+            }
           }
         }
       }).catch(function (res) {
@@ -232,12 +277,20 @@ export default {
       return this.$route.query.taskId;
     },
     isStop: function () {
-      if (this.process.taskstatu.startsWith("7")
-          || !this.$store.getters.isCurrentUser(this.group.groupadmin)
-      ) {
+      if (this.process.taskstatu.startsWith("7")) {
         return true;
       }
-      return false;
+      // 仅生信分析任务
+      if (this.process.isonlybio
+          && this.$store.getters.isBioAna
+          && this.$store.getters.isCurrentUser(this.process.bioinformaticsanalysis)){
+        return false;
+      }
+      if (!this.process.isonlybio
+          && this.$store.getters.isCurrentUserByName("张忻爽")){
+        return false;
+      }
+      return true;
     },
     inputNum : function (){
       if (this.$store.getters.isCurrentUser(this.process.creater)

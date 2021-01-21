@@ -5,13 +5,60 @@
     </transition>
     <a-back-top/>
     <a-modal :visible="visible" :footer="null" @cancel="onClose">
-      <img alt="example" style="width: 100%" :src="talkUrl" />
+      <img alt="example" style="width: 100%" :src="talkUrl"/>
     </a-modal>
-    <div class="wx-two" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'">
-<!--      <a-icon type="team" @click="showDrawer" />-->
-      <icon-font @click="showDrawer"
-                 style="font-size: 40px;position: absolute;bottom: 10px;left: 10px;"
-                 type="icon-weixin" />
+    <div class="wx-two">
+      <a-popover placement="right" :title="'快速访问'" trigger="click">
+        <template slot="content">
+          <div style="width: 300px">
+            <a-tooltip :title="'北京脑科学与类脑研究中心'" placement="top">
+              <div @click="gotoCibrHome" style="width: 65px;height: 40px;cursor: pointer;display: inline-block;">
+                <img src="./assets/CIBR-icon.png" style="width: 100%;height: 100%"/>
+              </div>
+            </a-tooltip>
+            <a-tooltip :title="'果蝇家园'" placement="top"
+                       v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'">
+              <icon-font @click="gotoFlyWeb"
+                         style="font-size: 40px;display: inline-block;width: 40px;height: 40px;margin-left: -5px"
+                         type="icon-guoying"/>
+            </a-tooltip>
+
+            <a-tooltip :title="'测序之家'" placement="top"
+                       v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
+              <icon-font @click="gotoSeqpro"
+                         style="font-size: 40px;display: inline-block;width: 40px;height: 40px;margin-left: 10px"
+                         type="icon-jiyinjiancebaogao"/>
+            </a-tooltip>
+
+            <a-tooltip :title="'基因组学中心'" placement="top">
+              <icon-font @click="gotoGeneWeb"
+                         style="font-size: 40px;display: inline-block;width: 40px;height: 40px;margin-left: 10px"
+                         type="icon-jiyinshuju"/>
+            </a-tooltip>
+
+            <a-tooltip :title="'计算中心'" placement="top">
+              <icon-font @click="gotoHpc"
+                         style="font-size: 40px;display: inline-block;width: 40px;height: 40px;margin-left: 12px"
+                         type="icon-shuliang"/>
+            </a-tooltip>
+
+            <a-tooltip :title="'微信群二维码'" placement="top">
+              <a-icon type="wechat" @click="showDrawer"
+                      v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'"
+                      theme="filled"
+                      style="font-size: 40px;display: inline-block;width: 40px;height: 40px;margin-left: 12px"/>
+<!--              <icon-font @click="showDrawer" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'"-->
+<!--                         style="font-size: 40px;display: inline-block;width: 40px;height: 40px;margin-left: 10px"-->
+<!--                         type="icon-lianxiwomen"/>-->
+            </a-tooltip>
+
+
+          </div>
+        </template>
+        <a-icon type="environment" style="font-size: 40px;position: absolute;bottom: 40px;left: 20px;cursor: pointer"
+                theme="twoTone" two-tone-color="#eb2f96"
+        />
+      </a-popover>
     </div>
   </div>
 </template>
@@ -30,24 +77,40 @@ export default {
   data: function () {
     return {
       transitionName: "slide-right",
-      visible : false
+      visible: false
     }
   },
 
   created() {
     this.$store.commit("saveUser", this.$cookies.get("user"));
   },
-  methods : {
-    showDrawer : function (){
+  methods: {
+    showDrawer: function () {
       this.visible = true;
     },
     onClose() {
       this.visible = false;
     },
+    gotoGeneWeb: function () {
+      window.open("http://genomics.cibr.ac.cn/");
+    },
+    gotoFlyWeb: function () {
+      window.open("http://119.90.33.35:3566/");
+    },
+    gotoCibrHome: function () {
+      window.open("http://www.cibr.ac.cn/");
+    },
+    gotoSeqpro: function () {
+      window.open("http://seq.cibr.ac.cn/");
+    },
+    gotoHpc : function (){
+      window.open("http://hpc.cibr.ac.cn/");
+    }
+
   },
   watch: {},
-  computed : {
-    talkUrl : function (){
+  computed: {
+    talkUrl: function () {
       return this.$axios.defaults.baseURL + "img/talk";
     }
   }
@@ -139,6 +202,12 @@ input {
   left: 0;
   width: 100px;
   height: 200px;
+}
+
+.draw-div {
+  position: fixed;
+  bottom: 0;
+  left: 0;
 }
 </style>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

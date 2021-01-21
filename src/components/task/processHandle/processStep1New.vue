@@ -20,7 +20,7 @@
 
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
-                      :disabled="selectedRows.length == 0"
+                      :disabled="canDelete"
                       :cancel-text="$t('no')"
                       v-if="canEdit"
                       @confirm="deleteInputs">
@@ -78,21 +78,21 @@
       <a-row type="flex">
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
-            {{ $t("allAllow") + "(" + createrName + ")"}}
+            {{ $t("allAllow") + "(" + createrName + ")" }}
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
-            {{ $t("notAllow") + "(" + operatorName + ")"}}
+            {{ $t("notAllow") + "(" + operatorName + ")" }}
           </a-tag>
-          <template  v-if="canEdit">
+          <template v-if="canEdit">
             <a-tag class="pointer" color="#2db7f5" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
               {{ sub.name }}
             </a-tag>
           </template>
           <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
-            {{ $t("init") + "(" + createrName + ")"}}
+            {{ $t("init") + "(" + createrName + ")" }}
           </a-tag>
           <template slot="title">
-            {{$t("process.tagListTip")}}
+            {{ $t("process.tagListTip") }}
           </template>
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
@@ -247,62 +247,62 @@
       <template slot="initSampleTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.sampleInitTip")}}
+            {{ $t("process.sampleInitTip") }}
           </template>
-          <icon-font style="font-size: 20px" type="icon-bitian" />
-          {{this.$t("initSample")}}
+          <icon-font style="font-size: 20px" type="icon-bitian"/>
+          {{ this.$t("initSample") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
 
       <template slot="sampleNameTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{this.$t("sampleName")}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ this.$t("sampleName") }}
       </template>
 
       <template slot="sampleIndexTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.sampleIndexTip")}}
+            {{ $t("process.sampleIndexTip") }}
           </template>
-          <icon-font style="font-size: 20px" type="icon-bitian" />
-          {{this.$t("sampleIndex")}}
+          <icon-font style="font-size: 20px" type="icon-bitian"/>
+          {{ this.$t("sampleIndex") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
       <template slot="speciesTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.speciesTip")}}
+            {{ $t("process.speciesTip") }}
           </template>
-          <icon-font style="font-size: 20px" type="icon-bitian" />
-          {{this.$t("species")}}
+          <icon-font style="font-size: 20px" type="icon-bitian"/>
+          {{ this.$t("species") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
 
       <template slot="tissueTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
-        {{this.$t("tissue") + this.$t("animal_stock_resource")}}
+        <icon-font style="font-size: 20px" type="icon-bitian"/>
+        {{ this.$t("tissue") + this.$t("animal_stock_resource") }}
       </template>
 
       <template slot="sampleMsgTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.dropdownTip")}}
+            {{ $t("process.dropdownTip") }}
           </template>
-          <icon-font style="font-size: 20px" type="icon-bitian" />
-          {{$t("sampleMsg")}}
+          <icon-font style="font-size: 20px" type="icon-bitian"/>
+          {{ $t("sampleMsg") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
       <template slot="sampleStatuTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.dropdownTip")}}
+            {{ $t("process.dropdownTip") }}
           </template>
-          <icon-font style="font-size: 20px" type="icon-bitian" />
-          {{$t("sampleStatu")}}
+          <icon-font style="font-size: 20px" type="icon-bitian"/>
+          {{ $t("sampleStatu") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
@@ -310,10 +310,10 @@
       <template slot="databaseTypeTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.dropdownTip")}}
+            {{ $t("process.dropdownTip") }}
           </template>
-          <icon-font style="font-size: 20px" type="icon-bitian" />
-          {{$t("databaseType")}}
+          <icon-font style="font-size: 20px" type="icon-bitian"/>
+          {{ $t("databaseType") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
@@ -321,10 +321,10 @@
       <template slot="SequencingPlatformTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.dropdownTip")}}
+            {{ $t("process.dropdownTip") }}
           </template>
-          <icon-font style="font-size: 20px" type="icon-bitian" />
-          {{$t("SequencingPlatform")}}
+          <icon-font style="font-size: 20px" type="icon-bitian"/>
+          {{ $t("SequencingPlatform") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
@@ -332,9 +332,9 @@
       <template slot="operationTitle">
         <a-tooltip>
           <template slot="title">
-            {{$t("process.operationTip")}}
+            {{ $t("process.operationTip") }}
           </template>
-          {{$t("operation")}}
+          {{ $t("operation") }}
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </template>
@@ -490,13 +490,13 @@
             </a-select>
           </a-input>
 
-<!--          <a-input-number-->
-<!--              v-else-if="col == 'concentration'"-->
-<!--              style="margin: -5px 0"-->
-<!--              v-model="record.concentration"-->
-<!--              :min="0"-->
-<!--              :disabled="colIsDisabed(record.initsample,'concentration') || isDisabled(record)"-->
-<!--          />-->
+          <!--          <a-input-number-->
+          <!--              v-else-if="col == 'concentration'"-->
+          <!--              style="margin: -5px 0"-->
+          <!--              v-model="record.concentration"-->
+          <!--              :min="0"-->
+          <!--              :disabled="colIsDisabed(record.initsample,'concentration') || isDisabled(record)"-->
+          <!--          />-->
           <a-input-number
               v-else-if="col == 'totalnumber'"
               style="margin: -5px 0"
@@ -553,7 +553,15 @@
           <span v-if="record.currentstatu == '03'">
             &nbsp;
             <a-badge :count="record.makeNum">
-              <a @click="() => submitItem(record,'real')" :disabled="!canOperating">{{ $t("samplePreparation") }}</a>
+              <a-popconfirm
+                  :title="$t('suretosubmit')"
+                  @confirm="submitItem(record,'real')"
+                  :disabled="!canOperating"
+                  :okText="$t('yes')"
+                  :cancelText="$t('no')"
+              >
+                <a :disabled="!canOperating">{{ $t("samplePreparation") }}</a>
+              </a-popconfirm>
             </a-badge>
             &nbsp;
           </span>
@@ -579,10 +587,10 @@ const IconFont = Icon.createFromIconfontCN({
 
 export default {
   name: "processStep1New",
-  components: {RefuseAlert, SubTaskInfo, Submitting,IconFont},
+  components: {RefuseAlert, SubTaskInfo, Submitting, IconFont},
   props: {
     process: Object,
-    statu : String,
+    statu: String,
   },
   data() {
     this.cacheData = [];
@@ -595,14 +603,14 @@ export default {
       columnNames: [],
       selectedRowKeys: [],
       selectedRows: [],
-      scroll: {x: 1500, y: 600 },
+      scroll: {x: 1500, y: 600},
       editingKey: '',
       todoNum: {},
       checkNum: {},
       subs: [],
       curFlag: "01",
       subId: "00",
-      operators : undefined,
+      operators: undefined,
       editObj: {
         arrindex: "",
         initsample: "",
@@ -627,12 +635,12 @@ export default {
     this.initPage();
   },
   methods: {
-    sampleInitChange : function (record){
+    sampleInitChange: function (record) {
       record.samplemsg = "";
       record.samplestatu = "";
       record.databasetype = "";
     },
-    batchUnPass : function (){
+    batchUnPass: function () {
       this.$(this.$refs.refuseAlert.$el).modal('show');
     },
     showReason: function (id) {
@@ -651,19 +659,19 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    confirmFun : function (reason,remark){
-      console.log(reason,remark);
+    confirmFun: function (reason, remark) {
+      console.log(reason, remark);
       this.$(this.$refs.refuseAlert.$el).modal("hide");
       var postData = {
         processId: this.process.id,
         datas: JSON.stringify(this.selectedRows),
         type: "unPass",
-        reason : reason,
-        remark : remark
+        reason: reason,
+        remark: remark
       };
       var _this = this;
       _this.$(_this.$refs.submitting.$el).modal("show");
-      this.$axios.post("/task/process/refuseInput",postData).then(function (res){
+      this.$axios.post("/task/process/refuseInput", postData).then(function (res) {
         _this.$(_this.$refs.submitting.$el).modal("hide");
         if (res.data.code != "200") {
           _this.$message.error(_this.$t(res.data.code));
@@ -671,26 +679,26 @@ export default {
           _this.$message.success(_this.$t("commitSucc"));
           _this.initPage();
         }
-      }).catch(function (res){
+      }).catch(function (res) {
         console.log(res);
         _this.$(_this.$refs.submitting.$el).modal("hide");
         // _this.$("#submitting").modal("hide");
         _this.$message.error(_this.$t("systemErr"));
       });
     },
-    passItem : function (record,flag){
+    passItem: function (record, flag) {
       this.selectedRows = new Array();
       this.selectedRows.push(record);
       this.selectedRowKeys = new Array();
       this.selectedRowKeys.push(record.id);
-      if (flag){
+      if (flag) {
         this.submitData("pass");
-      }else {
+      } else {
         // this.submitData("unPass");
         this.$(this.$refs.refuseAlert.$el).modal("show");
       }
     },
-    submitItem: function (record,flag) {
+    submitItem: function (record, flag) {
       this.selectedRows = new Array();
       this.selectedRows.push(record);
       this.selectedRowKeys = new Array();
@@ -875,9 +883,9 @@ export default {
       }
       // this.$("#submitting").modal("show");
 
-      if (type == "complete"){
-        if (!this.checkNull(this.selectedRows)){
-          return ;
+      if (type == "complete") {
+        if (!this.checkNull(this.selectedRows)) {
+          return;
         }
       }
 
@@ -914,7 +922,7 @@ export default {
           //   _this.initPage();
           // }
         }
-        _this.$emit("changeStatu","01");
+        _this.$emit("changeStatu", "01");
       }).catch(function (res) {
         console.log(res);
         _this.$(_this.$refs.submitting.$el).modal("hide");
@@ -955,8 +963,8 @@ export default {
       this.deleteInputs();
     },
 
-    checkNull : function (list){
-      for (var i=0; i<list.length; i++){
+    checkNull: function (list) {
+      for (var i = 0; i < list.length; i++) {
         var rowData = list[0];
         if (this.isNull(rowData.initsample)) {
           this.$message.error(this.$t("initSample") + this.$t("not_null"));
@@ -1271,7 +1279,7 @@ export default {
       }
       return false;
     },
-    isCreater : function (){
+    isCreater: function () {
       if (!this.process.taskstatu.startsWith("7")
           && this.$store.getters.isCurrentUser(this.process.creater)
       ) {
@@ -1298,14 +1306,14 @@ export default {
       }
       return false;
     },
-    createrName : function (){
-      if (this.operators === undefined){
+    createrName: function () {
+      if (this.operators === undefined) {
         return '';
       }
       return this.operators.creater.name;
     },
-    operatorName : function (){
-      if (this.operators === undefined){
+    operatorName: function () {
+      if (this.operators === undefined) {
         return '';
       }
       return this.operators.make.name;
@@ -1320,7 +1328,7 @@ export default {
       },
       deep: true
     },
-    statu(newVal){
+    statu(newVal) {
       this.subId = newVal;
       this.initPage();
     }

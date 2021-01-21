@@ -21,12 +21,16 @@
                 <a-menu-item key="departmentManager" v-if="$store.getters.isAdmin">
                   {{ $t("departmentManager") }}
                 </a-menu-item>
+                <a-menu-item key="billingCenter">
+                  {{ $t("billingCenter") }}
+                </a-menu-item>
               </a-menu>
             </a-layout-sider>
             <a-layout-content :style="{ padding: '0 24px', minHeight: '280px' }">
               <personal-info v-if="menuId == 'accountInfo'"></personal-info>
               <user-manager v-if="menuId == 'userManager'"></user-manager>
               <department-manager v-if="menuId == 'departmentManager'"></department-manager>
+              <billing-center v-if="menuId == 'billingCenter'"></billing-center>
             </a-layout-content>
           </a-layout>
         </a-layout-content>
@@ -40,10 +44,11 @@ import TopNav from "@/components/publib/TopNav";
 import PersonalInfo from "@/components/personal/personalInfo";
 import UserManager from "@/components/personal/userManager";
 import DepartmentManager from "@/components/personal/DepartmentManager";
+import BillingCenter from "@/components/personal/BillingCenter";
 
 export default {
   name: "personalMain",
-  components: {DepartmentManager, UserManager, PersonalInfo, TopNav},
+  components: {BillingCenter, DepartmentManager, UserManager, PersonalInfo, TopNav},
   data() {
     return {
       collapsed: false,

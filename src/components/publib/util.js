@@ -2,9 +2,43 @@ import i18n from "@/i18n";
 import $axios from "axios";
 import $ from "jquery";
 import {message as $message} from "ant-design-vue";
+import pinyin from 'js-pinyin';
 
 var util = {
-    alicdnIcon: "//at.alicdn.com/t/font_2031063_xlgpx2a3k.js",
+    alicdnIcon: "//at.alicdn.com/t/font_2031063_n09nbpzcld.js",
+    convertToPy : function (val){
+      return pinyin.getFullChars(val);
+    },
+    onFilter : function (val1,val2){
+      if (val1 == undefined || val2 == undefined){
+          return false;
+      }else {
+          return val1.indexOf(val2) === 0;
+      }
+    },
+    sorter : function (a,b){
+      console.log(a,b)
+      if (a == undefined){
+          return 1;
+      }
+      if (b == undefined){
+          return -1
+      }
+      var index = 0;
+      a = this.convertToPy(a);
+      b = this.convertToPy(b);
+      while (index < a.length && index < b.length){
+          var chara = a.codePointAt(index);
+          var charb = b.codePointAt(index);
+          if (chara == charb){
+              index ++;
+              continue;
+          }else {
+              return chara - charb;
+          }
+      }
+      return chara.length - charb.length;
+    },
     isNull: function (obj) {
         if (obj == null) {
             return true;
@@ -95,6 +129,7 @@ var util = {
         } else if (sampletype == "02") {
             /** 组织样本类型 */
             array.push({key: "21", val: "10X单细胞转录组"});
+            array.push({key: "34", val: "10X VDJ"});
             array.push({key: "22", val: "10X空间转录组"});
             array.push({key: "23", val: "10X ATAC"});
             array.push({key: "24", val: "smart-seq"});
@@ -107,9 +142,11 @@ var util = {
             array.push({key: "31", val: "真核普通转录组"});
             array.push({key: "32", val: "真核链特异性"});
             array.push({key: "33", val: "LncRNA"});
+            array.push({key: "35", val: "WGS"});
         } else if (sampletype == "03") {
             /** 细胞样本类型 */
             array.push({key: "41", val: "10X单细胞转录组"});
+            array.push({key: "46", val: "10X VDJ"});
             array.push({key: "42", val: "10X ATAC"});
             array.push({key: "43", val: "smart-seq"});
             array.push({key: "44", val: "ATAC"});
@@ -205,6 +242,14 @@ var util = {
                 if (users[i].roles[j].roletype == role){
                     return users[i].id;
                 }
+            }
+        }
+        return "";
+    },
+    getuserIdByName : function (users,name){
+        for (var i=0;i<users.length;i++){
+            if (users[i].name == name){
+                return users[i].id;
             }
         }
         return "";
@@ -1576,10 +1621,10 @@ var util = {
             // title: i18n.t("overDate"),
             slots : {title : "overDateTip"},
             dataIndex: 'lasttime',
-            width: '200px',
+            width: '300px',
             scopedSlots: {customRender: 'lasttime'},
         });
-        scorllLength += 200;
+        scorllLength += 300;
 
         /**备注*/
         clom.push({

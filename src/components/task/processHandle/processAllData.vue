@@ -1,207 +1,457 @@
 <template>
   <div>
-    <a-card class="item-card" size="small" :title="$t('sampleInput')">
-      <a-table
-          bordered :scroll="input.scroll"
-          :columns="input.columns"
-          :pagination="false"
-          :data-source="input.inputs" size="small" >
-        <!--   自定义列名 开始  -->
-        <template slot="initSampleTitle">
-          {{this.$t("initSample")}}
-        </template>
-        <template slot="sampleNameTitle">
-          {{this.$t("sampleName")}}
-        </template>
-        <template slot="sampleIndexTitle">
-          {{this.$t("sampleIndex")}}
-        </template>
-        <template slot="speciesTitle">
-          {{this.$t("species")}}
-        </template>
-        <template slot="tissueTitle">
-          {{this.$t("tissue") + this.$t("animal_stock_resource")}}
-        </template>
-        <template slot="sampleMsgTitle">
-          {{$t("sampleMsg")}}
-        </template>
-        <template slot="sampleStatuTitle">
-          {{$t("sampleStatu")}}
-        </template>
-        <template slot="databaseTypeTitle">
-          {{$t("databaseType")}}
-        </template>
-        <template slot="SequencingPlatformTitle">
-          {{$t("SequencingPlatform")}}
-        </template>
-        <template slot="operationTitle">
-          {{$t("operation")}}
-        </template>
-        <!--   自定义列名 结束  -->
-        <template
-            v-for="col in input.columnNames"
-            :slot="col"
-            slot-scope="text, record,index"
+    <a-page-header
+        style="border: 1px solid rgb(235, 237, 240)"
+        :title="$t('summary')"
+        :sub-title="process.projectname"
+    ></a-page-header>
+    <a-table :columns="columns"
+             :data-source="samples"
+             bordered
+             :scroll="scroll"
+             :loading="tableLoad"
+             :pagination="false"
+             size="small" >
+      <div
+          slot="filterDropdown"
+          slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+          style="padding: 8px"
+      >
+        <a-input
+            v-ant-ref="c => (searchInput = c)"
+            :value="selectedKeys[0]"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+            type="primary"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+            @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)"
         >
-          <div :key="col">
-            {{ showText(col, text, record, index) }}
-          </div>
-        </template>
-      </a-table>
-    </a-card>
+          {{ $t("search") }}
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+          {{ $t("reset") }}
+        </a-button>
+      </div>
+      <a-icon
+          slot="filterIcon"
+          slot-scope="filtered"
+          type="search"
+          :style="{ color: filtered ? '#108ee9' : undefined }"
+      />
 
-    <a-card class="item-card" size="small" :title="$t('sampleInput')">
-      <p>card content</p>
-      <p>card content</p>
-      <p>card content</p>
-    </a-card>
-    <a-card class="item-card" size="small" :title="$t('sampleInput')">
-      <p>card content</p>
-      <p>card content</p>
-      <p>card content</p>
-    </a-card>
-    <a-card class="item-card" size="small" :title="$t('sampleInput')">
-      <p>card content</p>
-      <p>card content</p>
-      <p>card content</p>
-    </a-card>
-    <a-card class="item-card" size="small" :title="$t('sampleInput')">
-      <p>card content</p>
-      <p>card content</p>
-      <p>card content</p>
-    </a-card>
-    <a-card class="item-card" size="small" :title="$t('sampleInput')">
-      <p>card content</p>
-      <p>card content</p>
-      <p>card content</p>
-    </a-card>
+      <template
+          v-for="col in this.columnNames"
+          :slot="col"
+          slot-scope="text, record"
+      >
+        <div :key="col">
+          <template v-if="col == 'sampleName' || col == 'species' || col == 'tissue'">
+            {{ showText(col ,record) }}
+          </template>
+          <div v-else style="font-size: 20px !important;">
+            <div v-if="text == '01'">
+              <a-tooltip :title="$t('processing')">
+                <icon-font type="icon-jinhangzhong"/>
+              </a-tooltip>
+            </div>
+            <div v-else-if="text == '02'">
+              <a-tooltip :title="$t('Pending')">
+                <icon-font type="icon-audit"/>
+              </a-tooltip>
+            </div>
+            <div v-else-if="text == '03'">
+              <a-tooltip :title="$t('allcomplete')">
+                <icon-font type="icon-yiwancheng"/>
+              </a-tooltip>
+            </div>
+            <div v-else-if="col == 'inputStatu' && text == '08'">
+              <a-tooltip :title="$t('AuditNotPassed')">
+                <icon-font type="icon-shenhebutongguo"/>
+              </a-tooltip>
+            </div >
+            <div v-else-if="col != 'inputStatu' && text == '07'">
+              <a-tooltip :title="$t('AuditNotPassed')">
+                <icon-font type="icon-shenhebutongguo"/>
+              </a-tooltip>
+            </div >
+<!--            <div v-else>-->
+<!--              <a-tooltip :title="'未开始'">-->
+<!--                <icon-font type="iconweikaishi"/>-->
+<!--              </a-tooltip>-->
+<!--              {{ text }}-->
+<!--            </div>-->
+          </div>
+        </div>
+      </template>
+    </a-table>
+    <process-diy-statu :process="process"></process-diy-statu>
   </div>
 </template>
 
 <script>
+import {Icon} from "ant-design-vue";
 import util from "@/components/publib/util";
+import ProcessDiyStatu from "@/components/task/processHandle/ProcessDiyStatu";
 
+const IconFont = Icon.createFromIconfontCN({
+  scriptUrl: util.alicdnIcon,
+});
 export default {
   name: "processAllData",
   props : {
     process:Object,
   },
+  components : {ProcessDiyStatu, IconFont},
   data : function (){
     return {
-      input :{
-        inputs : [],
-        scroll: {x: 1500,y:300},
-        columns : [],
-        columnNames : []
-      }
+      samples : [],
+      tableLoad : false,
+      searchText: '',
+      scroll : {y:500},
+      searchedColumn: '',
+      columns :[],
+      columnNames : []
     }
   },
   mounted() {
     this.initPage();
   },
   methods : {
+    showText : function (col, record){
+      if (col == 'sampleName'){
+        return record.sampleName;
+      }
+      if (col == 'species'){
+        return record.species;
+      }
+      if (col == 'tissue'){
+        return record.tissue;
+      }
+      return "";
+    },
     initPage : function (){
       this.initCols();
-      this.getData("01");
-    },
-    getData : function (flag){
       var postData = {
-        flag : flag,
         processId : this.process.id
       }
       var _this = this;
-      this.$axios.post("/task/process/allData",postData).then(function (res){
+      this.tableLoad = true;
+      this.$axios.post("/task/process/initAllStatu",postData).then(function (res){
+        _this.tableLoad = false;
         if (res.data.code != 200) {
           _this.$message.error(_this.$t(res.data.code));
         } else {
-          if (flag == "01"){
-            _this.input.inputs = res.data.retMap.inputs;
-            _this.input.inputs.map(ip => ip.key=ip.id);
-          }
+          console.log(res);
+          _this.samples = res.data.retMap.list;
         }
       }).catch(function (res){
+        _this.tableLoad = false;
         console.log(res);
         _this.$message.error(_this.$t("systemErr"));
-      });
+      })
     },
+
     initCols : function (){
-      var inputCols = util.initInputCols();
-      this.input.columns = inputCols.clom;
-      this.input.scroll.x = inputCols.scorllLength;
-      this.input.columnNames = inputCols.columnNames;
+      var clom = new Array();
+      /* 样本名称 */
+      clom.push({
+        title: this.$t("sampleName"),
+        dataIndex: 'sampleName',
+        key: 'sampleName',
+        width: "12%",
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'sampleName',
+        },
+        onFilter: (value, record) =>
+            record.sampleName
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
+
+      });
+
+      /* 物种 */
+      clom.push({
+        title: this.$t("species"),
+        dataIndex: 'species',
+        key: 'species',
+        width: "11%",
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'species',
+        },
+        onFilter: (value, record) =>
+            record.species
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
+      });
+
+      /* 样本名称 */
+      clom.push({
+        title: this.$t("tissue"),
+        dataIndex: 'tissue',
+        key: 'tissue',
+        width: "11%",
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'tissue',
+        },
+        onFilter: (value, record) =>
+            record.tissue
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            }, 0);
+          }
+        },
+      });
+
+      /* 样本录入 */
+      clom.push({
+        title: this.$t('sampleInput'),
+        width: "11%",
+        dataIndex: 'inputStatu',
+        key: 'inputStatu',
+        scopedSlots: { customRender: 'inputStatu' },
+        filters : [
+          {
+            text : this.$t('processing'),
+            value : '01'
+          },
+          {
+            text : this.$t('Pending'),
+            value : '02'
+          },
+          {
+            text : this.$t('allcomplete'),
+            value : '03'
+          },
+          {
+            text : this.$t('AuditNotPassed'),
+            value : '08'
+          },
+        ],
+        onFilter: (value, record) => {
+          if (record.inputStatu == undefined){
+            return false;
+          }
+          return record.inputStatu.indexOf(value) === 0;
+        },
+        sorter: (a, b) => util.sorter(a.inputStatu,b.inputStatu),
+      });
+
+      /* 样本制备 */
+      clom.push({
+        title: this.$t('samplePreparation'),
+        width: "11%",
+        dataIndex: 'makeStatu',
+        key: 'makeStatu',
+        scopedSlots: { customRender: 'makeStatu' },
+        filters : [
+          {
+            text : this.$t('processing'),
+            value : '01'
+          },
+          {
+            text : this.$t('Pending'),
+            value : '02'
+          },
+          {
+            text : this.$t('allcomplete'),
+            value : '03'
+          },
+          {
+            text : this.$t('AuditNotPassed'),
+            value : '07'
+          },
+        ],
+        onFilter: (value, record) => {
+          if (record.makeStatu == undefined){
+            return false;
+          }
+          return record.makeStatu.indexOf(value) === 0;
+        },
+        sorter: (a, b) => util.sorter(a.makeStatu,b.makeStatu),
+      });
+
+      /* 文库制备 */
+      clom.push({
+        title: this.$t('libraryPreparation'),
+        width: "11%",
+        dataIndex: 'libStatu',
+        key: 'libStatu',
+        scopedSlots: { customRender: 'libStatu' },
+        filters : [
+          {
+            text : this.$t('processing'),
+            value : '01'
+          },
+          {
+            text : this.$t('Pending'),
+            value : '02'
+          },
+          {
+            text : this.$t('allcomplete'),
+            value : '03'
+          },
+          {
+            text : this.$t('AuditNotPassed'),
+            value : '07'
+          },
+        ],
+        onFilter: (value, record) => {
+          if (record.libStatu == undefined){
+            return false;
+          }
+          return record.libStatu.indexOf(value) === 0;
+        },
+        sorter: (a, b) => util.sorter(a.libStatu,b.libStatu),
+      });
+
+      /* 上机确认 */
+      clom.push({
+        title: this.$t('uploadConfirm'),
+        width: "11%",
+        dataIndex: 'confrimStatu',
+        key: 'confrimStatu',
+        scopedSlots: { customRender: 'confrimStatu' },
+        filters : [
+          {
+            text : this.$t('processing'),
+            value : '01'
+          },
+          {
+            text : this.$t('Pending'),
+            value : '02'
+          },
+          {
+            text : this.$t('allcomplete'),
+            value : '03'
+          },
+          {
+            text : this.$t('AuditNotPassed'),
+            value : '07'
+          },
+        ],
+        onFilter: (value, record) => {
+          if (record.confrimStatu == undefined){
+            return false;
+          }
+          return record.confrimStatu.indexOf(value) === 0;
+        },
+        sorter: (a, b) => util.sorter(a.confrimStatu,b.confrimStatu),
+      });
+
+      /* 数据交付 */
+      clom.push({
+        title: this.$t('dismountData'),
+        width: "11%",
+        dataIndex: 'disStatu',
+        key: 'disStatu',
+        scopedSlots: { customRender: 'disStatu' },
+        filters : [
+          {
+            text : this.$t('processing'),
+            value : '01'
+          },
+          {
+            text : this.$t('Pending'),
+            value : '02'
+          },
+          {
+            text : this.$t('allcomplete'),
+            value : '03'
+          },
+          {
+            text : this.$t('AuditNotPassed'),
+            value : '07'
+          },
+        ],
+        onFilter: (value, record) => {
+          if (record.disStatu == undefined){
+            return false;
+          }
+          return record.disStatu.indexOf(value) === 0;
+        },
+        sorter: (a, b) => util.sorter(a.disStatu,b.disStatu),
+      });
+
+      /* 生信分析 */
+      clom.push({
+        title: this.$t('bioinformaticsAnalysis'),
+        width: "11%",
+        dataIndex: 'anaStatu',
+        key: 'anaStatu',
+        scopedSlots: { customRender: 'anaStatu' },
+        filters : [
+          {
+            text : this.$t('processing'),
+            value : '01'
+          },
+          {
+            text : this.$t('Pending'),
+            value : '02'
+          },
+          {
+            text : this.$t('allcomplete'),
+            value : '03'
+          },
+          {
+            text : this.$t('AuditNotPassed'),
+            value : '07'
+          },
+        ],
+        onFilter: (value, record) => {
+          if (record.anaStatu == undefined){
+            return false;
+          }
+          return record.anaStatu.indexOf(value) === 0;
+        },
+        sorter: (a, b) => util.sorter(a.anaStatu,b.anaStatu),
+      });
+      this.columns = clom;
+      this.columnNames = new Array();
+      for (var item in clom) {
+        this.columnNames.push(clom[item].dataIndex);
+      }
+
     },
-    showText : function (col,text, record, ind){
-      if (col == "index") {
-        return ind + 1;
-      }
-      if (col == "samplemsg") {
-        var samptyp = this.sampletypes(record.initsample);
-        for (var index in samptyp) {
-          var item = samptyp[index];
-          if (item.key == text) {
-            return item.val;
-          }
-        }
-      }
-
-      if (col == "samplestatu") {
-        var sampStu = this.sampleStatu(record.initsample);
-        for (var statuIndex in sampStu) {
-          var statu = sampStu[statuIndex];
-          if (statu.key == text) {
-            return statu.val;
-          }
-        }
-      }
-
-      if (col == "cellsort") {
-        for (var cellSortIndex in this.cellSortMethods) {
-          var cellSort = this.cellSortMethods[cellSortIndex];
-          if (cellSort.key == text) {
-            return cellSort.val;
-          }
-        }
-      }
-
-      if (col == "databasetype") {
-        var dbtyp = this.databaseTypes(record.initsample);
-        for (var databaseTypeIndex in dbtyp) {
-          var databaseType = dbtyp[databaseTypeIndex];
-          if (databaseType.key == text) {
-            return databaseType.val;
-          }
-        }
-      }
-
-      if (col == "sequencingplatform") {
-        for (var seqPlantsIndex in this.seqPlants) {
-          var seqPlant = this.seqPlants[seqPlantsIndex];
-          if (seqPlant.key == text) {
-            return seqPlant.val;
-          }
-        }
-      }
-
-      if (col == "initsample") {
-        var sampint = this.sampleInits;
-        for (var initSampleIndex = 0; initSampleIndex< sampint.length; initSampleIndex++){
-          var sampleInit = sampint[initSampleIndex];
-          if (sampleInit.key == text) {
-            return sampleInit.val;
-          }
-        }
-      }
-      return text;
+    handleSearch(selectedKeys, confirm, dataIndex) {
+      confirm();
+      this.searchText = selectedKeys[0];
+      this.searchedColumn = dataIndex;
     },
-    sampletypes: function (sampleType) {
-      return util.sampletypes(sampleType);
-    },
-    sampleStatu: function (sampleType) {
-
-      return util.sampleStatu(sampleType);
-    },
-    databaseTypes: function (sampleType) {
-      return util.databaseTypes(sampleType);
+    handleReset(clearFilters) {
+      clearFilters();
+      this.searchText = '';
     },
   },
   watch : {
@@ -213,21 +463,11 @@ export default {
     }
   },
   computed :{
-    seqPlants: function () {
-      return util.seqPlants();
-    },
-    sampleInits: function () {
-      return util.sampleInits();
-    },
-    cellSortMethods: function () {
-      return util.cellSortMethods();
-    },
+
   }
 }
 </script>
 
 <style scoped>
-.item-card{
-  margin-top: 20px;
-}
+
 </style>

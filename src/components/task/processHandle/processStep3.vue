@@ -30,7 +30,7 @@
         </a-button>
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
-                      :disabled="selectedRows.length == 0"
+                      :disabled="canComplete"
                       :cancel-text="$t('no')"
                       v-if="isEnd"
                       @confirm="deleteByIds">
@@ -398,7 +398,15 @@
           <span v-if="record.currentstatu == '03'">
             &nbsp;
             <a-badge :count="record.libNum">
-              <a @click="() => submitItem(record,'real')" :disabled="!canPase">{{ $t("uploadConfirm") }}</a>
+              <a-popconfirm
+                  :title="$t('suretosubmit')"
+                  @confirm=" submitItem(record,'real')"
+                  :disabled="!canPase"
+                  :okText="$t('yes')"
+                  :cancelText="$t('no')"
+              >
+                <a :disabled="!canPase">{{ $t("uploadConfirm") }}</a>
+              </a-popconfirm>
             </a-badge>
             &nbsp;
           </span>
@@ -618,6 +626,7 @@ export default {
     },
     showSubTask: function (subId) {
       // this.$router.push({name:"processDetail",query:{subId : subId}});
+
       this.subId = subId;
       this.initPage();
     },
@@ -789,6 +798,13 @@ export default {
               _this.data.push(lib);
             }
             _this.getFileCount(ids);
+
+            if (_this.subId == "02" && _this.$store.getters.isCurrentUser(_this.process.creater)){
+              _this.$warning({
+                title : _this.$t("operatorTip"),
+                content : _this.$t("process.checkTip"),
+              });
+            }
           }
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;

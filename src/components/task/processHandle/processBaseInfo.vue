@@ -61,8 +61,22 @@
           <a-icon type="question-circle" theme="twoTone"/>
         </a-tooltip>
       </a-divider>
-      <!--样品录入负责人-->
+      <!--    仅生信分析任务！   -->
       <div class="form-group col-md-4 col-sm-12 col-lg-2">
+        <label for="onlyBio">
+          {{$t("isOnlyBio")}}
+        </label>
+        <div id="onlyBio">
+          <a-switch
+              disabled
+              :checked-children="$t('yes')"
+              v-model="process.isonlybio"
+              :un-checked-children="$t('no')"/>
+        </div>
+      </div>
+      <!--样品录入负责人-->
+      <div v-if="!process.isonlybio"
+          class="form-group col-md-4 col-sm-12 col-lg-2">
         <label for="sampleInput">{{$t("sampleInput") + $t("principal") }}</label>
         <div id="sampleInput">
           <a-select style="width: 100%" v-model="process.sampleinput" :disabled="isNotConfirm && isPInotConfirm">
@@ -73,7 +87,8 @@
         </div>
       </div>
       <!--样品制备负责人-->
-      <div class="form-group col-md-4 col-sm-12 col-lg-2">
+      <div v-if="!process.isonlybio"
+          class="form-group col-md-4 col-sm-12 col-lg-2">
         <label for="samplePreparation">{{$t("samplePreparation") + $t("principal") }}</label>
         <div id="samplePreparation">
           <a-select style="width: 100%" v-model="process.samplepreparation" :disabled="isNotConfirm && isPInotConfirm">
@@ -84,7 +99,8 @@
         </div>
       </div>
       <!--文库制备负责人-->
-      <div class="form-group col-md-4 col-sm-12 col-lg-2">
+      <div v-if="!process.isonlybio"
+          class="form-group col-md-4 col-sm-12 col-lg-2">
         <label for="libraryPreparation">{{$t("libraryPreparation") + $t("principal") }}</label>
         <div id="libraryPreparation">
           <a-select style="width: 100%" v-model="process.librarypreparation" :disabled="isNotConfirm && isPInotConfirm">
@@ -257,17 +273,19 @@ export default {
       });
     },
     checkPre : function (){
-      if (util.isNull(this.process.sampleinput)){
-        this.$message.error(this.$t("sampleInput") + this.$t("principal") + this.$t("not_null"));
-        return false;
-      }
-      if (util.isNull(this.process.samplepreparation)){
-        this.$message.error(this.$t("samplePreparation") + this.$t("principal") + this.$t("not_null"));
-        return false;
-      }
-      if (util.isNull(this.process.librarypreparation)){
-        this.$message.error(this.$t("libraryPreparation") + this.$t("principal") + this.$t("not_null"));
-        return false;
+      if (!this.process.isonlybio){
+        if (util.isNull(this.process.sampleinput)){
+          this.$message.error(this.$t("sampleInput") + this.$t("principal") + this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(this.process.samplepreparation)){
+          this.$message.error(this.$t("samplePreparation") + this.$t("principal") + this.$t("not_null"));
+          return false;
+        }
+        if (util.isNull(this.process.librarypreparation)){
+          this.$message.error(this.$t("libraryPreparation") + this.$t("principal") + this.$t("not_null"));
+          return false;
+        }
       }
       if (util.isNull(this.process.dismountdata)){
         this.$message.error(this.$t("dismountData") + this.$t("principal") + this.$t("not_null"));

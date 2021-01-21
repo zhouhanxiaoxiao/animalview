@@ -15,7 +15,7 @@
         </a-button>
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
-                      :disabled="selectedRows.length == 0"
+                      :disabled="canComplete"
                       :cancel-text="$t('no')"
                       v-if="isEnd"
                       @confirm="deleteByIds">
@@ -521,7 +521,7 @@ export default {
     },
     isEnd : function (){
       if (!this.process.taskstatu.startsWith("7")
-          && this.$store.getters.isCurrentUser(this.process.dismountdata)
+          && this.$store.getters.isCurrentUser(this.process.bioinformaticsanalysis)
       ){
         return true;
       }

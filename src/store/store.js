@@ -9,6 +9,13 @@ export default new Vuex.Store({
     },
     mutations: {
         saveUser(state, user) {
+            if (user == undefined){
+                user = {
+                    name : "hi",
+                    roles : [],
+                    group : {}
+                }
+            }
             state.user = user;
         },
     },
@@ -53,6 +60,15 @@ export default new Vuex.Store({
             }
             return false;
         },
+        isBioAna(state) {
+            for (var i = 0; i < state.user.roles.length; i++) {
+                var role = state.user.roles[i];
+                if (role.roletype == "999999" || role.roletype == "34") {
+                    return true;
+                }
+            }
+            return false;
+        },
         isGroupAdmin(state) {
             if (state.user.group.groupadmin == state.user.id){
                 return true;
@@ -79,6 +95,17 @@ export default new Vuex.Store({
             }
             return false;
         },
-
+        isCurrentUserByName: (state) => (name) => {
+            if (state.user.name == name) {
+                return true;
+            }
+            for (var i = 0; i < state.user.roles.length; i++) {
+                var role = state.user.roles[i];
+                if (role.roletype == "999999") {
+                    return true;
+                }
+            }
+            return false;
+        },
     }
 })

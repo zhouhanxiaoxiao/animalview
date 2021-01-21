@@ -14,6 +14,12 @@
         </a-tooltip>
       </template>
       <template slot="extra">
+        <a-button class="editable-add-btn"
+                  @click="handleAdd"
+                  v-if="process.isonlybio && isEnd"
+        >
+          {{ $t("add") }}
+        </a-button>
         <a-button type="danger" @click="batchUnPass()" v-if="canPase" :disabled="disabledPass">
           {{ $t("unPass") }}
         </a-button>
@@ -23,7 +29,7 @@
         </a-button>
         <a-popconfirm placement="topLeft"
                       :ok-text="$t('yes')"
-                      :disabled="selectedRows.length == 0"
+                      :disabled="canComplete"
                       :cancel-text="$t('no')"
                       v-if="this.isEnd"
                       @confirm="deleteByIds">
@@ -169,7 +175,7 @@
                          format="YYYY-MM-DD"
                          :disabled="isDisabled(col,record)"
                          v-model="record.lasttime"/>
-          <div v-else-if="col == 'datepath' && record.currentstatu != '01'">
+          <div v-else-if="col == 'datepath' && record.currentstatu != '01' && record.currentstatu!= '00'">
             <a-tag @click="gotoDatapath(record.datepath)">
               {{ record.datepath }}
             </a-tag>
@@ -221,7 +227,15 @@
           <span v-if="record.currentstatu == '03'">
             &nbsp;
             <a-badge :count="record.bioNum">
-            <a @click="() => submitItem(record,'real')" :disabled="!isEnd">{{ $t("bioinformaticsAnalysis") }}</a>
+              <a-popconfirm
+                  :title="$t('suretosubmit')"
+                  @confirm="submitItem(record,'real')"
+                  :disabled="!isEnd"
+                  :okText="$t('yes')"
+                  :cancelText="$t('no')"
+              >
+                <a :disabled="!isEnd">{{ $t("bioinformaticsAnalysis") }}</a>
+              </a-popconfirm>
             </a-badge>
             &nbsp;
           </span>
@@ -275,6 +289,25 @@ export default {
     this.initPage();
   },
   methods: {
+    handleAdd : function (){
+      var uuid = this.editingKey = new Date().getTime();
+      var newData = {
+        key : uuid,
+        id : uuid,
+        sampleindex : "",
+        samplename : "",
+        species : "",
+        tissue : "",
+        dateaccount : "",
+        datepassword : "",
+        datepath : "",
+        sequencingplatform : "",
+        remarks : "",
+        lasttime : formatDate(new Date(),"yyyy-MM-dd"),
+        currentstatu : "00"
+      }
+      this.data = [...this.data, newData];
+    },
     gotoDatapath : function (url){
       window.open(url);
     },
@@ -295,6 +328,11 @@ export default {
       });
     },
     deleteItem : function (record){
+      if (record.currentstatu == "00"){
+        const dataSource = [...this.data];
+        this.data = dataSource.filter(item => item.key !== record.key);
+        return;
+      }
       this.selectedRows = new Array();
       this.selectedRows.push(record);
       this.selectedRowKeys = new Array();
@@ -352,8 +390,20 @@ export default {
     },
     deleteByIds : function (){
       var _this = this;
+      var postList = new Array();
+      this.selectedRows.forEach(item =>{
+        if (item.currentstatu == "00"){
+          const dataSour = [..._this.data];
+          _this.data = dataSour.filter(itm => itm.key !== item.key);
+        }else {
+          postList.push(item.key);
+        }
+      })
+      if (postList.length == 0){
+        return;
+      }
       var postData = {
-        ids : this.selectedRowKeys,
+        ids : postList,
         type : "04"
       };
       this.$(this.$refs.submitting.$el).modal("show");
@@ -404,6 +454,12 @@ export default {
       util.commonHandleUploadChange(ret);
     },
     isDisabled: function (col,record) {
+      if (record.currentstatu == "00"){
+        return false;
+      }
+      if (record.currentstatu == "01" && this.process.isonlybio){
+        return false;
+      }
       if (!this.isEnd){
         return true;
       }
@@ -532,6 +588,34 @@ export default {
         this.data = newData;
       }
     },
+    checkBaseInfo : function (list){
+      for (var i = 0; i < list.length; i++) {
+        var temp = list[i];
+        if (temp.currentstatu == "00") {
+          if (util.isNull(temp.sampleindex)) {
+            this.$message.error(this.$t("sampleIndex") + this.$t("not_null"));
+            return false;
+          }
+          if (util.isNull(temp.samplename)) {
+            this.$message.error(this.$t("sampleName") + this.$t("not_null"));
+            return false;
+          }
+          if (util.isNull(temp.species)) {
+            this.$message.error(this.$t("species") + this.$t("not_null"));
+            return false;
+          }
+          if (util.isNull(temp.tissue)) {
+            this.$message.error(this.$t("tissue") + this.$t("animal_stock_resource") + this.$t("not_null"));
+            return false;
+          }
+          if (util.isNull(temp.sequencingplatform)) {
+            this.$message.error(this.$t("SequencingPlatform") + this.$t("not_null"));
+            return false;
+          }
+        }
+      }
+      return true;
+    },
     submitData: function (type) {
       // console.log(type);
       var postData = {
@@ -543,7 +627,15 @@ export default {
       }
       if (type != "tmp"){
         postData.datas = JSON.stringify(this.selectedRows)
+        if (!this.checkBaseInfo(this.selectedRows)){
+          return;
+        }
+      }else {
+        if (!this.checkBaseInfo(this.data)){
+          return;
+        }
       }
+
       var _this = this;
       // _this.$("#submitting").modal('show');
       this.$(this.$refs.submitting.$el).modal("show");

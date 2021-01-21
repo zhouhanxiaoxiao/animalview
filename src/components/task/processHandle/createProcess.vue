@@ -98,14 +98,27 @@
             <a-icon type="question-circle" theme="twoTone"/>
           </a-tooltip>
         </a-divider>
-        <!--样品录入负责人-->
+        <!--    仅生信分析任务！   -->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
+          <label for="onlyBio">
+            {{$t("isOnlyBio")}}
+          </label>
+          <div id="onlyBio">
+            <a-switch
+                :checked-children="$t('yes')"
+                v-model="isOnlyBio"
+                :un-checked-children="$t('no')"/>
+          </div>
+        </div>
+        <!--样品录入负责人-->
+        <div v-if="!isOnlyBio"
+            class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="sampleInput">
             {{$t("sampleInput") + $t("principal") }}
             <icon-font style="font-size: 20px" type="icon-bitian" />
           </label>
           <div id="sampleInput">
-            <a-select  style="width: 100%" v-model="sampleInput" disabled="true">
+            <a-select  style="width: 100%" v-model="sampleInput" disabled="true" show-search>
               <a-select-option v-for="user in users" :key="user.id">
                 {{ user.name }}
               </a-select-option>
@@ -113,7 +126,8 @@
           </div>
         </div>
         <!--样品制备负责人-->
-        <div class="form-group col-md-4 col-sm-12 col-lg-2">
+        <div v-if="!isOnlyBio"
+            class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="samplePreparation">
             {{$t("samplePreparation") + $t("principal") }}
             <icon-font style="font-size: 20px" type="icon-bitian" />
@@ -127,7 +141,8 @@
           </div>
         </div>
         <!--文库制备负责人-->
-        <div class="form-group col-md-4 col-sm-12 col-lg-2">
+        <div v-if="!isOnlyBio"
+            class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="libraryPreparation">
             {{$t("libraryPreparation") + $t("principal") }}
             <icon-font style="font-size: 20px" type="icon-bitian" />
@@ -140,14 +155,14 @@
             </a-select>
           </div>
         </div>
-        <!--下机数据负责人-->
+        <!--数据交付负责人-->
         <div class="form-group col-md-4 col-sm-12 col-lg-2">
           <label for="dismountData">
             {{$t("dismountData") + $t("principal") }}
             <icon-font style="font-size: 20px" type="icon-bitian" />
           </label>
           <div id="dismountData">
-            <a-select style="width: 100%" v-model="dismountData">
+            <a-select style="width: 100%" v-model="dismountData" :disabled="isOnlyBio">
               <a-select-option v-for="user in users" :key="user.id">
                 {{ user.name }}
               </a-select-option>
@@ -209,6 +224,7 @@ export default {
       emails : [],
       users : [],
       remarks:"",
+      isOnlyBio : false,
       sampleMsg : [],
       samplePreparation:"",
       libraryPreparation : "",
@@ -223,6 +239,9 @@ export default {
     this.initPage();
   },
   methods:{
+    userFilter : function(inputValue, option){
+      console.log(inputValue,option.text,"11111111111111111");
+    },
     initPage : function (){
       var _this = this;
       _this.$(this.$refs.processTip.$el).modal("show");
@@ -231,8 +250,8 @@ export default {
           _this.$message.error(_this.$t(res.data.code));
         }else {
           _this.users = res.data.retMap.users;
-          _this.samplePreparation = util.getuserIdByRole(_this.users,"31");
-          _this.libraryPreparation = util.getuserIdByRole(_this.users,"32");
+          _this.samplePreparation = util.getuserIdByName(_this.users,"张忻爽");
+          _this.libraryPreparation = util.getuserIdByName(_this.users,"张忻爽");
           _this.dismountData = util.getuserIdByRole(_this.users,"33");
           _this.bioinformaticsAnalysis = util.getuserIdByRole(_this.users,"34");
         }
@@ -257,7 +276,8 @@ export default {
         bioinformaticsAnalysis : this.bioinformaticsAnalysis,
         sampleInput : this.sampleInput,
         remarks : this.remarks,
-        projectDesc : this.projectDesc
+        projectDesc : this.projectDesc,
+        isOnlyBio : this.isOnlyBio
       };
       if (postData.dataType == "其他"){
         postData.dataType = this.otherDataType;
@@ -311,13 +331,15 @@ export default {
       //   this.$message.error(this.$t("sampleMsg") + this.$t("not_null"));
       //   return false;
       // }
-      if (this.samplePreparation == ""){
-        this.$message.error(this.$t("samplePreparation") + this.$t("not_null"));
-        return false;
-      }
-      if (this.libraryPreparation == ""){
-        this.$message.error(this.$t("libraryPreparation") + this.$t("not_null"));
-        return false;
+      if (!this.isOnlyBio){
+        if (this.samplePreparation == ""){
+          this.$message.error(this.$t("samplePreparation") + this.$t("not_null"));
+          return false;
+        }
+        if (this.libraryPreparation == ""){
+          this.$message.error(this.$t("libraryPreparation") + this.$t("not_null"));
+          return false;
+        }
       }
       if (this.dismountData == ""){
         this.$message.error(this.$t("dismountData") + this.$t("not_null"));
@@ -341,6 +363,13 @@ export default {
         }
       }
     },
+    isOnlyBio(newVal){
+      if (newVal){
+        this.dismountData = this.$store.getters.getUser.id;
+      }else {
+        this.dismountData = util.getuserIdByRole(this.users,"33");
+      }
+    }
   },
   computed : {
     projectPre : function (){

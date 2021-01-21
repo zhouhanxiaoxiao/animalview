@@ -247,6 +247,7 @@ export default {
             }, 0);
           }
         },
+        sorter: (a, b) => util.sorter(a.name,b.name),
       });
 
       /**邮箱*/
@@ -275,6 +276,7 @@ export default {
             }, 0);
           }
         },
+        sorter: (a, b) => util.sorter(a.email,b.email),
       });
 
       /**角色*/
@@ -336,6 +338,7 @@ export default {
             }, 0);
           }
         },
+        sorter: (a, b) => util.sorter(a.group.groupname,b.group.groupname),
       });
       this.columns = clom;
       this.columnNames = new Array();

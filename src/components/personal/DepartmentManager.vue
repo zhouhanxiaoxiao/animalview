@@ -201,6 +201,7 @@ export default {
             }, 0);
           }
         },
+        sorter: (a, b) => util.sorter(a.groupname,b.groupname),
       });
       /**部门负责人*/
       clom.push({
@@ -244,10 +245,13 @@ export default {
           if (util.isNull(record.users)){
             return false;
           }
-          return record.users.length
-              .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase());
+          for (var i = 0; i<record.users.length; i++){
+            var user = record.users[i];
+            if (user.name.indexOf(value) != -1){
+              return true;
+            }
+          }
+          return false;
         },
         onFilterDropdownVisibleChange: visible => {
           if (visible) {
@@ -256,6 +260,7 @@ export default {
             }, 0);
           }
         },
+        sorter: (a, b) => a.users.length - b.users.length,
       });
 
       this.columns = clom;

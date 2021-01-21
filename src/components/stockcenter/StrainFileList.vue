@@ -32,22 +32,27 @@
               </p>
             </a-upload-dragger>
           </div>
-          <a-card :style="{ marginTop: '10px' }" hoverable
-                  v-for="item in fileList" :key="item.id"
-          >
-            <a slot="title" href="#" @click="downloadFile(item.id,item.realname)">{{item.realname}}</a>
-            <div slot="extra">
-              <a-popconfirm
-                  v-if="isFeeder"
-                  :title="$t('areyousureDelete')"
-                  ok-text="Yes"
-                  cancel-text="No"
-                  @confirm="confirmDelete(item.id)"
-              >
-                <a-icon type="delete"/>
-              </a-popconfirm>
-            </div>
-          </a-card>
+          <template v-if="fileList.length == 0">
+            <a-empty style="margin-top: 20px" />
+          </template>
+          <template v-else>
+            <a-card :style="{ marginTop: '10px' }" hoverable
+                    v-for="item in fileList" :key="item.id"
+            >
+              <a slot="title" href="#" @click="downloadFile(item.id,item.realname)">{{item.realname}}</a>
+              <div slot="extra">
+                <a-popconfirm
+                    v-if="isFeeder"
+                    :title="$t('areyousureDelete')"
+                    ok-text="Yes"
+                    cancel-text="No"
+                    @confirm="confirmDelete(item.id)"
+                >
+                  <a-icon type="delete"/>
+                </a-popconfirm>
+              </div>
+            </a-card>
+          </template>
         </div>
       </div>
     </div>
