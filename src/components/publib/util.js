@@ -1898,6 +1898,15 @@ var util = {
         });
         scorllLength += 200;
 
+        /**上传*/
+        clom.push({
+            title: i18n.t("upload"),
+            dataIndex: 'upload',
+            width: '200px',
+            scopedSlots: {customRender: 'upload'},
+        });
+        scorllLength += 200;
+
         /**操作*/
         clom.push({
             title: i18n.t("operation"),

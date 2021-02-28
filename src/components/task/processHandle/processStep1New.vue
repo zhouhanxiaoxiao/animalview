@@ -88,7 +88,7 @@
               {{ sub.name }}
             </a-tag>
           </template>
-          <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
+          <a-tag class="pointer" color="#f50" @click="showSubTask('00')" >
             {{ $t("init") + "(" + createrName + ")" }}
           </a-tag>
           <template slot="title">

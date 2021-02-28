@@ -2,9 +2,9 @@
   <div style="width: 100%;height: 100%">
     <div style="width: 80%;margin-top:10px; font-weight: bold;font-size: 20px;
     margin-left:5%;text-align: left;display: inline-block">
-      {{title}}
+      {{ title }}
     </div>
-    <e-charts :options="options" style="width: 100%;height: 80%"/>
+    <e-charts :options="options" ref="histogram" style="width: 100%;height: 80%" @click="clickImg"/>
   </div>
 </template>
 
@@ -18,11 +18,16 @@ export default {
   components: {ECharts},
   props: {
     dataList: Array,
-    titleList : Array,
-    title : String,
+    titleList: Array,
+    title: String,
   },
   data: function () {
     return {}
+  },
+  methods : {
+    clickImg : function (params){
+      this.$emit("clickHistogram",params);
+    }
   },
   computed: {
     options: function () {
@@ -38,7 +43,7 @@ export default {
           subtextStyle: {
             fontSize: 20
           },
-          show : true,
+          show: true,
         },
         tooltip: {
           trigger: 'axis',
@@ -59,7 +64,7 @@ export default {
           {
             type: 'category',
             boundaryGap: true,
-            data:this.titleList
+            data: this.titleList,
           }
         ],
         yAxis: [

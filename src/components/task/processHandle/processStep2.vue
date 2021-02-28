@@ -843,6 +843,9 @@ export default {
       })
     },
     getFileCount: function (ids) {
+      if (ids.length === 0){
+        return;
+      }
       var postData = {
         idsStr: JSON.stringify(ids)
       }

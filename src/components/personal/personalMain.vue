@@ -44,7 +44,7 @@ import TopNav from "@/components/publib/TopNav";
 import PersonalInfo from "@/components/personal/personalInfo";
 import UserManager from "@/components/personal/userManager";
 import DepartmentManager from "@/components/personal/DepartmentManager";
-import BillingCenter from "@/components/personal/BillingCenter";
+import BillingCenter from "@/components/personal/bill/BillingCenter";
 
 export default {
   name: "personalMain",
