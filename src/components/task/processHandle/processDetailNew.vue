@@ -109,6 +109,7 @@ import ProcessStep6 from "@/components/task/processHandle/processStep6";
 import ProcessTip from "@/components/task/processHandle/processTip";
 import ProcessAllConfirm from "@/components/task/processHandle/processAllConfirm";
 import ProcessAllData from "@/components/task/processHandle/processAllData";
+import util from "@/components/publib/util";
 
 export default {
   name: "processDetailNew",
@@ -148,7 +149,6 @@ export default {
   },
   beforeMount() {
     this.taskId = this.$route.query.taskId;
-    console.log(this.taskId)
     this.initPage();
   },
   methods: {
@@ -224,6 +224,7 @@ export default {
               _this.tabVal = "9";
             }
           }
+          util.initSelect(res.data.retMap.selectMap);
 
           if (_this.$store.getters.isCurrentUser(_this.process.creater)){
             const h = _this.$createElement;
@@ -267,7 +268,6 @@ export default {
   },
   watch: {
     getTaskId(newVal) {
-      console.log(newVal);
       this.taskId = newVal;
       this.initPage();
     },

@@ -1,29 +1,35 @@
 <template>
   <div>
     <top-nav></top-nav>
-    <div style="width: 100%;text-align: left">
-      <div class="my-task-num" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'">
-        <histogram style="height: 100%;width: 100%" :title="$t('myTodoSample')"
-                   :data-list="seqDataList" :title-list="seqTitleList"></histogram>
+    <div  style="width: 100%;text-align: left">
+      <div class="my-task-num" style="width: 90%" v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
+        <histogram style="height: 100%;width: 100%"
+                   :title="$t('果蝇品系')"
+                   @clickHistogram="clickStrainHistogram"
+                   :data-list="animalDataList"
+                   :title-list="animalTitleList"></histogram>
+      </div>
+    </div>
+
+    <div style="width: 100%;text-align: left" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'">
+      <div class="my-task-num">
+        <histogram style="height: 100%;width: 100%"
+                   :title="$t('myTodoSample')"
+                   :data-list="seqDataList"
+                   :title-list="seqTitleList"></histogram>
       </div>
 
-      <div class="my-task-num" v-else-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
-        <histogram style="height: 100%;width: 100%" :title="$t('果蝇品系')"
-                   :data-list="animalDataList" :title-list="animalTitleList"></histogram>
-      </div>
-
-      <div class="people-task" v-if="this.$systemFlag == 'seqpro' || this.$systemFlag == 'local'">
-<!--        <active-histogram style="height: 100%;width: 100%" :map-list="userTaskCount" :title="'用户数量'" :sub-title="''"></active-histogram>-->
-        <histogram style="height: 100%;width: 100%" :title="$t('ongoingProjects')"
-                   :data-list="topDataList" :title-list="topTitleList"></histogram>
-      </div>
-      <div class="people-task" v-if="this.$systemFlag == 'animal' || this.$systemFlag == 'local'">
-        <Pie style="width: 100%;height: 100%" :title="$t('taskCount')" :data="animalTaskCount"></Pie>
+      <div class="people-task">
+        <histogram style="height: 100%;width: 100%"
+                   :title="$t('ongoingProjects')"
+                   :data-list="topDataList"
+                   :title-list="topTitleList"></histogram>
       </div>
     </div>
     <div class="main-page" >
       <task-table-new page-location="home"></task-table-new>
     </div>
+
   </div>
 </template>
 
@@ -31,11 +37,10 @@
 import TopNav from "@/components/publib/TopNav";
 import TaskTableNew from "@/components/task/taskMain/taskTableNew";
 import Histogram from "@/components/publib/chart/Histogram";
-import Pie from "@/components/publib/chart/Pie";
 
 export default {
   name: "home",
-  components: {Pie, Histogram, TaskTableNew, TopNav},
+  components: { Histogram, TaskTableNew, TopNav},
   data: function () {
     return {
       allStrainNumber: 0,
@@ -110,6 +115,16 @@ export default {
         _this.$message.error(_this.$t("systemErr"));
       })
     },
+    clickStrainHistogram : function (params){
+      console.log(params,"home");
+      if (params.dataIndex === 0 || params.dataIndex === 3){
+        this.$router.push("/stock/currentStock");
+      }else if (params.dataIndex === 1 || params.dataIndex === 2){
+        this.$router.push("/stock/currentStrain");
+      }else if (params.dataIndex === 4){
+        this.$router.push("/task");
+      }
+    },
     currentStrain: function () {
       this.$router.push("/stock/currentStrain");
     },
@@ -166,7 +181,6 @@ export default {
 }
 
 .main-page {
-  padding-top: 10px;
   padding-bottom: 50px;
   margin-top: 10px;
   margin-bottom: 50px;

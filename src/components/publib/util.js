@@ -6,6 +6,42 @@ import pinyin from 'js-pinyin';
 
 var util = {
     alicdnIcon: "//at.alicdn.com/t/font_2031063_n09nbpzcld.js",
+    casLoginUrl : "http://119.90.33.35:8065/?service=",
+    casOutUrl : "http://119.90.33.35:8065/logout",
+    localUrl : "http://seq.cibr.ac.cn/",
+    // localUrl : "http://119.90.33.35:3566/",
+    initSampleList : [],
+    sampleTypeList : [],
+    sampleStatuList : [],
+    cellSortList : [],
+    databaseList : [],
+    seqPlantList : [],
+    extractList : [],
+    checkResultList : [],
+    upPlantList : [],
+    SUCCESS : "200",
+    catchErr : function (res){
+        console.log(res);
+        this.error("systemErr");
+    },
+    success : function (){
+        $message.success(i18n.t("commitSucc"));
+    },
+    error : function (message){
+        $message.error(i18n.t(message));
+    },
+    initSelect : function (selectMap){
+        this.initSampleList = selectMap.initSamples;
+        this.sampleTypeList = selectMap.sampleTypes;
+        this.sampleStatuList = selectMap.sampleStatus;
+        this.cellSortList = selectMap.cellSorts;
+        this.databaseList = selectMap.database;
+        this.seqPlantList = selectMap.seqPlants;
+        this.extractList = selectMap.extracts;
+        this.checkResultList = selectMap.checkResults;
+        this.upPlantList = selectMap.upPlants;
+    },
+
     convertToPy : function (val){
       return pinyin.getFullChars(val);
     },
@@ -17,7 +53,6 @@ var util = {
       }
     },
     sorter : function (a,b){
-      console.log(a,b)
       if (a == undefined){
           return 1;
       }
@@ -56,131 +91,179 @@ var util = {
     },
     sampletypes: function (sampletype) {
         var array = new Array();
-        if (sampletype == "01") {
-            /** 核酸样本类型 */
-            array.push({key: "01", val: "基因组DNA"});
-            array.push({key: "02", val: "total RNA"});
-            array.push({key: "03", val: "PCR产物"});
-            array.push({key: "04", val: "chip-seq DNA"});
-            array.push({key: "05", val: "单细胞扩增产物"});
-            array.push({key: "06", val: "FFPE"});
-            array.push({key: "00", val: "其它"});
-        } else if (sampletype == "02") {
-            /** 组织样本类型 */
-            array.push({key: "21", val: "组织"});
-            array.push({key: "22", val: "全血"});
-            array.push({key: "23", val: "石蜡组织"});
-            array.push({key: "24", val: "血清"});
-            array.push({key: "25", val: "口腔拭子"});
-            array.push({key: "26", val: "菌体"});
-            array.push({key: "20", val: "其它"});
-        } else if (sampletype == "03") {
-            /** 细胞样本类型 */
-            array.push({key: "41", val: "单细胞悬液"})
-            array.push({key: "40", val: "其他"})
+        // if (sampletype == "01") {
+        //     /** 核酸样本类型 */
+        //     array.push({key: "01", val: "基因组DNA"});
+        //     array.push({key: "02", val: "total RNA"});
+        //     array.push({key: "03", val: "PCR产物"});
+        //     array.push({key: "04", val: "chip-seq DNA"});
+        //     array.push({key: "05", val: "单细胞扩增产物"});
+        //     array.push({key: "06", val: "FFPE"});
+        //     array.push({key: "00", val: "其它"});
+        // } else if (sampletype == "02") {
+        //     /** 组织样本类型 */
+        //     array.push({key: "21", val: "组织"});
+        //     array.push({key: "22", val: "全血"});
+        //     array.push({key: "23", val: "石蜡组织"});
+        //     array.push({key: "24", val: "血清"});
+        //     array.push({key: "25", val: "口腔拭子"});
+        //     array.push({key: "26", val: "菌体"});
+        //     array.push({key: "20", val: "其它"});
+        // } else if (sampletype == "03") {
+        //     /** 细胞样本类型 */
+        //     array.push({key: "41", val: "单细胞悬液"})
+        //     array.push({key: "40", val: "其他"})
+        // }
+        for (var i = 0; i < this.sampleTypeList.length; i++){
+            var item = this.sampleTypeList[i];
+            if (item.parentid == sampletype){
+                array.push({ key: item.id, val: item.name });
+            }
         }
         return array;
     },
     sampleStatu: function (sampletype) {
         var array = new Array();
-        if (sampletype == "01") {
-            /** 核酸样本类型 */
-            array.push({key: "01", val: "溶于纯水"});
-            array.push({key: "02", val: "溶于TE"});
-            array.push({key: "03", val: "溶于无Rnase水"});
-            array.push({key: "04", val: "溶于EB"});
-            array.push({key: "05", val: "干粉"});
-            array.push({key: "00", val: "其它"});
-        } else if (sampletype == "02") {
-            /** 组织样本类型 */
-            array.push({key: "21", val: "速冻组织"});
-            array.push({key: "22", val: "活体"});
-            array.push({key: "23", val: "RNAlater保存"});
-            array.push({key: "24", val: "Trlzol保存"});
-            array.push({key: "20", val: "其它"});
-        } else if (sampletype == "03") {
-            /** 细胞样本类型 */
-            array.push({key: "41", val: "裂解液"});
-            array.push({key: "42", val: "液氮速冻"});
-            array.push({key: "40", val: "其它"});
+        // if (sampletype == "01") {
+        //     /** 核酸样本类型 */
+        //     array.push({key: "01", val: "溶于纯水"});
+        //     array.push({key: "02", val: "溶于TE"});
+        //     array.push({key: "03", val: "溶于无Rnase水"});
+        //     array.push({key: "04", val: "溶于EB"});
+        //     array.push({key: "05", val: "干粉"});
+        //     array.push({key: "00", val: "其它"});
+        // } else if (sampletype == "02") {
+        //     /** 组织样本类型 */
+        //     array.push({key: "21", val: "速冻组织"});
+        //     array.push({key: "22", val: "活体"});
+        //     array.push({key: "23", val: "RNAlater保存"});
+        //     array.push({key: "24", val: "Trlzol保存"});
+        //     array.push({key: "20", val: "其它"});
+        // } else if (sampletype == "03") {
+        //     /** 细胞样本类型 */
+        //     array.push({key: "41", val: "裂解液"});
+        //     array.push({key: "42", val: "液氮速冻"});
+        //     array.push({key: "40", val: "其它"});
+        // }
+        for (var i = 0; i < this.sampleStatuList.length; i++){
+            var item = this.sampleStatuList[i];
+            if (item.parentid == sampletype){
+                array.push({ key: item.id, val: item.name });
+            }
         }
         return array;
     },
     cellSortMethods: function () {
-        return [
-            {key: "01", val: "过筛网"},
-            {key: "02", val: "磁珠分选"},
-            {key: "03", val: "口吸管法"},
-            {key: "04", val: "BD流式分选"},
-            {key: "05", val: "NanoCellect 流式分选"}
-        ]
+        // return [
+        //     {key: "01", val: "过筛网"},
+        //     {key: "02", val: "磁珠分选"},
+        //     {key: "03", val: "口吸管法"},
+        //     {key: "04", val: "BD流式分选"},
+        //     {key: "05", val: "NanoCellect 流式分选"}
+        // ]
+        var array = new Array();
+        for (var i = 0; i < this.cellSortList.length; i++){
+            var item = this.cellSortList[i];
+            array.push({ key: item.id, val: item.name });
+        }
+        return array;
     },
     databaseTypes: function (sampletype) {
         var array = new Array();
-        if (sampletype == "01") {
-            /** 核酸样本类型 */
-            array.push({key: "01", val: "DNA常规小片段"});
-            array.push({key: "02", val: "DNA非常规小片段"});
-            array.push({key: "03", val: "人外显子"});
-            array.push({key: "04", val: "PCR-free文库"});
-            array.push({key: "05", val: "真核普通转录组"});
-            array.push({key: "06", val: "真核链特异性"});
-            array.push({key: "07", val: "LncRNA"});
-        } else if (sampletype == "02") {
-            /** 组织样本类型 */
-            array.push({key: "21", val: "10X单细胞转录组"});
-            array.push({key: "34", val: "10X VDJ"});
-            array.push({key: "22", val: "10X空间转录组"});
-            array.push({key: "23", val: "10X ATAC"});
-            array.push({key: "24", val: "smart-seq"});
-            array.push({key: "25", val: "ATAC"});
-            array.push({key: "26", val: "HI-C"});
-            array.push({key: "27", val: "DNA常规小片段"});
-            array.push({key: "28", val: "DNA非常规小片段"});
-            array.push({key: "29", val: "人外显子"});
-            array.push({key: "30", val: "PCR-free文库"});
-            array.push({key: "31", val: "真核普通转录组"});
-            array.push({key: "32", val: "真核链特异性"});
-            array.push({key: "33", val: "LncRNA"});
-            array.push({key: "35", val: "WGS"});
-        } else if (sampletype == "03") {
-            /** 细胞样本类型 */
-            array.push({key: "41", val: "10X单细胞转录组"});
-            array.push({key: "46", val: "10X VDJ"});
-            array.push({key: "42", val: "10X ATAC"});
-            array.push({key: "43", val: "smart-seq"});
-            array.push({key: "44", val: "ATAC"});
-            array.push({key: "45", val: "HI-C"});
+        // if (sampletype == "01") {
+        //     /** 核酸样本类型 */
+        //     array.push({key: "01", val: "DNA常规小片段"});
+        //     array.push({key: "02", val: "DNA非常规小片段"});
+        //     array.push({key: "03", val: "人外显子"});
+        //     array.push({key: "04", val: "PCR-free文库"});
+        //     array.push({key: "05", val: "真核普通转录组"});
+        //     array.push({key: "06", val: "真核链特异性"});
+        //     array.push({key: "07", val: "LncRNA"});
+        // } else if (sampletype == "02") {
+        //     /** 组织样本类型 */
+        //     array.push({key: "21", val: "10X单细胞转录组"});
+        //     array.push({key: "34", val: "10X VDJ"});
+        //     array.push({key: "22", val: "10X空间转录组"});
+        //     array.push({key: "23", val: "10X ATAC"});
+        //     array.push({key: "24", val: "smart-seq"});
+        //     array.push({key: "25", val: "ATAC"});
+        //     array.push({key: "26", val: "HI-C"});
+        //     array.push({key: "27", val: "DNA常规小片段"});
+        //     array.push({key: "28", val: "DNA非常规小片段"});
+        //     array.push({key: "29", val: "人外显子"});
+        //     array.push({key: "30", val: "PCR-free文库"});
+        //     array.push({key: "31", val: "真核普通转录组"});
+        //     array.push({key: "32", val: "真核链特异性"});
+        //     array.push({key: "33", val: "LncRNA"});
+        //     array.push({key: "35", val: "WGS"});
+        // } else if (sampletype == "03") {
+        //     /** 细胞样本类型 */
+        //     array.push({key: "41", val: "10X单细胞转录组"});
+        //     array.push({key: "46", val: "10X VDJ"});
+        //     array.push({key: "42", val: "10X ATAC"});
+        //     array.push({key: "43", val: "smart-seq"});
+        //     array.push({key: "44", val: "ATAC"});
+        //     array.push({key: "45", val: "HI-C"});
+        // }
+        for (var i = 0; i < this.databaseList.length; i++){
+            var item = this.databaseList[i];
+            if (item.parentid == sampletype){
+                array.push({ key: item.id, val: item.name });
+            }
+        }
+        return array;
+    },
+    sequencePlant: function () {
+        var array = new Array();
+        for (var i = 0; i < this.upPlantList.length; i++){
+            var item = this.upPlantList[i];
+            array.push({ key: item.id, val: item.name });
         }
         return array;
     },
     seqPlants: function () {
         var array = new Array();
-        array.push({key: "01", val: "Hiseq-SE50"});
-        array.push({key: "02", val: "Hiseq-PE150"});
-        array.push({key: "03", val: "Hiseq-PE250"});
-        array.push({key: "00", val: "其它"});
+        // array.push({key: "01", val: "Hiseq-SE50"});
+        // array.push({key: "02", val: "Hiseq-PE150"});
+        // array.push({key: "03", val: "Hiseq-PE250"});
+        // array.push({key: "00", val: "其它"});
+        for (var i = 0; i < this.seqPlantList.length; i++){
+            var item = this.seqPlantList[i];
+            array.push({ key: item.id, val: item.name });
+        }
         return array;
     },
     extractmethods: function () {
         var array = new Array();
-        array.push({key: "01", val: "柱提法"});
-        array.push({key: "02", val: "磁珠提法"});
-        array.push({key: "00", val: "其它"});
+        // array.push({key: "01", val: "柱提法"});
+        // array.push({key: "02", val: "磁珠提法"});
+        // array.push({key: "00", val: "其它"});
+        for (var i = 0; i < this.extractList.length; i++){
+            var item = this.extractList[i];
+            array.push({ key: item.id, val: item.name });
+        }
         return array;
     },
     checkresults: function () {
         var array = new Array();
-        array.push({key: "01", val: "合格"});
-        array.push({key: "02", val: "风险"});
-        array.push({key: "03", val: "不合格"});
+        // array.push({key: "01", val: "合格"});
+        // array.push({key: "02", val: "风险"});
+        // array.push({key: "03", val: "不合格"});
+        for (var i = 0; i < this.checkResultList.length; i++){
+            var item = this.checkResultList[i];
+            array.push({ key: item.id, val: item.name });
+        }
         return array;
     },
     sampleInits: function () {
         var array = new Array();
-        array.push({key: "01", val: i18n.t("nucleicAcid") + i18n.t("sample")});
-        array.push({key: "02", val: i18n.t("tissue") + i18n.t("sample")});
-        array.push({key: "03", val: i18n.t("cell") + i18n.t("sample")});
+        // array.push({key: "01", val: i18n.t("nucleicAcid") + i18n.t("sample")});
+        // array.push({key: "02", val: i18n.t("tissue") + i18n.t("sample")});
+        // array.push({key: "03", val: i18n.t("cell") + i18n.t("sample")});
+        for (var i = 0; i < this.initSampleList.length; i++){
+            var item = this.initSampleList[i];
+            array.push({ key: item.id, val: item.name });
+        }
         return array;
     },
     commonUploadUrl: function () {
@@ -511,6 +594,16 @@ var util = {
             scopedSlots: {customRender: 'databasetype'},
         });
         scorllLength += 200;
+
+        /**建库类型*/
+        clom.push({
+            slots: { title: 'uploadplatformTitle' },
+            dataIndex: 'uploadplatform',
+            width: '200px',
+            scopedSlots: {customRender: 'uploadplatform'},
+        });
+        scorllLength += 200;
+
         /**测序平台*/
         clom.push({
             slots: { title: 'SequencingPlatformTitle' },
@@ -1898,6 +1991,15 @@ var util = {
         });
         scorllLength += 200;
 
+        /**上传*/
+        clom.push({
+            title: i18n.t("upload"),
+            dataIndex: 'upload',
+            width: '200px',
+            scopedSlots: {customRender: 'upload'},
+        });
+        scorllLength += 200;
+
         /**操作*/
         clom.push({
             title: i18n.t("operation"),
@@ -2166,6 +2268,15 @@ var util = {
         });
         scorllLength += 200;
 
+        /** 上机平台 */
+        clom.push({
+            slots : {title : "sequenceTitle"},
+            dataIndex: 'seqplant',
+            width: '200px',
+            scopedSlots: {customRender: 'seqplant'},
+        });
+        scorllLength += 200;
+
         /** 上机数据量 */
         clom.push({
             // title: i18n.t("uploadsize"),
@@ -2182,6 +2293,15 @@ var util = {
             dataIndex: 'uploadunit',
             width: '150px',
             scopedSlots: {customRender: 'uploadunit'},
+        });
+        scorllLength += 150;
+
+        /** 数据量单位 */
+        clom.push({
+            title: i18n.t("canDivide"),
+            dataIndex: 'candivide',
+            width: '150px',
+            scopedSlots: {customRender: 'candivide'},
         });
         scorllLength += 150;
 

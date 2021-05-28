@@ -6,7 +6,7 @@ import zh from './config/zh';
 import en from './config/en';
 
 const i18n = new VueI18n({
-    locale:localStorage.getItem('local')||'zh',
+    locale : localStorage.getItem('local')||'zh',
     messages:{
         zh,en
     }

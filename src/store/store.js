@@ -51,6 +51,16 @@ export default new Vuex.Store({
             }
             return false;
         },
+        isUpDataUser(state){
+            for (var i = 0; i < state.user.roles.length; i++) {
+                var role = state.user.roles[i];
+                if (role.roletype == "999999"
+                    || role.roletype == "35") {
+                    return true;
+                }
+            }
+            return false;
+        },
         isAdmin(state) {
             for (var i = 0; i < state.user.roles.length; i++) {
                 var role = state.user.roles[i];

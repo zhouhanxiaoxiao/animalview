@@ -77,14 +77,18 @@
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
             {{ $t("allAllow") + "(" + createrName + ")"}}
+            <a-icon type="check-circle" v-if="subId == '03'" />
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
             {{ $t("notAllow") + "(" + createrName + ")"}}
+            <a-icon type="check-circle" v-if="subId == '02'" />
           </a-tag>
           <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
             {{ sub.name }}
+            <a-icon type="check-circle" v-if="subId == sub.id" />
           </a-tag>
           <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
+            <a-icon type="check-circle" v-if="subId == '00'" />
             {{ $t("init") + "(" + operatorName + ")"}}
           </a-tag>
           <template slot="title">

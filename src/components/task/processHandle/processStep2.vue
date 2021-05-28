@@ -83,18 +83,23 @@
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
             {{ $t("allAllow") + "(" + createrName + ")" }}
+            <a-icon type="check-circle" v-if="subId == '03'" />
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
             {{ $t("notAllow") + "(" + createrName + ")" }}
+            <a-icon type="check-circle" v-if="subId == '02'" />
           </a-tag>
           <template v-if="isEnd">
             <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
               {{ sub.name }}
+              <a-icon type="check-circle" v-if="subId == sub.id" />
             </a-tag>
           </template>
-          <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
+          <a-tag class="pointer chceckedTag" size="large" color="#f50" @click="showSubTask('00')">
             {{ $t("init") + "(" + operatorName + ")" }}
+            <a-icon type="check-circle" v-if="subId == '00'" />
           </a-tag>
+
           <template slot="title">
             {{ $t("process.tagListTip") }}
           </template>
@@ -224,7 +229,6 @@
           slot-scope="text, record,index"
       >
         <div :key="col">
-
           <!-- 细胞分选法 -->
           <a-select style="width: 100%" v-if="col == 'cellsort'"
                     v-model="record.cellsort"
@@ -626,7 +630,7 @@ export default {
       this.$router.push({name: "processInit", query: {taskId: this.process.taskid}});
     },
     isTissu: function (record) {
-      if (record.initsample == "02") {
+      if (record.initsample == "d2caa4f640de44c48a7bec38b57ac12d") {
         return true;
       }
       return false;
@@ -843,6 +847,9 @@ export default {
       })
     },
     getFileCount: function (ids) {
+      if (ids.length === 0){
+        return;
+      }
       var postData = {
         idsStr: JSON.stringify(ids)
       }
@@ -1176,9 +1183,6 @@ export default {
     transformSamples: function () {
       var arr = new Array();
       for (var i = 0; i < this.sampleInits.length; i++) {
-        // if (this.sampleInits[i].key != "02"){
-        //   arr.push(this.sampleInits[i]);
-        // }
         arr.push(this.sampleInits[i]);
       }
       return arr;
@@ -1314,5 +1318,6 @@ export default {
 </script>
 
 <style scoped>
-
+.chceckedTag{
+}
 </style>

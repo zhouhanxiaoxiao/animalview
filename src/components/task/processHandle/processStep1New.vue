@@ -54,7 +54,7 @@
             {{ $t("add") }}
           </a-button>
         </a-tooltip>
-        <a-button icon="download" @click="downLoad">
+        <a-button icon="download" @click="downLoad" :disabled="this.selectedRows.length === 0">
           {{ $t("outPut") }}
         </a-button>
         <a-upload
@@ -79,17 +79,21 @@
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
             {{ $t("allAllow") + "(" + createrName + ")" }}
+            <a-icon type="check-circle" v-if="subId == '03'" />
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
             {{ $t("notAllow") + "(" + operatorName + ")" }}
+            <a-icon type="check-circle" v-if="subId == '02'" />
           </a-tag>
           <template v-if="canEdit">
             <a-tag class="pointer" color="#2db7f5" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
               {{ sub.name }}
+              <a-icon type="check-circle" v-if="subId == sub.id" />
             </a-tag>
           </template>
-          <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
+          <a-tag class="pointer" color="#f50" @click="showSubTask('00')" >
             {{ $t("init") + "(" + createrName + ")" }}
+            <a-icon type="check-circle" v-if="subId == '00'" />
           </a-tag>
           <template slot="title">
             {{ $t("process.tagListTip") }}
@@ -318,6 +322,17 @@
         </a-tooltip>
       </template>
 
+      <template slot="uploadplatformTitle">
+        <a-tooltip>
+          <template slot="title">
+            {{ $t("process.dropdownTip") }}
+          </template>
+          <icon-font style="font-size: 20px" type="icon-bitian"/>
+          {{ $t("sequencePlant") }}
+          <a-icon type="question-circle" theme="twoTone"/>
+        </a-tooltip>
+      </template>
+
       <template slot="SequencingPlatformTitle">
         <a-tooltip>
           <template slot="title">
@@ -414,6 +429,18 @@
               {{ item.val }}
             </a-select-option>
           </a-select>
+
+          <!-- 建库类型 -->
+          <a-select style="width: 100%" v-else-if="col == 'uploadplatform'"
+                    v-model="record.uploadplatform"
+                    :disabled="isDisabled(record)"
+          >
+            <a-select-option v-for="item in uploadplatforms" :key="item.key" :value="item.key">
+              {{ item.val }}
+            </a-select-option>
+          </a-select>
+
+
           <!-- initSample -->
           <a-select style="width: 100%" v-else-if="col == 'initsample'"
                     v-model="record.initsample"
@@ -998,6 +1025,10 @@ export default {
           this.$message.error(this.$t("databaseType") + this.$t("not_null"));
           return false;
         }
+        if (this.isNull(rowData.uploadplatform)) {
+          this.$message.error(this.$t("uploadplatform") + this.$t("not_null"));
+          return false;
+        }
         if (this.isNull(rowData.sequencingplatform)) {
           this.$message.error(this.$t("SequencingPlatform") + this.$t("not_null"));
           return false;
@@ -1191,6 +1222,9 @@ export default {
       } else {
         return this.$t("cell") + this.$t("totalNumber") + "(" + this.$t("cellNumber") + ")";
       }
+    },
+    uploadplatforms : function (){
+      return util.sequencePlant();
     },
     seqPlants: function () {
       return util.seqPlants();

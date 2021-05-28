@@ -341,14 +341,14 @@ export default {
       if (
           (this.process.taskstatu == "21")
           && this.$store.getters.isReviewer
-          && this.jyzxGroup.id == this.$store.getters.getUser.roleid
+          && this.jyzxGroup.id == this.$store.getters.getUser.groupid
       ){
         return false;
       }
       return true;
     },
     isPInotConfirm : function (){
-      for (var i = 0;i<this.groupReviewer.length;i++){
+      for (var i = 0;i < this.groupReviewer.length;i++){
         var reviewer = this.groupReviewer[i];
         if (
             (this.process.taskstatu == "10")

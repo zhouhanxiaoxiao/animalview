@@ -353,9 +353,8 @@ export default {
       this.tableLoad = true;
       _this.$axios.post("/task/gatAllTask", postData).then(function (res) {
         _this.tableLoad = false;
-        // console.log(res);
+        console.log("111")
         if (res.data.code != "200") {
-          // console.log(res);
           _this.$message.error(_this.$t(res.data.code));
         } else {
           _this.taskList = res.data.retMap.alltask;

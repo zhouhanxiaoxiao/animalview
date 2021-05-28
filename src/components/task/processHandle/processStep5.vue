@@ -55,14 +55,18 @@
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
             {{ $t("allAllow") + "(" + createrName + ")"}}
+            <a-icon type="check-circle" v-if="subId == '03'" />
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
             {{ $t("notAllow") + "(" + createrName + ")"}}
+            <a-icon type="check-circle" v-if="subId == '02'" />
           </a-tag>
           <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
             {{ sub.name }}
+            <a-icon type="check-circle" v-if="subId == sub.id" />
           </a-tag>
           <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
+            <a-icon type="check-circle" v-if="subId == '00'" />
             {{ $t("init") + "(" + operatorName + ")"}}
           </a-tag>
           <template slot="title">
@@ -131,7 +135,22 @@
           >
             {{ record.reportpath }}
           </a-tag>
-
+          <div v-else-if="col == 'upload'">
+            <a-upload
+                name="file"
+                :multiple="true"
+                :disabled="isDisabled(col,record)"
+                :headers="uploadHeader(record)"
+                :action="uploadUrl"
+                :showUploadList="false"
+                @change="handleUploadChange"
+            >
+              <a-button :disabled="isDisabled(col,record)">
+                <a-icon type="upload"/>
+                {{ $t("upload") }}
+              </a-button>
+            </a-upload>
+          </div>
           <a-input
               v-else-if="col != 'index'"
               style="margin: -5px 0"
@@ -175,9 +194,21 @@
             <a @click="showReason(record.id)">{{ $t("showReason") }}</a>
             &nbsp;
           </span>
+          &nbsp;
+          <a-badge
+              :count="showFileCount(record.id)"
+              :number-style="{
+                  backgroundColor: '#fff',
+                  color: '#999',
+                  boxShadow: '0 0 0 1px #d9d9d9 inset',
+                }"
+          >
+            <a @click="() => showFileList(record.id)">{{ "附件" }}</a>
+          </a-badge>
         </div>
       </template>
     </a-table>
+    <show-filelist :detail-id="detailId" ref="showFilelist"></show-filelist>
     <submitting :title="$t('submitting')" ref="submitting"></submitting>
     <sub-task-info @subTaskInfo="startProcess" ref="subTask"></sub-task-info>
     <refuse-alert :modal-title="$t('unPass')" ref="unPassAlert" @confirmFun="confirmFun"></refuse-alert>
@@ -189,10 +220,11 @@ import Submitting from "@/components/publib/submitting";
 import util from "@/components/publib/util";
 import SubTaskInfo from "@/components/task/processHandle/subTaskInfo";
 import RefuseAlert from "@/components/publib/refuseAlert";
+import ShowFilelist from "@/components/publib/showFilelist";
 
 export default {
   name: "processStep5",
-  components: {RefuseAlert, SubTaskInfo, Submitting},
+  components: {ShowFilelist, RefuseAlert, SubTaskInfo, Submitting},
   props: {
     process: Object,
     statu : String
@@ -214,7 +246,9 @@ export default {
       remarks : "",
       subId : "00",
       subs : [],
-      operators : undefined
+      operators : undefined,
+      fileCounts : {},
+      detailId : ""
     }
   },
   beforeMount() {
@@ -222,6 +256,34 @@ export default {
     this.initPage();
   },
   methods: {
+    showFileList: function (detailId) {
+      this.detailId = detailId;
+      // this.$("#showFileList").modal("show");
+      this.$(this.$refs.showFilelist.$el).modal("show");
+    },
+    getFileCount: function (ids) {
+      if (ids.length === 0){
+        return;
+      }
+      var postData = {
+        idsStr: JSON.stringify(ids)
+      }
+      var _this = this;
+      this.$axios.post("/file/getFileCount", postData).then(function (res) {
+        if (res.data.code == "200") {
+          _this.fileCounts = res.data.retMap.fileCounts;
+        }
+      });
+    },
+    showFileCount :function (id){
+      return this.fileCounts[id];
+    },
+    uploadUrl: function () {
+      return util.commonUploadUrl();
+    },
+    uploadHeader: function (record) {
+      return {token: this.$cookies.get('token'), detailId: record.id}
+    },
     gotoPath : function (path){
       window.open(path,"_blank");
     },
@@ -383,14 +445,17 @@ export default {
         if (res.data.code != 200) {
           _this.$message.error(_this.$t(res.data.code));
         } else {
+          var ids = new Array();
           if (res.data.retMap.datas.length != 0) {
             _this.data = new Array();
             for (var ind in res.data.retMap.datas) {
               var d = res.data.retMap.datas[ind];
               d.key = d.id;
               _this.data.push(d);
+              ids.push(d.id);
             }
           }
+          _this.getFileCount(ids);
           _this.cacheData = _this.data.map(item => ({...item}));
           _this.allUsers = res.data.retMap.allUsers;
           // _this.subtask = res.data.retMap.subtask;

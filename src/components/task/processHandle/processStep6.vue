@@ -80,15 +80,19 @@
         <a-tooltip>
           <a-tag class="pointer" color="#87d068" @click="showSubTask('03')">
             {{ $t("allAllow")  + "(" + createrName + ")"}}
+            <a-icon type="check-circle" v-if="subId == '03'" />
           </a-tag>
           <a-tag class="pointer" color="#108ee9" @click="showSubTask('02')">
             {{ $t("notAllow")  + "(" + createrName + ")"}}
+            <a-icon type="check-circle" v-if="subId == '02'" />
           </a-tag>
           <a-tag class="pointer" color="blue" v-for="sub in subs" :key="sub.id" @click="showSubTask(sub.id)">
             {{ sub.name }}
+            <a-icon type="check-circle" v-if="subId == sub.id" />
           </a-tag>
           <a-tag class="pointer" color="#f50" @click="showSubTask('00')">
             {{ $t("init")  + "(" + operatorName + ")"}}
+            <a-icon type="check-circle" v-if="subId == '00'" />
           </a-tag>
           <template slot="title">
             {{$t("process.tagListTip")}}
@@ -107,7 +111,7 @@
              size="middle">
       <!--   自定义列名 开始   -->
       <template slot="qpcrTitle">
-        <icon-font style="font-size: 20px" type="icon-bitian" />
+<!--        <icon-font style="font-size: 20px" type="icon-bitian" />-->
         {{"QPCR摩尔浓度(nmol/L)"}}
       </template>
 
@@ -135,6 +139,12 @@
         <icon-font style="font-size: 20px" type="icon-bitian" />
         {{$t("databaseunit")}}
       </template>
+
+      <template slot="sequenceTitle">
+        <icon-font style="font-size: 20px" type="icon-bitian" />
+        {{$t("sequencePlant")}}
+      </template>
+
 
       <template slot="operationTitle">
         <a-tooltip>
@@ -197,6 +207,23 @@
               {{ item.val }}
             </a-select-option>
           </a-select>
+
+          <!-- 上机平台 -->
+          <a-select style="width: 100%" v-else-if="col == 'seqplant'"
+                    v-model="record.seqplant"
+                    :disabled="isDisabled(col,record)"
+          >
+            <a-select-option v-for="item in sequencePlant" :key="item.key" :value="item.key">
+              {{ item.val }}
+            </a-select-option>
+          </a-select>
+
+          <a-switch v-else-if="col == 'candivide'"
+                    :checked-children="$t('yes')"
+                    :un-checked-children="$t('no')"
+                    :disabled="isDisabled(col,record)"
+                    v-model="record.candivide"
+          />
 
           <!-- 测序平台 -->
           <a-select style="width: 100%" v-else-if="col == 'seqmethod'"
@@ -354,6 +381,9 @@ export default {
   },
   methods : {
     getFileCount: function (ids) {
+      if (ids.length === 0){
+        return;
+      }
       var postData = {
         idsStr: JSON.stringify(ids)
       }
@@ -377,7 +407,7 @@ export default {
         this.$message.success(this.$t("upload") + this.$t("save_success"));
         this.initPage();
       }else if (ret.file.status == "error"){
-        this.$message.success(this.$t("systemErr"));
+        this.$message.error(this.$t("systemErr"));
       }
     },
     databaseTypes: function (type) {
@@ -473,18 +503,18 @@ export default {
       if (record == undefined){
         return true;
       }
-      if ((col == "seqmethod" || col== "uploadsize"|| col== "uploadunit"
-          || col == "uploadremark")
+      if ((col == "seqmethod" || col== "uploadsize"|| col== "uploadunit" || col== "seqplant"
+          || col == "uploadremark" || col== "candivide")
           && record.currentstatu == "02" && this.canPase){
         return false;
       }
-
       if (!this.isEnd){
         return true;
       }
       if (col == "sampleindex" || col == "samplename"
           || col == "libindex"|| col == "species"|| col == "tissue"
           ||col == "seqmethod" || col== "uploadsize"|| col== "uploadunit"
+          || col== "seqplant" || col== "candivide"
           || col == "uploadremark") {
         return true;
       }
@@ -522,6 +552,10 @@ export default {
           this.$message.error(this.$t("databaseunit") + this.$t("not_null"));
           return false;
         }
+        if (util.isNull(item.seqplant)){
+          this.$message.error(this.$t("sequencePlant") + this.$t("not_null"));
+          return false;
+        }
         // if (util.isNull(item.uploadremark)){
         //   this.$message.error(this.$t("uploadremark") + this.$t("not_null"));
         //   return false;
@@ -532,10 +566,10 @@ export default {
     checkCompleteData : function (list){
       for (var i = 0;i < list.length; i++){
         var item = list[i];
-        if (util.isNull(item.qpcr)){
-          this.$message.error("QPCR摩尔浓度(nmol/L)" + this.$t("not_null"));
-          return false;
-        }
+        // if (util.isNull(item.qpcr)){
+        //   this.$message.error("QPCR摩尔浓度(nmol/L)" + this.$t("not_null"));
+        //   return false;
+        // }
         if (util.isNull(item.peakdesc)){
           this.$message.error("峰图描述" + this.$t("not_null"));
           return false;
@@ -548,7 +582,6 @@ export default {
       return true;
     },
     submitData: function (type) {
-      // console.log(type);
       if (type == "pass"){
         if (!this.checkPassData(this.selectedRows)){
           return ;
@@ -559,15 +592,23 @@ export default {
         }
       }
 
+      var confirms = this.data;
+      if (type != "tmp"){
+        confirms = this.selectedRows
+      }
+      confirms.map(con => {
+        if (con.candivide){
+          con.candivide = "0"
+        }else {
+          con.candivide = "1"
+        }
+      })
       var postData = {
         processId: this.process.id,
-        datas: JSON.stringify(this.data),
+        datas: JSON.stringify(confirms),
         type: type,
         subProcessName : this.subProcessName,
         remarks : this.remarks,
-      }
-      if (type != "tmp"){
-        postData.datas = JSON.stringify(this.selectedRows)
       }
       var _this = this;
       this.$(this.$refs.submitting.$el).modal("show");
@@ -665,6 +706,11 @@ export default {
               d.key = d.id;
               if (!util.isNull(d.createdbtime)) {
                 d.createdbtime = formatDate(new Date(d.createdbtime), "yyyy-MM-dd");
+                if (d.candivide === "1"){
+                  d.candivide = false;
+                }else {
+                  d.candivide = true;
+                }
               }
               ids.push(d.id);
               _this.data.push(d);
@@ -720,6 +766,9 @@ export default {
         }
       }
       return false;
+    },
+    sequencePlant : function (){
+      return util.sequencePlant();
     },
     seqPlants: function () {
       return util.seqPlants();

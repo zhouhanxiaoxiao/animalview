@@ -71,7 +71,7 @@
             </a-select-option>
           </a-select>
           <a-select v-else-if="col == 'group.groupname'"
-                    v-model="record.roleid"
+                    v-model="record.groupid"
                     style="width: 100%">
             <a-select-option v-for="group in groups" :key="group.id" :value="group.id">
               {{ group.groupname }}

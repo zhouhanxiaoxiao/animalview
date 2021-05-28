@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
-import login from "@/components/login";
+// import login from "@/components/login";
 import register from "@/components/register";
 import home from "@/components/home/home";
 import AnimalStock from "@/components/personal/AnimalStock";
@@ -23,11 +23,15 @@ import currentStock from "@/components/stockcenter/currentStock";
 import currentStrainNew from "@/components/stockcenter/currentStrainNew";
 import history from "@/components/history/history";
 import askTaskMain from "@/components/task/askTask/askTaskMain";
+import seqOrder from "@/components/seqOrder/seqOrder";
+import upmachine from "@/components/seqOrder/upMachine/upmachine";
+import upmaDetail from "@/components/seqOrder/upMachine/upmaDetail";
+import seqReport from "@/components/seqOrder/seqReport/seqReport";
 
 /*配置路由*/
 const routes=[
-    {path:'',component : login,meta:{index:0}},
-    {path:'/login',component: login,meta:{index:0}},
+    {path:'',component : home,meta:{index:0}},
+    // {path:'/login',component: login,meta:{index:0}},
     {path: '/register',component: register,meta:{index:0}},
     {path: '/home',component: home,meta:{index:0}},
     {path: '/personal/animalStock',component: AnimalStock,meta: {index: 0}},
@@ -49,7 +53,11 @@ const routes=[
     // {path: '/stock/currentStrain',component: CurrentStrain,meta: {index: 0}},
     {path: '/stock/currentStrain',component: currentStrainNew,meta: {index: 0}},
     {path: '/task/resourceOrder',name:"resource",component: resource,meta: {index: 0}},
-    {path: '/*',login,meta:{index:0}}
+    {path: '/seqOrder',name:"seqOrder",component: seqOrder,meta: {index: 0}},
+    {path: '/seqwait/upmac',name:"upmac",component: upmachine,meta: {index: 0}},
+    {path: '/seqwait/upmaDetail',name:"upmaDetail",component: upmaDetail,meta: {index: 0}},
+    {path: '/seqwait/seqReport',name:"seqReport",component: seqReport,meta: {index: 0}},
+    {path: '/*',home,meta:{index:0}}
 ]
 /*实例化路由*/
 const router = new VueRouter({
