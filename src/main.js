@@ -21,6 +21,8 @@ import Antd from 'ant-design-vue';
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 
+import util from "@/components/publib/util";
+
 import Multiselect from 'vue-multiselect'
 
 Vue.use(Viewer)
@@ -42,42 +44,91 @@ Vue.prototype.$md5 = md5;
 // VueCookies.config('1h');
 Vue.prototype.$cookies = VueCookies;
 
-Vue.prototype.$systemFlag = "local";
+// Vue.prototype.$systemFlag = "local";
 // Vue.prototype.$systemFlag = "animal";
-// Vue.prototype.$systemFlag = "seqpro";
+Vue.prototype.$systemFlag = "seqpro";
 
 /*
 * axios 全局设置
 * */
-axios.defaults.baseURL = 'http://localhost:8085/'; //本机测试
+axios.defaults.baseURL = 'http://localhost:8815/test/'; //本机测试
 // axios.defaults.baseURL = 'http://119.90.33.35:3566/'; //果蝇管理系统
 // axios.defaults.baseURL = 'http://119.90.33.35:3568/'; // 流程管理系统
-axios.interceptors.request.use(config => {
-  var token = VueCookies.get("token");
-  if (token){
-    config.headers['token'] = token;
-  }
-  return config;
-},error => {
-  console.log(error);
-  return Promise.reject(error);
-});
+// axios.defaults.baseURL = '';
+// axios.interceptors.request.use(config => {
+//   var token = VueCookies.get("token");
+//   if (token){
+//     config.headers['token'] = token;
+//   }
+//   return config;
+// },error => {
+//   console.log(error);
+//   return Promise.reject(error);
+// });
+//
+// import {message as $message} from "ant-design-vue";
+// axios.interceptors.response.use(response =>{
+//   return response;
+// },error => {
+//   console.log(error);
+//   if (error.response){
+//     switch (error.response.status) {
+//       case 401:
+//         VueCookies.remove("token");
+//         router.replace({
+//           path : "/login",
+//           query : {redirect : router.currentRoute.fullPath}
+//         });
+//         $message.error(i18n.t("logintimeover"));
+//         return Promise.reject("转到登录啦！");
+//       default:
+//         break;
+//     }
+//   }
+//   router.replace({
+//     path : "/error",
+//     query : {redirect : router.currentRoute.fullPath}
+//   });
+// });
 
-import {message as $message} from "ant-design-vue";
+/*路由监听*/
+// router.beforeEach((to, from, next) => {
+//   if (to.path === "/register") {
+//     next();
+//   }else if(to.path === '/login' || to.path === '/'){
+//     let token = VueCookies.get("token");
+//     if (token != 'null' && token != '' && token != null){
+//       next('/home');
+//     }else {
+//       next();
+//     }
+//   }
+//   else {
+//     let token = VueCookies.get("token");
+//     if (token === 'null' || token === '' || token === null) {
+//       next('/login');
+//     } else {
+//       next();
+//     }
+//   }
+// });
+
 axios.interceptors.response.use(response =>{
   return response;
 },error => {
   console.log(error);
   if (error.response){
     switch (error.response.status) {
+      // case 403:
+      //   router.replace({
+      //     path : "/login",
+      //     query : {redirect : router.currentRoute.fullPath}
+      //   });
+      //   return Promise.reject("转到登录啦！");
       case 401:
-        VueCookies.remove("token");
-        router.replace({
-          path : "/login",
-          query : {redirect : router.currentRoute.fullPath}
-        });
-        $message.error(i18n.t("logintimeover"));
-        return Promise.reject("转到登录啦！");
+        var currentUrl = util.localUrl.replaceAll("/","%2F").replaceAll(":","%3A");
+        window.location.href = util.casLoginUrl + currentUrl;
+        break;
       default:
         break;
     }
@@ -87,29 +138,6 @@ axios.interceptors.response.use(response =>{
     query : {redirect : router.currentRoute.fullPath}
   });
 });
-
-/*路由监听*/
-router.beforeEach((to, from, next) => {
-  if (to.path === "/register") {
-    next();
-  }else if(to.path === '/login' || to.path === '/'){
-    let token = VueCookies.get("token");
-    if (token != 'null' && token != '' && token != null){
-      next('/home');
-    }else {
-      next();
-    }
-  }
-  else {
-    let token = VueCookies.get("token");
-    if (token === 'null' || token === '' || token === null) {
-      next('/login');
-    } else {
-      next();
-    }
-  }
-});
-
 Vue.config.productionTip = false
 
 new Vue({
